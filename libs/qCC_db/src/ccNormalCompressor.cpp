@@ -21,7 +21,7 @@
 #include <CCConst.h>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 void ccNormalCompressor::InvertNormal(CompressedNormType& code)
 {

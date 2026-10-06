@@ -23,7 +23,6 @@
 void ccMeshGroup::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	// does nothing
-	return;
 }
 
 bool ccMeshGroup::toFile_MeOnly(QFile& out, short dataVersion) const

@@ -25,7 +25,7 @@
 #include <Neighbourhood.h>
 
 // System
-#include <string.h>
+#include <cstring>
 
 ccQuadric::ccQuadric(CCVector2                      minCorner,
                      CCVector2                      maxCorner,
@@ -284,9 +284,9 @@ bool ccQuadric::toFile_MeOnly(QFile& out, short dataVersion) const
 	outStream << m_maxCorner.x;
 	outStream << m_maxCorner.y;
 
-	for (unsigned i = 0; i < 6; ++i)
+	for (float coeff : m_eq)
 	{
-		outStream << m_eq[i];
+		outStream << coeff;
 	}
 
 	return true;
@@ -320,5 +320,5 @@ short ccQuadric::minimumFileVersion_MeOnly() const
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
+	return {CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true};
 }

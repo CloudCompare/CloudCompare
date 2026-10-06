@@ -18,16 +18,12 @@
 #include "../include/ccMesh.h"
 
 // Local
-#include "../include/ccChunk.h"
-#include "../include/ccColorScalesManager.h"
 #include "../include/ccGenericGLDisplay.h"
 #include "../include/ccHObjectCaster.h"
-#include "../include/ccIncludeGL.h"
 #include "../include/ccNormalCompressor.h"
 #include "../include/ccNormalVectors.h"
 #include "../include/ccPolyline.h"
 #include "../include/ccProgressDialog.h"
-#include "../include/ccScalarField.h"
 #include "../include/ccSubMesh.h"
 
 // CCCoreLib
@@ -38,11 +34,11 @@
 #include <ReferenceCloud.h>
 
 // System
-#include <assert.h>
+#include <cassert>
 #include <cmath> //for std::modf
 #include <cstdint>
 #include <memory>
-#include <string.h>
+#include <string>
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccGenericMesh("Mesh", uniqueID)
@@ -933,12 +929,11 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	// project the polylines on the best fitting plane
 	{
 		ccPolyline* polylines[2] = {p1, p2};
-		for (size_t i = 0; i < 2; ++i)
+		for (auto* poly : polylines)
 		{
-			ccPolyline* poly       = polylines[i];
-			unsigned    vertCount  = poly->size();
-			int         vertIndex0 = static_cast<int>(points2D.size());
-			bool        closed     = poly->isClosed();
+			unsigned vertCount  = poly->size();
+			int      vertIndex0 = static_cast<int>(points2D.size());
+			bool     closed     = poly->isClosed();
 			for (unsigned v = 0; v < vertCount; ++v)
 			{
 				const CCVector3* P         = poly->getPoint(v);
@@ -1282,7 +1277,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					// reserve mem for materials
 					if (!m_materials)
 					{
-						auto set = ccMaterialSet::Shared(new ccMaterialSet("materials"));
+						auto set = std::make_shared<ccMaterialSet>("materials");
 						setMaterialSet(set);
 					}
 					assert(m_materials);
@@ -1656,12 +1651,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create segmented mesh vertices! (not enough memory)");
 			return nullptr;
 		}
-		else if (newVertices == m_associatedCloud)
+		if (newVertices == m_associatedCloud)
 		{
 			// nothing to do
 			return this;
 		}
-		else if (newVertices->size() == 0)
+		if (newVertices->size() == 0)
 		{
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] No visible point in selection");
 			delete newVertices;
@@ -1797,9 +1792,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 
 						// for each triangle of this mesh, try to determine if its normals are already in use
 						//(otherwise add them to the new container and increase its index)
-						for (unsigned j = 0; j < 3; ++j)
+						for (int index : triNormIndexes.u)
 						{
-							if (triNormIndexes.u[j] >= 0 && newNormIndexes[triNormIndexes.u[j]] < 0)
+							if (index >= 0 && newNormIndexes[index] < 0)
 							{
 								if (newTriNormals->size() == newTriNormals->capacity()
 								    && !newTriNormals->reserveSafe(newTriNormals->size() + 4096)) // auto expand
@@ -1811,8 +1806,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 								}
 
 								// import old normal to new subset (create new index)
-								newNormIndexes[triNormIndexes.u[j]] = static_cast<int>(newTriNormals->size()); // new element index = new size - 1 = old size!
-								newTriNormals->emplace_back(m_triNormals->getValue(triNormIndexes.u[j]));
+								newNormIndexes[index] = static_cast<int>(newTriNormals->size()); // new element index = new size - 1 = old size!
+								newTriNormals->emplace_back(m_triNormals->getValue(index));
 							}
 						}
 
@@ -1834,9 +1829,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 
 						// for each triangle of this mesh, try to determine if its textures coordinates are already in use
 						//(otherwise add them to the new container and increase its index)
-						for (unsigned j = 0; j < 3; ++j)
+						for (int index : triTexIndexes.u)
 						{
-							if (triTexIndexes.u[j] >= 0 && newTexIndexes[triTexIndexes.u[j]] < 0)
+							if (index >= 0 && newTexIndexes[index] < 0)
 							{
 								if (newTriTexIndexes->size() == newTriTexIndexes->capacity()
 								    && !newTriTexIndexes->reserveSafe(newTriTexIndexes->size() + 4096)) // auto expand
@@ -1847,8 +1842,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 									break;
 								}
 								// import old texture coordinate to new subset (create new index)
-								newTexIndexes[triTexIndexes.u[j]] = static_cast<int>(newTriTexIndexes->size()); // new element index = new size - 1 = old size!
-								newTriTexIndexes->emplace_back(m_texCoords->getValue(triTexIndexes.u[j]));
+								newTexIndexes[index] = static_cast<int>(newTriTexIndexes->size()); // new element index = new size - 1 = old size!
+								newTriTexIndexes->emplace_back(m_texCoords->getValue(index));
 							}
 						}
 
@@ -1944,9 +1939,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				}
 			}
 
-			for (size_t i = 0; i < subMeshes.size(); ++i)
+			for (auto& entity : subMeshes)
 			{
-				ccSubMesh* subMesh    = static_cast<ccSubMesh*>(subMeshes[i]);
+				ccSubMesh* subMesh    = static_cast<ccSubMesh*>(entity);
 				ccSubMesh* newSubMesh = subMesh->createNewSubMeshFromSelection(removeSelectedTriangles,
 				                                                               triangleIndexMap,
 				                                                               removeSelectedTriangles ? &newRemainingTriangleIndexes : nullptr);
@@ -1971,8 +1966,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				if (subMesh->size() == 0) // no triangle left in current sub-mesh?
 				{
 					removeChild(subMesh);
-					subMeshes[i] = nullptr;
-					subMesh      = nullptr;
+					entity  = nullptr;
+					subMesh = nullptr;
 				}
 			}
 		}
@@ -1984,9 +1979,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				newMesh->setVisible(true); // force parent mesh visibility in this case!
 			}
 
-			for (size_t i = 0; i < subMeshes.size(); ++i)
+			for (auto& entity : subMeshes)
 			{
-				removeChild(subMeshes[i]);
+				removeChild(entity);
 			}
 		}
 	}
@@ -2026,42 +2021,42 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 		assert(visArray.size() == m_associatedCloud->size());
 
 		size_t lastTri = 0;
-		for (size_t i = 0; i < triCount; ++i)
+		for (size_t triId = 0; triId < triCount; ++triId)
 		{
-			if (triangleIndexMap[i] < 0) // triangle is not used in the new mesh, it will be kept in this one
+			if (triangleIndexMap[triId] < 0) // triangle is not used in the new mesh, it will be kept in this one
 			{
-				const CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
-				for (unsigned j = 0; j < 3; ++j)
+				const CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(triId);
+				for (unsigned int vertexIndex : tsi.i)
 				{
-					visArray[tsi.i[j]] = CCCoreLib::POINT_HIDDEN;
+					visArray[vertexIndex] = CCCoreLib::POINT_HIDDEN;
 				}
 
-				if (i != lastTri)
+				if (triId != lastTri)
 				{
 					m_triVertIndexes->setValue(lastTri, tsi);
 
 					if (m_triNormalIndexes)
 					{
-						m_triNormalIndexes->setValue(lastTri, m_triNormalIndexes->getValue(i));
+						m_triNormalIndexes->setValue(lastTri, m_triNormalIndexes->getValue(triId));
 					}
 					if (m_triMtlIndexes)
 					{
-						m_triMtlIndexes->setValue(lastTri, m_triMtlIndexes->getValue(i));
+						m_triMtlIndexes->setValue(lastTri, m_triMtlIndexes->getValue(triId));
 					}
 					if (m_texCoordIndexes)
 					{
-						m_texCoordIndexes->setValue(lastTri, m_texCoordIndexes->getValue(i));
+						m_texCoordIndexes->setValue(lastTri, m_texCoordIndexes->getValue(triId));
 					}
 				}
 				if (newIndexesOfRemainingTriangles)
 				{
-					newIndexesOfRemainingTriangles->at(i) = static_cast<int>(lastTri);
+					newIndexesOfRemainingTriangles->at(triId) = static_cast<int>(lastTri);
 				}
 				++lastTri;
 			}
 			else if (newIndexesOfRemainingTriangles)
 			{
-				newIndexesOfRemainingTriangles->at(i) = -1;
+				newIndexesOfRemainingTriangles->at(triId) = -1;
 			}
 		}
 
@@ -2073,17 +2068,15 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 		if (m_associatedCloud->removeVisiblePoints(nullptr, &newIndexes))
 		{
 			// warning: from this point on, verticesVisibility is not valid anymore!
-			for (size_t i = 0; i < m_triVertIndexes->size(); ++i)
+			for (auto& tsi : *m_triVertIndexes)
 			{
-				CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
-
 				// update each vertex index
-				for (int j = 0; j < 3; ++j)
+				for (unsigned& vertexIndex : tsi.i)
 				{
-					int oldVertexIndex = tsi.i[j];
+					unsigned oldVertexIndex = vertexIndex;
 					assert(oldVertexIndex < newIndexes.size());
-					tsi.i[j] = newIndexes[oldVertexIndex];
-					assert(tsi.i[j] < m_associatedCloud->size());
+					vertexIndex = newIndexes[oldVertexIndex];
+					assert(vertexIndex < m_associatedCloud->size());
 				}
 			}
 		}
@@ -2689,7 +2682,7 @@ void ccMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, 
 	assert(triIndex < m_triVertIndexes->size());
 
 	const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->at(triIndex);
-	return computeInterpolationWeights(tri, P, weights);
+	computeInterpolationWeights(tri, P, weights);
 }
 
 void ccMesh::computeInterpolationWeights(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const
@@ -3597,7 +3590,7 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 			if (parentWidget)
 			{
-				pDlg.reset(new ccProgressDialog(true, parentWidget));
+				pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 			}
 
 			// try to build the octree
@@ -3790,7 +3783,7 @@ ccMesh* ccMesh::unroll(ccPointCloud::UnrollMode            mode,
 			unsigned stretchedTriangleCount = 0;
 			for (unsigned i = 0; i < triCount; ++i)
 			{
-				const auto vertIndexes = outputMesh->getTriangleVertIndexes(i);
+				auto* vertIndexes = outputMesh->getTriangleVertIndexes(i);
 				// check every edge until one fails the test
 				for (unsigned j = 0; j < 3; ++j)
 				{

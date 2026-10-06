@@ -108,10 +108,7 @@ class ccPointCloudLODThread : public QThread
 				{
 					const CCVector3* P            = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
 					double           squareRadius = (P->toDouble() - sumP).norm2();
-					if (squareRadius > maxSquareRadius)
-					{
-						maxSquareRadius = squareRadius;
-					}
+					maxSquareRadius               = std::max(squareRadius, maxSquareRadius);
 
 					if (m_earlyStop)
 					{
@@ -285,66 +282,63 @@ class ccPointCloudLODThread : public QThread
 		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 
 		// refinement step
-		if (true)
+		// we look at the 'main' depth level (with the most points)
+		uint8_t biggestLevel = 0;
+		for (uint8_t i = 1; i <= m_maxLevel; ++i)
 		{
-			// we look at the 'main' depth level (with the most points)
-			uint8_t biggestLevel = 0;
-			for (uint8_t i = 1; i <= m_maxLevel; ++i)
+			if (m_lod.m_levels[i].data.size() > m_lod.m_levels[biggestLevel].data.size())
 			{
-				if (m_lod.m_levels[i].data.size() > m_lod.m_levels[biggestLevel].data.size())
-				{
-					biggestLevel = i;
-				}
+				biggestLevel = i;
 			}
+		}
 
-			// divide again the cells (with a lower limit on the number of points)
-			biggestLevel = std::min<uint8_t>(biggestLevel, 10);
-			for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
+		// divide again the cells (with a lower limit on the number of points)
+		biggestLevel = std::min<uint8_t>(biggestLevel, 10);
+		for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
+		{
+			ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+			assert(!level.data.empty());
+
+			size_t cellCountBefore = m_lod.m_levels[currentLevel + 1].data.size();
+			for (ccPointCloudLOD::Node& node : level.data)
 			{
-				ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
-				assert(!level.data.empty());
-
-				size_t cellCountBefore = m_lod.m_levels[currentLevel + 1].data.size();
-				for (ccPointCloudLOD::Node& node : level.data)
+				// do we need to subdivide this cell?
+				if (node.childCount == 0 && node.pointCount > 16)
 				{
-					// do we need to subdivide this cell?
-					if (node.childCount == 0 && node.pointCount > 16)
+					for (uint32_t i = 0; i < node.pointCount;)
 					{
-						for (uint32_t i = 0; i < node.pointCount;)
+						int32_t                childNodeIndex = m_lod.newCell(node.level + 1);
+						ccPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
+						childNode.firstCodeIndex              = node.firstCodeIndex + i;
+
+						uint8_t childIndex = fillNode_flat(childNode);
+						if (m_earlyStop)
 						{
-							int32_t                childNodeIndex = m_lod.newCell(node.level + 1);
-							ccPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
-							childNode.firstCodeIndex              = node.firstCodeIndex + i;
-
-							uint8_t childIndex = fillNode_flat(childNode);
-							if (m_earlyStop)
-							{
-								// abort requested
-								abortConstruction();
-								return;
-							}
-
-							node.childIndexes[childIndex] = childNodeIndex;
-							node.childCount++;
-							i += childNode.pointCount;
+							// abort requested
+							abortConstruction();
+							return;
 						}
+
+						node.childIndexes[childIndex] = childNodeIndex;
+						node.childCount++;
+						i += childNode.pointCount;
 					}
 				}
-
-				size_t cellCountAfter = m_lod.m_levels[currentLevel + 1].data.size();
-				ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel + 1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
-
-				if (m_earlyStop)
-				{
-					// abort requested
-					abortConstruction();
-					return;
-				}
 			}
 
-			m_lod.shrink_to_fit();
-			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
+			size_t cellCountAfter = m_lod.m_levels[currentLevel + 1].data.size();
+			ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel + 1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
+
+			if (m_earlyStop)
+			{
+				// abort requested
+				abortConstruction();
+				return;
+			}
 		}
+
+		m_lod.shrink_to_fit();
+		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 
 		m_lod.setState(ccPointCloudLOD::INITIALIZED);
 
@@ -385,9 +379,9 @@ size_t ccPointCloudLOD::memory() const
 	size_t thisSize = sizeof(ccPointCloudLOD);
 
 	size_t totalNodeCount = 0;
-	for (size_t i = 0; i < m_levels.size(); ++i)
+	for (const auto& level : m_levels)
 	{
-		totalNodeCount += m_levels[i].data.size();
+		totalNodeCount += level.data.size();
 	}
 	size_t nodeSize  = sizeof(Node);
 	size_t nodesSize = totalNodeCount * nodeSize;
@@ -599,10 +593,7 @@ class PointCloudLODVisibilityFlagger
 						node.intersection = Frustum::OUTSIDE;
 						break;
 					}
-					else
-					{
-						node.intersection = Frustum::INTERSECT;
-					}
+					node.intersection = Frustum::INTERSECT;
 				}
 			}
 		}

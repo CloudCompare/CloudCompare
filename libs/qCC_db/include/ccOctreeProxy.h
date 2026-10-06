@@ -46,15 +46,15 @@ class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 	}
 
 	// Inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::POINT_OCTREE;
 	}
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
 
   protected:
 	// Inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
   protected: // members
 	//! Associated octree

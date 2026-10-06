@@ -119,7 +119,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isA(CC_TYPES::POINT_OCTREE))
 		{
@@ -137,10 +137,8 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	{
 		return proxy->getOctree();
 	}
-	else
-	{
-		return {};
-	}
+
+	return {};
 }
 
 void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild /*=true*/)
@@ -369,16 +367,12 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 					nearestSquareDist = point.squareDistd;
 					return true;
 				}
-				else
-				{
-					// nothing found
-					return false;
-				}
+
+				// nothing found
+				return false;
 			}
-			else
-			{
-				ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
-			}
+
+			ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
 		}
 	}
 

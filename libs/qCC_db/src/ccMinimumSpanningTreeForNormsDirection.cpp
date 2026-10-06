@@ -267,7 +267,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 					{
 						const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 						// dot product
-						float weight = std::max(0.0f, 1.0f - static_cast<float>(std::abs(N1.dot(N2))));
+						float weight = std::max(0.0f, 1.0f - std::abs(N1.dot(N2)));
 
 						// distance
 						// float weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
@@ -312,7 +312,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 					v = element.v1();
 					if (inverNormal)
 					{
-						cloud->setPointNormal(static_cast<unsigned>(v), -N1);
+						cloud->setPointNormal(v, -N1);
 						++inversionCount;
 					}
 				}
@@ -321,7 +321,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 					v = element.v2();
 					if (inverNormal)
 					{
-						cloud->setPointNormal(static_cast<unsigned>(v), -N2);
+						cloud->setPointNormal(v, -N2);
 						++inversionCount;
 					}
 				}
@@ -361,7 +361,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 						{
 							const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 							// dot product
-							float weight = std::max(0.0f, 1.0f - static_cast<float>(std::abs(N1.dot(N2))));
+							float weight = std::max(0.0f, 1.0f - std::abs(N1.dot(N2)));
 
 							// distance
 							// float weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
@@ -384,7 +384,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 #endif
 				if (progressCb && !nProgress.oneStep())
 				{
-					visitedCount = static_cast<unsigned>(vertexCount); // early stop
+					visitedCount = vertexCount; // early stop
 					break;
 				}
 			}

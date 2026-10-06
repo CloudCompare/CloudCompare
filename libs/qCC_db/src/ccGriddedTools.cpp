@@ -68,10 +68,8 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 				{
 					if (_indexGrid[i] >= 0)
 					{
-						if (i < minIndex)
-							minIndex = i;
-						if (i > maxIndex)
-							maxIndex = i;
+						minIndex = std::min(i, minIndex);
+						maxIndex = std::max(i, maxIndex);
 					}
 				}
 
@@ -111,20 +109,15 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 
 							// find max range
 							PointCoordinateType range = P.norm();
-							if (range > parameters.maxRange)
-								parameters.maxRange = range;
+							parameters.maxRange       = std::max(range, parameters.maxRange);
 						}
 					}
 
-					if (parameters.minPhi > minPhiCurrentLine)
-						parameters.minPhi = minPhiCurrentLine;
-					if (parameters.maxPhi < maxPhiCurrentLine)
-						parameters.maxPhi = maxPhiCurrentLine;
+					parameters.minPhi = std::min(parameters.minPhi, minPhiCurrentLine);
+					parameters.maxPhi = std::max(parameters.maxPhi, maxPhiCurrentLine);
 
-					if (minPhiShifted > minPhiCurrentLineShifted)
-						minPhiShifted = minPhiCurrentLineShifted;
-					if (maxPhiShifted < maxPhiCurrentLineShifted)
-						maxPhiShifted = maxPhiCurrentLineShifted;
+					minPhiShifted = std::min(minPhiShifted, minPhiCurrentLineShifted);
+					maxPhiShifted = std::max(maxPhiShifted, maxPhiCurrentLineShifted);
 
 					unsigned   span      = maxIndex - minIndex + 1;
 					ScalarType angle_rad = static_cast<ScalarType>((maxPhiCurrentLine - minPhiCurrentLine) / span);
@@ -193,10 +186,8 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 				{
 					if (_indexGrid[j * grid->w] >= 0)
 					{
-						if (j < minIndex)
-							minIndex = j;
-						if (j > maxIndex)
-							maxIndex = j;
+						minIndex = std::min(j, minIndex);
+						maxIndex = std::max(j, maxIndex);
 					}
 				}
 
@@ -237,15 +228,11 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 						}
 					}
 
-					if (parameters.minTheta > minThetaCurrentCol)
-						parameters.minTheta = minThetaCurrentCol;
-					if (parameters.maxTheta < maxThetaCurrentCol)
-						parameters.maxTheta = maxThetaCurrentCol;
+					parameters.minTheta = std::min(parameters.minTheta, minThetaCurrentCol);
+					parameters.maxTheta = std::max(parameters.maxTheta, maxThetaCurrentCol);
 
-					if (minThetaShifted > minThetaCurrentColShifted)
-						minThetaShifted = minThetaCurrentColShifted;
-					if (maxThetaShifted < maxThetaCurrentColShifted)
-						maxThetaShifted = maxThetaCurrentColShifted;
+					minThetaShifted = std::min(minThetaShifted, minThetaCurrentColShifted);
+					maxThetaShifted = std::max(maxThetaShifted, maxThetaCurrentColShifted);
 
 					unsigned   span      = maxIndex - minIndex;
 					ScalarType angle_rad = static_cast<ScalarType>((maxThetaCurrentCol - minThetaCurrentCol) / span);

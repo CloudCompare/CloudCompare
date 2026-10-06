@@ -168,11 +168,11 @@ CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) // tempor
 	return nullptr;
 }
 
-void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
+void ccSubMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
-	if (m_associatedMesh && triIndex < size())
+	if (m_associatedMesh && triangleIndex < size())
 	{
-		m_associatedMesh->getTriangleVertices(getTriGlobalIndex(triIndex), A, B, C);
+		m_associatedMesh->getTriangleVertices(getTriGlobalIndex(triangleIndex), A, B, C);
 	}
 	else
 	{
@@ -181,10 +181,10 @@ void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& 
 	}
 }
 
-CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
+CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
-	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triIndex));
+	if (m_associatedMesh && triangleIndex < size())
+		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triangleIndex));
 
 	// shouldn't happen
 	assert(false);
@@ -369,16 +369,16 @@ bool ccSubMesh::hasUniqueMaterial()
 	return m_associatedMesh ? m_associatedMesh->hasUniqueMaterial() : false;
 }
 
-const ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
+ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
 {
 	assert(m_associatedMesh);
 	return m_associatedMesh->getMaterialSet();
 }
 
-int ccSubMesh::getTriangleMtlIndex(unsigned triIndex) const
+int ccSubMesh::getTriangleMtlIndex(unsigned triangleIndex) const
 {
 	assert(m_associatedMesh);
-	return m_associatedMesh->getTriangleMtlIndex(getTriGlobalIndex(triIndex));
+	return m_associatedMesh->getTriangleMtlIndex(getTriGlobalIndex(triangleIndex));
 }
 
 TextureCoordsContainer::Shared ccSubMesh::getTexCoordinatesTable() const
@@ -405,22 +405,22 @@ void ccSubMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1
 	m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
 }
 
-void ccSubMesh::getTriangleNormalIndexes(unsigned triIndex, int& i1, int& i2, int& i3) const
+void ccSubMesh::getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
 {
-	assert(m_associatedMesh && triIndex < size());
-	m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triIndex), i1, i2, i3);
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
 }
 
-void ccSubMesh::getTriangleCompressedNormals(unsigned triIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const
+void ccSubMesh::getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const
 {
-	assert(m_associatedMesh && triIndex < size());
-	m_associatedMesh->getTriangleCompressedNormals(getTriGlobalIndex(triIndex), Na, Nb, Nc);
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleCompressedNormals(getTriGlobalIndex(triangleIndex), Na, Nb, Nc);
 }
 
-void ccSubMesh::getTriangleNormals(unsigned triIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const
+void ccSubMesh::getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const
 {
-	assert(m_associatedMesh && triIndex < size());
-	m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triIndex), Na, Nb, Nc);
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triangleIndex), Na, Nb, Nc);
 }
 
 NormsIndexesTableType::Shared ccSubMesh::getTriNormsTable() const

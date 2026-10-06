@@ -169,7 +169,7 @@ class Frustum
 
 			if (distance < -r)
 				return OUTSIDE;
-			else if (distance < r)
+			if (distance < r)
 				result = INTERSECT;
 		}
 
@@ -184,7 +184,7 @@ class Frustum
 		{
 			if (plane.distance(box.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (plane.distance(box.getVertexN(plane.normal)) < 0)
+			if (plane.distance(box.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 
@@ -199,7 +199,7 @@ class Frustum
 		{
 			if (plane.distance(cube.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (plane.distance(cube.getVertexN(plane.normal)) < 0)
+			if (plane.distance(cube.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 

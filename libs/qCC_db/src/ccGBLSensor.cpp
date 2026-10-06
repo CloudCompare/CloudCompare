@@ -370,9 +370,9 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(CCCoreLib::GenericCloud* cl
 }
 
 ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(CCCoreLib::GenericCloud* cloud,
-                                                   const ColorGrid&         theColors) const
+                                                   const ColorGrid&         rgbColors) const
 {
-	if (!cloud || theColors.capacity() == 0)
+	if (!cloud || rgbColors.capacity() == 0)
 		return nullptr;
 
 	unsigned gridSize = m_depthBuffer.height * m_depthBuffer.width;
@@ -437,7 +437,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(CCCoreLib::GenericCloud* clou
 					unsigned index = y * m_depthBuffer.width + x;
 
 					// accumulate color
-					const ccColor::Rgb& srcC  = theColors[i];
+					const ccColor::Rgb& srcC  = rgbColors[i];
 					ccColor::Rgbf&      destC = colorAccumGrid[index];
 
 					destC.r += srcC.r;
@@ -625,8 +625,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 					minPitch = maxPitch = Q.y;
 				}
 
-				if (depth > maxDepth)
-					maxDepth = depth;
+				maxDepth = std::max(depth, maxDepth);
 			}
 		}
 
@@ -684,10 +683,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			const CCVector3*    P     = theCloud->getNextPoint();
 			PointCoordinateType depth = computeDistanceToPoint(*P, m_activeIndex);
 
-			if (depth > maxDepth)
-			{
-				maxDepth = depth;
-			}
+			maxDepth = std::max(depth, maxDepth);
 		}
 		setSensorRange(maxDepth);
 	}
@@ -973,21 +969,21 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	if (!withGLFeatures)
 	{
-		return ccBBox();
+		return {};
 	}
 
 	// get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	ccPointCloud cloud;
 	if (!cloud.reserve(8))
 	{
 		// not enough memory?!
-		return ccBBox();
+		return {};
 	}
 
 	cloud.addPoint(CCVector3(-m_scale, -m_scale, -m_scale));
@@ -1008,13 +1004,13 @@ ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 	// get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
-		return ccBBox();
+		return {};
 
 	trans = sensorPos;
 
-	return ccBBox(CCVector3(-m_scale, -m_scale, -m_scale),
-	              CCVector3(m_scale, m_scale, m_scale),
-	              true);
+	return {CCVector3(-m_scale, -m_scale, -m_scale),
+	        CCVector3(m_scale, m_scale, m_scale),
+	        true};
 }
 
 bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win /*=nullptr*/) const

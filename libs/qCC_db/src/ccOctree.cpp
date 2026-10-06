@@ -102,12 +102,12 @@ void ccOctree::clear()
 
 ccBBox ccOctree::getSquareBB() const
 {
-	return ccBBox(m_dimMin, m_dimMax, true);
+	return {m_dimMin, m_dimMax, true};
 }
 
 ccBBox ccOctree::getPointsBB() const
 {
-	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
+	return {m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0};
 }
 
 void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)
@@ -511,10 +511,10 @@ bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned
 	m_frustumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
 	// project points
-	for (size_t i = 0; i < pointsToTest.size(); i++)
+	for (const auto& idVecPair : pointsToTest)
 	{
-		if (sensor->isGlobalCoordInFrustum(pointsToTest[i].second /*, false*/))
-			inCameraFrustum.push_back(pointsToTest[i].first);
+		if (sensor->isGlobalCoordInFrustum(idVecPair.second /*, false*/))
+			inCameraFrustum.push_back(idVecPair.first);
 	}
 
 	return true;
@@ -634,9 +634,9 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 	}
 
 	// let's sweep through the octree
-	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
+	for (const auto& cellIndexAndCode : m_thePointsAndTheirCellCodes)
 	{
-		CellCode truncatedCode = (it->theCode >> currentBitDec);
+		CellCode truncatedCode = (cellIndexAndCode.theCode >> currentBitDec);
 
 		// new cell?
 		if (truncatedCode != currentCellTruncatedCode)
@@ -645,7 +645,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 			while (level > 1)
 			{
 				unsigned char bitDec = GET_BIT_SHIFT(level - 1);
-				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
+				if ((cellIndexAndCode.theCode >> bitDec) == (currentCellCode >> bitDec))
 				{
 					// same parent cell, we can stop here
 					break;
@@ -653,13 +653,13 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 				--level;
 			}
 
-			currentCellCode = it->theCode;
+			currentCellCode = cellIndexAndCode.theCode;
 
 			// now try to go deeper with the new cell
 			while (level < maxLevel)
 			{
 				Tuple3i cellPos;
-				getCellPos(it->theCode, level, cellPos, false);
+				getCellPos(cellIndexAndCode.theCode, level, cellPos, false);
 
 				// first test with the total bounding box
 				PointCoordinateType halfCellSize = getCellSize(level) / 2;
@@ -690,8 +690,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 
 				if (skipThisCell)
 					break;
-				else
-					++level;
+				++level;
 			}
 
 			currentBitDec            = GET_BIT_SHIFT(level);
@@ -705,11 +704,11 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 		if (!skipThisCell)
 		{
 			// we shouldn't test points that are actually hidden!
-			if ((!visTable || visTable->at(it->theIndex) == CCCoreLib::POINT_VISIBLE)
-			    && (!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex))))
+			if ((!visTable || visTable->at(cellIndexAndCode.theIndex) == CCCoreLib::POINT_VISIBLE)
+			    && (!activeSF || activeSF->getColor(activeSF->getValue(cellIndexAndCode.theIndex))))
 			{
 				// test the point
-				const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+				const CCVector3* P = m_theAssociatedCloud->getPoint(cellIndexAndCode.theIndex);
 				CCVector3        Q = *P;
 				if (hasGLTrans)
 				{
@@ -728,7 +727,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 						if (!output.point || squareDist < output.squareDistd)
 						{
 							output.point       = P;
-							output.pointIndex  = it->theIndex;
+							output.pointIndex  = cellIndexAndCode.theIndex;
 							output.squareDistd = squareDist;
 						}
 					}
@@ -778,7 +777,7 @@ PointCoordinateType ccOctree::GuessBestRadiusAutoComputeOctree(ccGenericPointClo
 
 PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*                cloud,
                                               const BestRadiusParams&             params,
-                                              CCCoreLib::DgmOctree*               inputOctree /*=nullptr*/,
+                                              CCCoreLib::DgmOctree*               cloudOctree /*=nullptr*/,
                                               CCCoreLib::GenericProgressCallback* progressCb /*=nullptr*/)
 {
 	if (!cloud)
@@ -787,7 +786,7 @@ PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*              
 		return 0;
 	}
 
-	CCCoreLib::DgmOctree* octree = inputOctree;
+	CCCoreLib::DgmOctree* octree = cloudOctree;
 	if (!octree)
 	{
 		octree = new CCCoreLib::DgmOctree(cloud);
@@ -934,7 +933,7 @@ PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*              
 		}
 	}
 
-	if (nullptr == inputOctree)
+	if (nullptr == cloudOctree)
 	{
 		delete octree;
 		octree = nullptr;

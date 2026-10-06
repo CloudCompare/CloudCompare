@@ -69,9 +69,9 @@ ccScalarField::ccScalarField(const ccScalarField& sf)
 	m_logSaturationRange = sf.m_logSaturationRange;
 }
 
-ScalarType ccScalarField::normalize(ScalarType d) const
+ScalarType ccScalarField::normalize(ScalarType val) const
 {
-	if (/*!ValidValue(d) || */ !m_displayRange.isInRange(d)) // NaN values are also rejected by 'isInRange'!
+	if (/*!ValidValue(val) || */ !m_displayRange.isInRange(val)) // NaN values are also rejected by 'isInRange'!
 	{
 		return static_cast<ScalarType>(-1);
 	}
@@ -81,40 +81,32 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	{
 		if (!m_symmetricalScale)
 		{
-			if (d <= m_saturationRange.start())
+			if (val <= m_saturationRange.start())
 				return 0;
-			else if (d >= m_saturationRange.stop())
+			if (val >= m_saturationRange.stop())
 				return static_cast<ScalarType>(1);
-			return (d - m_saturationRange.start()) / m_saturationRange.range();
+			return (val - m_saturationRange.start()) / m_saturationRange.range();
 		}
-		else // symmetric scale
-		{
-			if (std::abs(d) <= m_saturationRange.start())
-				return static_cast<ScalarType>(0.5);
+		if (std::abs(val) <= m_saturationRange.start())
+			return static_cast<ScalarType>(0.5);
 
-			if (d >= 0)
-			{
-				if (d >= m_saturationRange.stop())
-					return static_cast<ScalarType>(1);
-				return (static_cast<ScalarType>(1) + (d - m_saturationRange.start()) / m_saturationRange.range()) / 2;
-			}
-			else
-			{
-				if (d <= -m_saturationRange.stop())
-					return 0;
-				return (static_cast<ScalarType>(1) + (d + m_saturationRange.start()) / m_saturationRange.range()) / 2;
-			}
+		if (val >= 0)
+		{
+			if (val >= m_saturationRange.stop())
+				return static_cast<ScalarType>(1);
+			return (static_cast<ScalarType>(1) + (val - m_saturationRange.start()) / m_saturationRange.range()) / 2;
 		}
-	}
-	else // log scale
-	{
-		ScalarType dLog = log10(std::max(static_cast<ScalarType>(std::abs(d)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
-		if (dLog <= m_logSaturationRange.start())
+
+		if (val <= -m_saturationRange.stop())
 			return 0;
-		else if (dLog >= m_logSaturationRange.stop())
-			return static_cast<ScalarType>(1);
-		return (dLog - m_logSaturationRange.start()) / m_logSaturationRange.range();
+		return (static_cast<ScalarType>(1) + (val + m_saturationRange.start()) / m_saturationRange.range()) / 2;
 	}
+	ScalarType dLog = log10(std::max(static_cast<ScalarType>(std::abs(val)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
+	if (dLog <= m_logSaturationRange.start())
+		return 0;
+	if (dLog >= m_logSaturationRange.stop())
+		return static_cast<ScalarType>(1);
+	return (dLog - m_logSaturationRange.start()) / m_logSaturationRange.range();
 
 	// can't get here normally!
 	assert(false);

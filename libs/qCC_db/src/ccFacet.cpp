@@ -606,8 +606,8 @@ void ccFacet::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccFacet::invertNormal()
 {
-	for (int i = 0; i < 4; ++i)
+	for (float& coef : m_planeEquation)
 	{
-		m_planeEquation[i] = -m_planeEquation[i];
+		coef = -coef;
 	}
 }

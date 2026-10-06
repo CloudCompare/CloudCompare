@@ -153,10 +153,8 @@ bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 			ccLog::Warning(QString("[ccMaterial::loadAndSetTexture] Failed to load image '%1'").arg(absoluteFilename));
 			return false;
 		}
-		else
-		{
-			setTexture(image, absoluteFilename, true);
-		}
+
+		setTexture(image, absoluteFilename, true);
 	}
 
 	return true;
@@ -195,7 +193,7 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename /*=QString()*
 	GetMaterialDB().addTexture(m_textureFilename, mirrorImage ? image.mirrored() : image);
 }
 
-const QImage ccMaterial::getTexture() const
+QImage ccMaterial::getTexture() const
 {
 	return GetMaterialDB().getTexture(m_textureFilename);
 }
@@ -223,10 +221,8 @@ GLuint ccMaterial::getTextureID() const
 		}
 		return tex->textureId();
 	}
-	else
-	{
-		return 0;
-	}
+
+	return 0;
 }
 
 bool ccMaterial::hasTexture() const
@@ -377,21 +373,15 @@ short ccMaterial::minimumFileVersion() const
 
 bool ccMaterial::compare(const ccMaterial& mtl) const
 {
-	if (mtl.m_name != m_name
-	    || mtl.m_textureFilename != m_textureFilename
-	    || mtl.m_shininessFront != m_shininessFront
-	    || mtl.m_shininessBack != m_shininessBack
-	    || mtl.m_ambient != m_ambient
-	    || mtl.m_specular != m_specular
-	    || mtl.m_emission != m_emission
-	    || mtl.m_diffuseBack != m_diffuseBack
-	    || mtl.m_diffuseFront != m_diffuseFront
-	    || mtl.m_diffuseFront != m_diffuseFront)
-	{
-		return false;
-	}
-
-	return true;
+	return mtl.m_name == m_name
+	       && mtl.m_textureFilename == m_textureFilename
+	       && mtl.m_shininessFront == m_shininessFront
+	       && mtl.m_shininessBack == m_shininessBack
+	       && mtl.m_ambient == m_ambient
+	       && mtl.m_specular == m_specular
+	       && mtl.m_emission == m_emission
+	       && mtl.m_diffuseBack == m_diffuseBack
+	       && mtl.m_diffuseFront == m_diffuseFront;
 }
 
 void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter)

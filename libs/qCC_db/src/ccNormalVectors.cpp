@@ -31,6 +31,7 @@
 #include <Neighbourhood.h>
 
 // System
+#include <algorithm>
 #include <cassert>
 
 // Number of points for local modeling to compute normals with 2D1/2 Delaunay triangulation
@@ -406,10 +407,8 @@ bool ccNormalVectors::ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPer
 
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 bool ccNormalVectors::ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
@@ -434,10 +433,7 @@ bool ccNormalVectors::ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist*
 		N = *_N;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
@@ -644,8 +640,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::oct
 		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
 		{
-			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3)
-				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3;
+			k = std::min(k, NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3);
 			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
@@ -779,7 +774,7 @@ CCVector3f ccNormalVectors::ConvertDipAndDipDirToNormal(float dip_deg, float dip
 	// specific case
 	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
 	{
-		return CCVector3f(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	float      Nz         = cos(CCCoreLib::DegreesToRadians(dip_deg));
@@ -808,7 +803,7 @@ CCVector3d ccNormalVectors::ConvertDipAndDipDirToNormal(double dip_deg, double d
 	// specific case
 	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
 	{
-		return CCVector3(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	double     Nz         = cos(CCCoreLib::DegreesToRadians(dip_deg));

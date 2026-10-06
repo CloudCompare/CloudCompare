@@ -45,9 +45,7 @@ ccSensor::ccSensor(const ccSensor& sensor)
 	}
 }
 
-ccSensor::~ccSensor()
-{
-}
+ccSensor::~ccSensor() = default;
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 {

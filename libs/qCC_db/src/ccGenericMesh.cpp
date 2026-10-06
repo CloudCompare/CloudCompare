@@ -39,6 +39,7 @@
 
 // System
 #include <cassert>
+#include <memory>
 
 #if defined(_OPENMP)
 // OpenMP
@@ -559,10 +560,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!entityPickingMode || !glParams.showSF);
 		assert(prog.isNull() == false);
 
-		auto   verticesBuffer = GetVertexBuffer();
+		auto*  verticesBuffer = GetVertexBuffer();
 		float* normalIndexes  = reinterpret_cast<float*>(GetNormalsBuffer());
-		auto   rgbColors      = GetColorsBuffer();
-		auto   texCoords      = GetTexCoordsBuffer();
+		auto*  rgbColors      = GetColorsBuffer();
+		auto*  texCoords      = GetTexCoordsBuffer();
 
 		prog->bind();
 
@@ -629,7 +630,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const TexCoords2D* Tx2 = nullptr;
 				const TexCoords2D* Tx3 = nullptr;
 
-				float* _texCoords = reinterpret_cast<float*>(texCoords);
+				float* _texCoords = texCoords;
 				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
 					unsigned triangleIndex = static_cast<unsigned>(chunkStart + n);
@@ -1152,7 +1153,7 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 	std::unique_ptr<std::vector<unsigned>> triIndices;
 	if (withFeatures)
 	{
-		triIndices.reset(new std::vector<unsigned>);
+		triIndices = std::make_unique<std::vector<unsigned>>();
 	}
 
 	CCCoreLib::PointCloud* sampledCloud = nullptr;
@@ -1496,7 +1497,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d&           clickPos,
 		if (nearestTriIndex < 0 || squareDist < nearestSquareDist)
 		{
 			nearestSquareDist = squareDist;
-			nearestTriIndex   = static_cast<int>(i);
+			nearestTriIndex   = i;
 			nearestPoint      = P;
 			if (barycentricCoords)
 			{

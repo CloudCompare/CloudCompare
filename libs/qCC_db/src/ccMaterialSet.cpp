@@ -39,7 +39,7 @@ int ccMaterialSet::findMaterialByName(const QString& mtlName)
 	int i = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 name: %2").arg(i).arg(mtl->getName()));
 		if (mtl->getName() == mtlName)
 			return i;
@@ -55,7 +55,7 @@ int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 	int i = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 ID: %2").arg(i).arg(mtl->getUniqueIdentifier()));
 		if (mtl->getUniqueIdentifier() == uniqueID)
 			return i;
@@ -64,21 +64,21 @@ int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 	return -1;
 }
 
-int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames /*=false*/)
+int ccMaterialSet::addMaterial(ccMaterial::CShared mat, bool allowDuplicateNames /*=false*/)
 {
-	if (!mtl)
+	if (!mat)
 	{
 		// invalid input material
 		return -1;
 	}
 
 	// material already exists?
-	int previousIndex = findMaterialByName(mtl->getName());
+	int previousIndex = findMaterialByName(mat->getName());
 	// DGM: warning, the materials may have the same name, but they may be different in reality (other texture, etc.)!
 	if (previousIndex >= 0)
 	{
 		const ccMaterial::CShared& previousMtl = (*this)[previousIndex];
-		if (!previousMtl->compare(*mtl))
+		if (!previousMtl->compare(*mat))
 		{
 			// in fact the material is a bit different
 			previousIndex = -1;
@@ -92,9 +92,9 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 					if (findMaterialByName(newMtlName) < 0)
 					{
 						// we duplicate the material and we change its name
-						auto newMtl = std::make_shared<ccMaterial>(*mtl);
+						auto newMtl = std::make_shared<ccMaterial>(*mat);
 						newMtl->setName(newMtlName);
-						mtl = newMtl;
+						mat = newMtl;
 						break;
 					}
 				}
@@ -106,7 +106,7 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 
 	try
 	{
-		push_back(mtl);
+		push_back(mat);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -387,7 +387,7 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 	size_t matIndex = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++matIndex)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		stream << Qt::endl
 		       << "newmtl " << mtl->getName() << Qt::endl;
 
@@ -585,8 +585,6 @@ short ccMaterialSet::minimumFileVersion_MeOnly() const
 	{
 		return 37;
 	}
-	else
-	{
-		return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
-	}
+
+	return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
 }

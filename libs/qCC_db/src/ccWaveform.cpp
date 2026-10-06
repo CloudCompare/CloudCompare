@@ -256,10 +256,7 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 		minVal = maxVal = std::numeric_limits<double>::quiet_NaN();
 		return 0.0;
 	}
-	else
-	{
-		minVal = maxVal = getSample(0, descriptor, dataStorage);
-	}
+	minVal = maxVal = getSample(0, descriptor, dataStorage);
 
 	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
 	{

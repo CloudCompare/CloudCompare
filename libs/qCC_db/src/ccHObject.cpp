@@ -47,6 +47,9 @@
 // Qt
 #include <QIcon>
 
+// System
+#include <algorithm>
+
 ccHObject::ccHObject(const QString& name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccObject(name, uniqueID)
     , ccDrawableObject()
@@ -254,7 +257,7 @@ ccHObject* ccHObject::New(const QString& pluginId, const QString& classId, const
 
 QIcon ccHObject::getIcon() const
 {
-	return QIcon();
+	return {};
 }
 
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /*=true*/)
@@ -265,7 +268,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /
 		assert(false);
 		return;
 	}
-	else if (flags == 0)
+	if (flags == 0)
 	{
 		return;
 	}
@@ -302,20 +305,13 @@ int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 
 bool ccHObject::hasDependencyFlag(int dependencyFlag) const
 {
-	for (auto it : m_dependencies)
-	{
-		if (it.second == dependencyFlag)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return std::any_of(m_dependencies.cbegin(), m_dependencies.cend(), [dependencyFlag](const auto& p)
+	                   { return p.second == dependencyFlag; });
 }
 
 void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
-	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); // DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	m_dependencies.erase(otherObject);
 	if (!otherObject->m_isDeleting)
 	{
 		otherObject->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
@@ -410,7 +406,7 @@ unsigned int ccHObject::getChildCountRecursive() const
 {
 	unsigned int count = static_cast<unsigned>(m_children.size());
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		count += child->getChildCountRecursive();
 	}
@@ -445,7 +441,7 @@ unsigned ccHObject::filterChildren(Container&          filteredChildren,
                                    bool                strict /*=false*/,
                                    ccGenericGLDisplay* inDisplay /*=nullptr*/) const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if ((!strict && child->isKindOf(filter))
 		    || (strict && child->isA(filter)))
@@ -497,7 +493,7 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent /*=false*/)
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove link from old parent
 		int childDependencyFlags  = child->getDependencyFlagsWith(this);
@@ -564,14 +560,14 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 
 ccBBox ccHObject::getOwnBB(bool withGLFeatures /*=false*/)
 {
-	return ccBBox();
+	return {};
 }
 
 ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
 {
 	// by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
-	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
+	return {box.minCorner(), box.maxCorner(), box.isValid()};
 }
 
 bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
@@ -587,7 +583,7 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabl
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -602,7 +598,7 @@ ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeature
 {
 	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -620,7 +616,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 	if (!display || display == m_currentDisplay)
 		box = getOwnBB(true);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isEnabled())
 		{
@@ -816,7 +812,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// draw entity's children
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		child->draw(context);
 	}
@@ -864,7 +860,7 @@ void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput /*=
 		notifyGeometryUpdate();
 	}
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 		child->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
@@ -875,13 +871,10 @@ unsigned ccHObject::findMaxUniqueID_recursive() const
 {
 	unsigned id = getUniqueID();
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		unsigned childMaxID = child->findMaxUniqueID_recursive();
-		if (id < childMaxID)
-		{
-			id = childMaxID;
-		}
+		id                  = std::max(id, childMaxID);
 	}
 
 	return id;
@@ -914,7 +907,7 @@ void ccHObject::detachChild(ccHObject* child)
 
 void ccHObject::detachAllChildren()
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove any dependency (bilateral)
 		removeDependencyWith(child);
@@ -1023,7 +1016,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1037,7 +1030,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	}
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1173,7 +1166,7 @@ short ccHObject::minimumFileVersion() const
 	minVersion       = std::max(minVersion, minimumFileVersion_MeOnly());
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		minVersion = std::max(minVersion, child->minimumFileVersion());
 	}
@@ -1357,9 +1350,7 @@ short ccHObject::minimumFileVersion_MeOnly() const
 
 struct HObjectDisplayState : ccDrawableObject::DisplayState
 {
-	HObjectDisplayState()
-	{
-	}
+	HObjectDisplayState() = default;
 
 	HObjectDisplayState(const ccHObject& obj)
 	    : ccDrawableObject::DisplayState(obj)

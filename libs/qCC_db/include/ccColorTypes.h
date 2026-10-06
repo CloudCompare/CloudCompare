@@ -74,7 +74,13 @@ namespace ccColor
 		{
 		}
 
-		//! Comparison operator
+		//! equality operator
+		inline bool operator==(const RgbTpl<Type>& t) const
+		{
+			return (r == t.r && g == t.g && b == t.b);
+		}
+
+		//! inequality operator
 		inline bool operator!=(const RgbTpl<Type>& t) const
 		{
 			return (r != t.r || g != t.g || b != t.b);
@@ -157,7 +163,13 @@ namespace ccColor
 		//! Cast operator (const version)
 		// inline operator const Type*() const { return rgba; }
 
-		//! Comparison operator
+		//! equality operator
+		inline bool operator==(const RgbaTpl<Type>& t) const
+		{
+			return (r == t.r && g == t.g && b == t.b && a == t.a);
+		}
+
+		//! inequality operator
 		inline bool operator!=(const RgbaTpl<Type>& t) const
 		{
 			return (r != t.r || g != t.g || b != t.b || a != t.a);
@@ -271,12 +283,11 @@ namespace ccColor
 
 			if (6 * hue < 1.0f)
 				return m1 + (m2 - m1) * hue * 6;
-			else if (2 * hue < 1.0f)
+			if (2 * hue < 1.0f)
 				return m2;
-			else if (3 * hue < 2.0f)
+			if (3 * hue < 2.0f)
 				return m1 + (m2 - m1) * (4.0f - hue * 6);
-			else
-				return m1;
+			return m1;
 		}
 	};
 

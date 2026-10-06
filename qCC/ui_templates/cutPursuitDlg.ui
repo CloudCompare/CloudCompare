@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>330</width>
-    <height>200</height>
+    <height>359</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,6 +18,10 @@
   </property>
   <property name="windowTitle">
    <string>Cut Pursuit</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../icons.qrc">
+    <normaloff>:/CC/images/ccCutPursuit.svg</normaloff>:/CC/images/ccCutPursuit.svg</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -73,16 +77,16 @@
         </size>
        </property>
        <property name="minimum">
-        <double>0</double>
+        <double>0.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100</double>
+        <double>100.000000000000000</double>
        </property>
        <property name="singleStep">
-        <double>0.1</double>
+        <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>0.4</double>
+        <double>0.400000000000000</double>
        </property>
       </widget>
      </item>
@@ -108,16 +112,16 @@
         <number>4</number>
        </property>
        <property name="minimum">
-        <double>0</double>
+        <double>0.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>1</double>
+        <double>1.000000000000000</double>
        </property>
        <property name="singleStep">
-        <double>0.1</double>
+        <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>0.3</double>
+        <double>0.300000000000000</double>
        </property>
       </widget>
      </item>
@@ -143,16 +147,16 @@
         <number>5</number>
        </property>
        <property name="minimum">
-        <double>0.0</double>
+        <double>0.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>1.0</double>
+        <double>1.000000000000000</double>
        </property>
        <property name="singleStep">
-        <double>0.0001</double>
+        <double>0.000100000000000</double>
        </property>
        <property name="value">
-        <double>0.001</double>
+        <double>0.001000000000000</double>
        </property>
       </widget>
      </item>
@@ -213,7 +217,7 @@
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -233,23 +237,18 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ccOctreeSpinBox</class>
-   <extends>QSpinBox</extends>
-   <header location="global">ccOctreeSpinBox.h</header>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

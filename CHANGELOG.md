@@ -148,6 +148,11 @@ New features:
 		- simply splits the screen into two 3D views (left / right)
 	- (the Oculus support has been dropped)
 
+	- New 'Cut pursuit' segmentation algorithm
+		- Tools > Segmentation > Cut pursuit
+		- can be used to segment a cloud into piecewise constant regions, based on one or several scalar field
+		- based on the paper "Parallel Cut Pursuit for Minimization of the Graph Total Variation" (Raguet et al., 2019)
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

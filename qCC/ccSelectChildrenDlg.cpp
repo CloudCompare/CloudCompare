@@ -17,7 +17,8 @@
 
 #include "ccSelectChildrenDlg.h"
 
-#include "ui_selectChildrenDlg.h"
+// Ui
+#include <ui_selectChildrenDlg.h>
 
 static QString       s_lastName;
 static bool          s_lastNameState       = false;

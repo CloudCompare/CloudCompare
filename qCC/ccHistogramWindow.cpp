@@ -17,15 +17,21 @@
 
 #include "ccHistogramWindow.h"
 
-#include "ccGuiParameters.h"
-
 // Local
-#include "ccPersistentSettings.h"
 #include "ccQCustomPlot.h"
+
+// Ui
+#include <ui_histogramDlg.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <ccColorScalesManager.h>
 #include <ccFileUtils.h>
+
+// qCC_glWindow
+#include <ccGuiParameters.h>
 
 // qCC_io
 #include <ImageFileFilter.h>
@@ -40,9 +46,6 @@
 // System
 #include <cassert>
 #include <cmath>
-
-// Gui
-#include "ui_histogramDlg.h"
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent /*=nullptr*/)
     : QCustomPlot(parent)

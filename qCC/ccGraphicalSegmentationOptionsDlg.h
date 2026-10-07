@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
+#include <ui_graphicalSegmentationOptionsDlg.h>
+
 // Qt
 #include <QString>
-
-// GUI
-#include <ui_graphicalSegmentationOptionsDlg.h>
 
 class ccGraphicalSegmentationOptionsDlg : public QDialog
     , public Ui::GraphicalSegmentationOptionsDlg

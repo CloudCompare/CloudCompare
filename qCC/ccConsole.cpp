@@ -18,8 +18,10 @@
 #include "ccConsole.h"
 
 // Local
-#include "ccPersistentSettings.h"
 #include "mainwindow.h"
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // Qt
 #include <QApplication>
@@ -32,8 +34,9 @@
 #include <QThread>
 #include <QTime>
 
-// system
+// System
 #include <cassert>
+
 #ifdef QT_DEBUG
 #include <iostream>
 #endif

@@ -17,19 +17,19 @@
 
 #include "ccColorLevelsDlg.h"
 
-// local
-#include "ccGenericPointCloud.h"
+// Local
 #include "ccHistogramWindow.h"
 
 // qCC_db
 #include <ccGenericGLDisplay.h>
+#include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
 // Qt
 #include <QPushButton>
 
-// system
+// System
 #include <cassert>
 
 // persistent parameters

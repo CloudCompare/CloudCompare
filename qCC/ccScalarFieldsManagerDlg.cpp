@@ -17,11 +17,12 @@
 
 #include "ccScalarFieldsManagerDlg.h"
 
-#include "ui_scalarFieldsManagerDlg.h"
-
-// local
+// Local
 #include "ccHistogramWindow.h"
 #include "mainwindow.h"
+
+// Ui
+#include <ui_scalarFieldsManagerDlg.h>
 
 // qCC_db
 #include <ccPointCloud.h>

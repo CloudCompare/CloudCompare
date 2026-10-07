@@ -21,7 +21,7 @@
 #include <QDoubleValidator>
 #include <QListWidgetItem>
 
-// system
+// System
 #include <cassert>
 
 ccMatchScalesDlg::ccMatchScalesDlg(const ccHObject::Container& entities,

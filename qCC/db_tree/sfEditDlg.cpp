@@ -17,21 +17,21 @@
 
 #include "sfEditDlg.h"
 
-#include "ui_sfEditDlg.h"
-
 // Local
 #include "ccHistogramWindow.h"
 
-// qCC_db
-#include <ccScalarField.h>
+// Ui
+#include <ui_sfEditDlg.h>
 
 // CCCoreLib
 #include <CCConst.h>
 
-// system
+// qCC_db
+#include <ccScalarField.h>
+
+// System
 #include <cassert>
 
-//! Default number of steps for spin-boxes
 const int SPIN_BOX_STEPS = 1000;
 
 sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)

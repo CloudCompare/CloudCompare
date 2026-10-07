@@ -17,8 +17,11 @@
 
 #include "ccColorFromScalarDlg.h"
 
-// local
+// Local
 #include "ccHistogramWindow.h"
+
+// Ui
+#include <ui_colorFromScalarDlg.h>
 
 // qCC_db
 #include <ccColorScale.h>
@@ -29,10 +32,7 @@
 // Qt
 #include <QPushButton>
 
-// ui
-#include <ui_colorFromScalarDlg.h>
-
-// system
+// System
 #include <cassert>
 #include <cstring>
 

@@ -17,12 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <ui_matchScalesDlg.h>
-
 // Local
 #include "ccLibAlgorithms.h"
 
-//! Scales matching tool dialog
+// Ui
+#include <ui_matchScalesDlg.h>
+
 class ccMatchScalesDlg : public QDialog
     , public Ui::MatchScalesDialog
 {

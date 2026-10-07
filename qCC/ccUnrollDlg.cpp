@@ -17,9 +17,12 @@
 
 #include "ccUnrollDlg.h"
 
+// Local
 #include "ccEntitySelectionDlg.h"
 #include "ccUtils.h"
-#include "ui_unrollDlg.h"
+
+// Ui
+#include <ui_unrollDlg.h>
 
 // qCC_db
 #include <ccCylinder.h>

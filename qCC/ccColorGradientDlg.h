@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
+#include <ui_colorGradientDlg.h>
+
 // Qt
 #include <QColor>
-#include <ui_colorGradientDlg.h>
 
 //! Dialog to define a color gradient (default, with 2 colors, banding, etc.)
 class ccColorGradientDlg : public QDialog

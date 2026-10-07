@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// GUI
-#include <ui_pointListPickingDlg.h>
-
 // Local
 #include "ccPointPickingGenericInterface.h"
+
+// Ui
+#include <ui_pointListPickingDlg.h>
 
 // qCC_db
 #include <ccHObject.h>

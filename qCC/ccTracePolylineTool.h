@@ -17,14 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
 
 // qCC_db
 #include <ccGenericGLDisplay.h>
 
-// system
+// System
 #include <vector>
 
 class ccPolyline;

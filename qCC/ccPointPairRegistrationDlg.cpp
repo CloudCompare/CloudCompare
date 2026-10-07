@@ -15,17 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <ccPointPairRegistrationDlg.h>
+#include "ccPointPairRegistrationDlg.h"
 
 // Local
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "mainwindow.h"
 
-// common
-#include <ccPickingHub.h>
+// CCCoreLib
+#include <GeometricalAnalysisTools.h>
+#include <RegistrationTools.h>
 
-// qCC_gl
-#include <ccGLWindowInterface.h>
+// CCFbo
+#include <ccGlFilter.h>
+
+// CCPluginAPI
+#include <ccPickingHub.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -34,15 +38,11 @@
 #include <ccProgressDialog.h>
 #include <ccSphere.h>
 
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
 // qCC_io
 #include <ccGlobalShiftManager.h>
-
-// CC_FBO
-#include <ccGlFilter.h>
-
-// CCCoreLib
-#include <GeometricalAnalysisTools.h>
-#include <RegistrationTools.h>
 
 // Qt
 #include <QMdiSubWindow>

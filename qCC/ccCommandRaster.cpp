@@ -15,21 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
-#include "ccRasterizeTool.h"
-
-// Qt
-#include <QMessageBox>
-#include <QString>
-
-// qCC_db
 #include "ccCommandRaster.h"
 
-#include <QDateTime>
+// Local
+#include "ccRasterizeTool.h"
+#include "ccVolumeCalcTool.h"
+
+// qCC_db
 #include <ccColorScalesManager.h>
 #include <ccMesh.h>
 #include <ccProgressDialog.h>
-#include <ccVolumeCalcTool.h>
+
+// Qt
+#include <QDateTime>
+#include <QMessageBox>
+#include <QString>
 
 // shared commands
 constexpr char COMMAND_GRID_VERT_DIR[]               = "VERT_DIR";

@@ -18,15 +18,13 @@
 #include "ccPropertiesTreeDelegate.h"
 
 // Local
-#include "ccColorScaleEditorDlg.h"
-#include "ccColorScaleSelector.h"
 #include "mainwindow.h"
 #include "matrixDisplayDlg.h"
 #include "sfEditDlg.h"
 
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
-#include <ccGuiParameters.h>
+// CCPluginAPI
+#include <ccColorScaleEditorDlg.h>
+#include <ccColorScaleSelector.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -57,6 +55,10 @@
 #include <ccSensor.h>
 #include <ccSphere.h>
 #include <ccSubMesh.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+#include <ccGuiParameters.h>
 
 // Qt
 #include <QAbstractItemView>

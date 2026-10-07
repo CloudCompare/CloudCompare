@@ -17,8 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QDialog>
+// Ui
 #include <ui_adjustZoomDlg.h>
+
+// Qt
+#include <QDialog>
 
 class ccGLWindowInterface;
 

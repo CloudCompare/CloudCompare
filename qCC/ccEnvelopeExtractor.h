@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// qCC_db
-#include <ccPolyline.h>
-
 // CCCoreLib
 #include <PointProjectionTools.h>
+
+// qCC_db
+#include <ccPolyline.h>
 
 //! Envelope extractor (with debug GUI)
 class ccEnvelopeExtractor

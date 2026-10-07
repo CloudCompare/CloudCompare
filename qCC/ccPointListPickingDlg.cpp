@@ -17,13 +17,9 @@
 
 #include "ccPointListPickingDlg.h"
 
-// Qt
-#include <QApplication>
-#include <QClipboard>
-#include <QFileDialog>
-#include <QMenu>
-#include <QMessageBox>
-#include <QSettings>
+// Local
+#include "db_tree/ccDBRoot.h"
+#include "mainwindow.h"
 
 // CCCoreLib
 #include <CCConst.h>
@@ -34,20 +30,24 @@
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
 
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
 // qCC_io
 #include <AsciiFilter.h>
 
-// qCC_gl
-#include <ccGLWindowInterface.h>
+// Qt
+#include <QApplication>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QSettings>
 
-// local
-#include "db_tree/ccDBRoot.h"
-#include "mainwindow.h"
-
-// system
+// System
 #include <cassert>
 
-// semi persistent settings
+// Semi persistent settings
 static int        s_pickedPointsStartIndex          = 0;
 static bool       s_showGlobalCoordsCheckBoxChecked = false;
 static const char s_pickedPointContainerName[]      = "Picked points list";

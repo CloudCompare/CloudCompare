@@ -17,18 +17,19 @@
 // #                                                                        #
 // ##########################################################################
 
-// common
-#include <ccOverlayDialog.h>
-
-// local
+// Local
 #include "ccEnvelopeExtractor.h"
 
+// Ui
 #include <ui_clippingBoxDlg.h>
 
-// qCC_db
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+
+// qCC_glWindow
 #include <ccGLUtils.h>
 
-// system
+// System
 #include <vector>
 
 class ccGenericPointCloud;

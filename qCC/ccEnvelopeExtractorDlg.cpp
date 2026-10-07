@@ -20,14 +20,15 @@
 // CCCoreLib
 #include <CCPlatform.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt
 #include <QCoreApplication>
 
-// system
+// System
 #include <cassert>
+
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else

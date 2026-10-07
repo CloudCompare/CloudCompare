@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
+#include <ui_colorLevelsDlg.h>
+
 // Qt
 #include <QColor>
-#include <ui_colorLevelsDlg.h>
 
 class ccHistogramWindow;
 class ccGenericPointCloud;

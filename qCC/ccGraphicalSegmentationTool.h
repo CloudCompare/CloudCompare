@@ -17,7 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
+// Ui
+#include <ui_graphicalSegmentationDlg.h>
+
+// CCPluginAPI
 #include <ccOverlayDialog.h>
 
 // qCC_db
@@ -25,9 +28,6 @@
 
 // Qt
 #include <QSet>
-
-// GUI
-#include <ui_graphicalSegmentationDlg.h>
 
 // System
 #include <set>

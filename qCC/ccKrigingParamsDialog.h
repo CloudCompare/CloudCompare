@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
-
 // qCC_db
 #include <ccRasterGrid.h>
+
+// Qt
+#include <QDialog>
 
 namespace Ui
 {

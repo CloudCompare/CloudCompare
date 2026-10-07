@@ -21,7 +21,13 @@
 #include "ccCommandCrossSection.h"
 #include "ccCommandLineCommands.h"
 #include "ccCommandRaster.h"
-#include "ccPluginInterface.h"
+#include "ccConsole.h"
+
+// Ui
+#include <ui_commandLineDlg.h>
+
+// CCPluginStub
+#include <ccPluginInterface.h>
 
 // qCC_db
 #include <ccGenericMesh.h>
@@ -32,17 +38,12 @@
 #include <AsciiFilter.h>
 #include <BinFilter.h>
 
-// qCC
-#include "ccConsole.h"
-
-#include <ui_commandLineDlg.h>
-
 // Qt
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMessageBox>
 
-// system
+// System
 #include <unordered_set>
 
 // commands

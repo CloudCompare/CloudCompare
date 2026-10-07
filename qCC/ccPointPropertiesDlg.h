@@ -17,9 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "ccPointPickingGenericInterface.h"
 
-// Local
+// Ui
 #include <ui_pointPropertiesDlg.h>
 
 class cc2DLabel;

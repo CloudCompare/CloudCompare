@@ -17,14 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
+// Local
+#include "ccQCustomPlot.h"
 
 // qCC_db
 #include <ccScalarField.h>
 
-// QCustomPlot
-#include "ccQCustomPlot.h"
+// Qt
+#include <QDialog>
 
 class QCPArrow;
 class QCPBarsWithText;

@@ -17,8 +17,10 @@
 
 #include "ccSORFilterDlg.h"
 
-#include "ui_sorFilterDlg.h"
+// Ui
+#include <ui_sorFilterDlg.h>
 
+// Qt
 #include <QThread>
 
 ccSORFilterDlg::ccSORFilterDlg(QWidget* parent /*=nullptr*/)

@@ -18,21 +18,19 @@
 #include "ccDBRoot.h"
 
 // Local
-#include "ccGLWindowInterface.h"
+#include "ccPropertiesTreeDelegate.h"
+#include "ccSelectChildrenDlg.h"
+#include "mainwindow.h"
 
-// Qt
-#include <QApplication>
-#include <QCheckBox>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QInputDialog>
-#include <QMenu>
-#include <QMessageBox>
-#include <QMimeData>
-#include <QRegularExpression>
-#include <QSettings>
-#include <QStandardItemModel>
-#include <QTreeView>
+// CCAppCommon
+#include <ccOptions.h>
+#include <ccPickOneElementDlg.h>
+
+// CCCoreLib
+#include <CCMiscTools.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -52,25 +50,28 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// CClib
-#include <CCMiscTools.h>
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
-// common
-#include <ccOptions.h>
-#include <ccPickOneElementDlg.h>
+// Qt
+#include <QApplication>
+#include <QCheckBox>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QRegularExpression>
+#include <QSettings>
+#include <QStandardItemModel>
+#include <QTreeView>
 
-// local
-#include "ccPersistentSettings.h"
-#include "ccPropertiesTreeDelegate.h"
-#include "ccSelectChildrenDlg.h"
-#include "mainwindow.h"
-
-// system
+// System
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 
-// Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;
 
 // test whether a cloud can be deleted or moved

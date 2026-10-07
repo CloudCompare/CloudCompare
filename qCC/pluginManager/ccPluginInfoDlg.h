@@ -1,5 +1,5 @@
-#ifndef CCPLUGININFODLG_H
-#define CCPLUGININFODLG_H
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -61,5 +61,3 @@ class ccPluginInfoDlg : public QDialog
 	QSortFilterProxyModel* m_ProxyModel;
 	QStandardItemModel*    m_ItemModel;
 };
-
-#endif

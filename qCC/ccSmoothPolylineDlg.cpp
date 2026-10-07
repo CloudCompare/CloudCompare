@@ -17,7 +17,7 @@
 
 #include "ccSmoothPolylineDlg.h"
 
-// ui
+// Ui
 #include <ui_smoothPolylineDlg.h>
 
 // Qt

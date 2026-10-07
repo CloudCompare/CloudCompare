@@ -18,10 +18,17 @@
 #include "ccApplyTransformationDlg.h"
 
 // Local
-#include "ccPersistentSettings.h"
 #include "ccUtils.h"
 #include "mainwindow.h"
-#include "ui_dipDirTransformationDlg.h"
+
+// Ui
+#include <ui_dipDirTransformationDlg.h>
+
+// CCCoreLib
+#include <CCConst.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <ccFileUtils.h>
@@ -33,9 +40,6 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
-
-// CCCoreLib
-#include <CCConst.h>
 
 static QString s_lastMatrix("1.00000000 0.00000000 0.00000000 0.00000000\n0.00000000 1.00000000 0.00000000 0.00000000\n0.00000000 0.00000000 1.00000000 0.00000000\n0.00000000 0.00000000 0.00000000 1.00000000");
 static bool    s_inverseMatrix    = false;

@@ -17,10 +17,14 @@
 
 #include "ccShortcutDialog.h"
 
-#include "ccPersistentSettings.h"
-#include "ui_shortcutEditDialog.h"
-#include "ui_shortcutSettings.h"
+// Ui
+#include <ui_shortcutEditDialog.h>
+#include <ui_shortcutSettings.h>
 
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
+// Qt
 #include <QAction>
 #include <QHash>
 #include <QMessageBox>

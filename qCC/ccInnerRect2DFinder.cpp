@@ -20,7 +20,7 @@
 // qCC_db
 #include <ccLog.h>
 
-// system
+// System
 #include <cassert>
 
 ccInnerRect2DFinder::ccInnerRect2DFinder()

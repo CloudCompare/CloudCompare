@@ -17,7 +17,8 @@
 
 #include "ccScaleDlg.h"
 
-#include "ui_scaleDlg.h"
+// Ui
+#include <ui_scaleDlg.h>
 
 // semi persistent parameters
 static CCVector3d s_lastScales(1.0, 1.0, 1.0);

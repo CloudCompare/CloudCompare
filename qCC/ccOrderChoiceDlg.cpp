@@ -17,20 +17,18 @@
 
 #include "ccOrderChoiceDlg.h"
 
-// common
-#include <ccQtHelpers.h>
+// Ui
+#include <ui_roleChoiceDlg.h>
 
-// qCC_plugins
+// CCPluginAPI
 #include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 // qCC_db
 #include <ccHObject.h>
 
 // Qt
 #include <QMainWindow>
-
-// ui template
-#include <ui_roleChoiceDlg.h>
 
 ccOrderChoiceDlg::ccOrderChoiceDlg(ccHObject*          firstEntity,
                                    QString             firstRole,

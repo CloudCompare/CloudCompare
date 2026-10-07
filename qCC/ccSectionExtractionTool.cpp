@@ -24,6 +24,12 @@
 #include "ccSectionExtractionSubDlg.h"
 #include "mainwindow.h"
 
+// Ui
+#include <ui_sectionExtractionDlg.h>
+
+// CCCoreLib
+#include <ReferenceCloud.h>
+
 // qCC_db
 #include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
@@ -32,20 +38,14 @@
 #include <ccPolyline.h>
 #include <ccProgressDialog.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
-
-// CCCoreLib
-#include <ReferenceCloud.h>
 
 // Qt
 #include <QCoreApplication>
 #include <QInputDialog>
 #include <QMdiSubWindow>
 #include <QMessageBox>
-
-// GUI
-#include <ui_sectionExtractionDlg.h>
 
 // System
 #include <cassert>

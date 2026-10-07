@@ -17,7 +17,7 @@
 
 #include "ccCamSensorProjectionDlg.h"
 
-// local
+// Local
 #include "ccCustomDoubleValidator.h"
 
 // qCC_db

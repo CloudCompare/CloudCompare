@@ -17,9 +17,8 @@
 
 #include "ccPointPropertiesDlg.h"
 
-// qCC_gl
-#include <ccGLWindowInterface.h>
-#include <ccGuiParameters.h>
+// CCCoreLib
+#include <ScalarField.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -28,8 +27,9 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-// CCCoreLib
-#include <ScalarField.h>
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+#include <ccGuiParameters.h>
 
 // Qt
 #include <QInputDialog>

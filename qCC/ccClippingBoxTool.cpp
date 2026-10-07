@@ -22,7 +22,6 @@
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccContourLinesGenerator.h"
 #include "ccCropTool.h"
-#include "ccGLWindowInterface.h"
 #include "ccReservedIDs.h"
 #include "db_tree/ccDBRoot.h"
 #include "mainwindow.h"
@@ -32,6 +31,9 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccRasterGrid.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QMessageBox>

@@ -17,7 +17,8 @@
 
 #include "ccStatisticalTestDlg.h"
 
-#include "ui_statisticalTestDlg.h"
+// Ui
+#include <ui_statisticalTestDlg.h>
 
 ccStatisticalTestDlg::ccStatisticalTestDlg(QString  param1Label,
                                            QString  param2Label,

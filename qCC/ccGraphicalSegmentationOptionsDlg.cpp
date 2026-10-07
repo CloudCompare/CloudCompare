@@ -15,7 +15,6 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
 #include "ccGraphicalSegmentationOptionsDlg.h"
 
 // Qt

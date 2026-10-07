@@ -17,7 +17,7 @@
 
 #include "ccEntitySelectionDlg.h"
 
-// ui
+// Ui
 #include <ui_entitySelectionDlg.h>
 
 // Qt

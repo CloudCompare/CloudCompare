@@ -17,9 +17,10 @@
 
 #include "ccComparisonDlg.h"
 
-// Qt
-#include <QHeaderView>
-#include <QMessageBox>
+// Local
+#include "ccCommon.h"
+#include "ccHistogramWindow.h"
+#include "mainwindow.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
@@ -27,6 +28,9 @@
 #include <MeshSamplingTools.h>
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
+
+// CCPluginAPI
+#include <ccQtHelpers.h>
 
 // qCC_db
 #include <ccBackgroundTask.h>
@@ -38,16 +42,10 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-// CCPluginAPI
-#include <ccQtHelpers.h>
-
-// Local
-#include "ccCommon.h"
-#include "ccHistogramWindow.h"
-#include "mainwindow.h"
-
 // Qt
 #include <QElapsedTimer>
+#include <QHeaderView>
+#include <QMessageBox>
 #include <QThreadPool>
 
 // System

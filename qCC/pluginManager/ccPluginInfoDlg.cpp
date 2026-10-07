@@ -17,10 +17,16 @@
 
 #include "ccPluginInfoDlg.h"
 
-#include "ccPluginManager.h"
-#include "ccStdPluginInterface.h"
-#include "ui_ccPluginInfoDlg.h"
+// Ui
+#include <ui_ccPluginInfoDlg.h>
 
+// CCAppCommon
+#include <ccPluginManager.h>
+
+// CCPluginStub
+#include <ccStdPluginInterface.h>
+
+// Qt
 #include <QDebug>
 #include <QDir>
 #include <QSortFilterProxyModel>

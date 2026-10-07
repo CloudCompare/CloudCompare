@@ -17,18 +17,21 @@
 
 #include "ccVolumeCalcTool.h"
 
-#include "ui_volumeCalcDlg.h"
-
 // Local
-#include "ccPersistentSettings.h"
 #include "mainwindow.h"
+
+// Ui
+#include <ui_volumeCalcDlg.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt

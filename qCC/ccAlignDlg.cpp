@@ -17,15 +17,18 @@
 
 #include "ccAlignDlg.h"
 
+// Local
 #include "mainwindow.h"
-#include "ui_alignDlg.h"
 
-// common
-#include <ccQtHelpers.h>
+// Ui
+#include <ui_alignDlg.h>
 
 // CCCoreLib
 #include <CloudSamplingTools.h>
 #include <GeometricalAnalysisTools.h>
+
+// CCPluginAPI
+#include <ccQtHelpers.h>
 
 // qCC_db
 #include <ccGenericPointCloud.h>

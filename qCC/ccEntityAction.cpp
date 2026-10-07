@@ -15,12 +15,30 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QColorDialog>
-#include <QElapsedTimer>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QPushButton>
+#include "ccEntityAction.h"
+
+// Local
+#include "ccAskThreeDoubleValuesDlg.h"
+#include "ccAskTwoDoubleValuesDlg.h"
+#include "ccColorGradientDlg.h"
+#include "ccColorLevelsDlg.h"
+#include "ccCommon.h"
+#include "ccComputeOctreeDlg.h"
+#include "ccExportCoordToSFDlg.h"
+#include "ccHistogramWindow.h"
+#include "ccInterpolationDlg.h"
+#include "ccItemSelectionDlg.h"
+#include "ccLibAlgorithms.h"
+#include "ccNormalComputationDlg.h"
+#include "ccOrderChoiceDlg.h"
+#include "ccScalarFieldArithmeticsDlg.h"
+#include "ccScalarFieldFromColorDlg.h"
+#include "ccSetSFAsVec3Dlg.h"
+#include "ccStatisticalTestDlg.h"
+#include "ccUtils.h"
+
+// CCAppCommon
+#include <ccPickOneElementDlg.h>
 
 // CCCoreLib
 #include <NormalDistribution.h>
@@ -28,6 +46,9 @@
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
 
 // qCC_db
 #include <ccBackgroundTask.h>
@@ -38,38 +59,18 @@
 #include <ccPointCloud.h>
 #include <ccPointCloudInterpolator.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 #include <ccSensor.h>
 
-// qCC_gl
-#include "ccGuiParameters.h"
+// qCC_glWindow
+#include <ccGuiParameters.h>
 
-// common
-#include <ccPickOneElementDlg.h>
-
-// Local
-#include "ccAskThreeDoubleValuesDlg.h"
-#include "ccAskTwoDoubleValuesDlg.h"
-#include "ccColorGradientDlg.h"
-#include "ccColorLevelsDlg.h"
-#include "ccCommon.h"
-#include "ccComputeOctreeDlg.h"
-#include "ccEntityAction.h"
-#include "ccExportCoordToSFDlg.h"
-#include "ccHistogramWindow.h"
-#include "ccInterpolationDlg.h"
-#include "ccItemSelectionDlg.h"
-#include "ccLibAlgorithms.h"
-#include "ccNormalComputationDlg.h"
-#include "ccOrderChoiceDlg.h"
-#include "ccProgressDialog.h"
-#include "ccScalarFieldArithmeticsDlg.h"
-#include "ccScalarFieldFromColorDlg.h"
-#include "ccSetSFAsVec3Dlg.h"
-#include "ccStatisticalTestDlg.h"
-#include "ccUtils.h"
-
-// This is included only for temporarily removing an object from the tree.
-#include "ccMainAppInterface.h"
+// Qt
+#include <QColorDialog>
+#include <QElapsedTimer>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 // System
 #include <array>

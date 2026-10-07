@@ -17,10 +17,10 @@
 
 #include "ccKrigingParamsDialog.h"
 
-// ui
+// Ui
 #include <ui_krigingParamsDialog.h>
 
-// system
+// System
 #include <cassert>
 
 ccKrigingParamsDialog::ccKrigingParamsDialog(QWidget* parent /*=nullptr*/)

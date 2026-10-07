@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
+#include <ui_orthoSectionGenerationDlg.h>
+
 // Qt
 #include <QDialog>
-#include <ui_orthoSectionGenerationDlg.h>
 
 //! Dialog for generating orthogonal sections along a path (Section Extraction Tool)
 class ccOrthoSectionGenerationDlg : public QDialog

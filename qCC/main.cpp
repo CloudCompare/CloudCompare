@@ -15,7 +15,33 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccApplication.h"
+#include "ccCommandLineParser.h"
+#include "mainwindow.h"
+
+// CCAppCommon
+#include <ccPluginManager.h>
+#include <ccTranslationManager.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
+// CCPluginStub
+#include <ccPluginInterface.h>
+
+// qCC_db
+#include <ccColorScalesManager.h>
 #include <ccIncludeGL.h>
+#include <ccLog.h>
+#include <ccNormalVectors.h>
+
+// qCC_glWindow
+#include <ccGuiParameters.h>
+
+// qCC_io
+#include <FileIOFilter.h>
+#include <ccGlobalShiftManager.h>
 
 // Qt
 #include <QDir>
@@ -26,27 +52,6 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-
-// qCC_db
-#include <ccColorScalesManager.h>
-#include <ccLog.h>
-#include <ccNormalVectors.h>
-
-// qCC_io
-#include <FileIOFilter.h>
-#include <ccGlobalShiftManager.h>
-
-// local
-#include "ccApplication.h"
-#include "ccCommandLineParser.h"
-#include "ccGuiParameters.h"
-#include "ccPersistentSettings.h"
-#include "ccTranslationManager.h"
-#include "mainwindow.h"
-
-// plugins
-#include "ccPluginInterface.h"
-#include "ccPluginManager.h"
 
 #ifdef USE_VLD
 #include <vld.h>

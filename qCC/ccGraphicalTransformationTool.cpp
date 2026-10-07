@@ -17,19 +17,20 @@
 
 #include "ccGraphicalTransformationTool.h"
 
+// Local
+#include "ccDBRoot.h"
 #include "mainwindow.h"
-
-// qCC_gl
-#include <ccGLUtils.h>
-#include <ccGLWindowInterface.h>
 
 // qCC_db
 #include <ccCoordinateSystem.h>
-#include <ccDBRoot.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>
+
+// qCC_glWindow
+#include <ccGLUtils.h>
+#include <ccGLWindowInterface.h>
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
     : ccOverlayDialog(parent)

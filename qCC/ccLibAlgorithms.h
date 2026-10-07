@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccHObject.h"
-
+// CCCoreLib
 #include <GeometricalAnalysisTools.h>
+
+// qCC_db
+#include <ccHObject.h>
 
 class QWidget;
 

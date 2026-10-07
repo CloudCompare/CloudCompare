@@ -17,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
 #include <ui_noiseFilterDlg.h>
 
 //! Dialog for noise filtering (based on the distance to the implicit local surface)

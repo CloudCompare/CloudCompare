@@ -17,13 +17,13 @@
 
 #include "ccColorGradientDlg.h"
 
-// common
+// CCPluginAPI
 #include <ccQtHelpers.h>
 
 // Qt
 #include <QColorDialog>
 
-// system
+// System
 #include <cassert>
 
 // persistent parameters

@@ -17,15 +17,23 @@
 
 #include "ccPluginUIManager.h"
 
+// Local
+#include "ccConsole.h"
 #include "ccPluginInfoDlg.h"
 
-#include <ccConsole.h>
-#include <ccGLPluginInterface.h>
-#include <ccGLWindowInterface.h>
-#include <ccIOPluginInterface.h>
-#include <ccMainAppInterface.h>
+// CCAppCommon
 #include <ccPluginManager.h>
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+
+// CCPluginStub
+#include <ccGLPluginInterface.h>
+#include <ccIOPluginInterface.h>
 #include <ccStdPluginInterface.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QAction>

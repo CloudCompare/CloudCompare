@@ -17,7 +17,8 @@
 
 #include "ccSubsamplingDlg.h"
 
-#include "ui_subsamplingDlg.h"
+// Ui
+#include <ui_subsamplingDlg.h>
 
 // CCCoreLib
 #include <CloudSamplingTools.h>
@@ -29,7 +30,6 @@
 // Qt
 #include <QSettings>
 
-// Exponent of the 'log' scale used for 'SPATIAL' interval
 static const double SPACE_RANGE_EXPONENT = 0.05;
 
 ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent /*=nullptr*/)

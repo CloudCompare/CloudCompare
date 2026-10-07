@@ -17,6 +17,10 @@
 
 #include "ccCropTool.h"
 
+// CCCoreLib
+#include <ManualSegmentationTools.h>
+#include <SimpleMesh.h>
+
 // qCC_db
 #include <ccHObject.h>
 #include <ccLog.h>
@@ -25,10 +29,6 @@
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
-
-// CCCoreLib
-#include <ManualSegmentationTools.h>
-#include <SimpleMesh.h>
 
 ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*=true*/, const ccGLMatrix* meshRotation /*=nullptr*/)
 {

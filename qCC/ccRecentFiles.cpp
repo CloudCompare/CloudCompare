@@ -17,8 +17,13 @@
 
 #include "ccRecentFiles.h"
 
+// Local
 #include "mainwindow.h"
 
+// qCC_db
+#include <ccLog.h>
+
+// Qt
 #include <QAction>
 #include <QDir>
 #include <QFile>
@@ -26,9 +31,6 @@
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-
-// qCC_db
-#include <ccLog.h>
 
 QString ccRecentFiles::s_settingKey("RecentFiles");
 

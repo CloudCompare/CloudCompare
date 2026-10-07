@@ -18,14 +18,17 @@
 #include "ccWaveformDialog.h"
 
 // Local
-#include "ccFileUtils.h"
-#include "ccPersistentSettings.h"
 #include "ccQCustomPlot.h"
 
-// common
+// Ui
+#include <ui_waveDlg.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 #include <ccPickingHub.h>
 
 // qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -36,9 +39,6 @@
 // System
 #include <cassert>
 #include <cmath>
-
-// Gui
-#include "ui_waveDlg.h"
 
 ccWaveWidget::ccWaveWidget(QWidget* parent /*=nullptr*/)
     : QCustomPlot(parent)

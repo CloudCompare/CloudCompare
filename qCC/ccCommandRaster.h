@@ -17,7 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
 struct CommandRasterize : public ccCommandLineInterface::Command
 {

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ITEM_DELEGATE_HEADER
-#define CC_ITEM_DELEGATE_HEADER
 
 // qCC_db
 #include <ccArray.h>
@@ -225,5 +224,3 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 	QAbstractItemView*  m_view;
 	CC_PROPERTY_ROLE    m_lastFocusItemRole;
 };
-
-#endif

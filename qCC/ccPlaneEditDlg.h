@@ -17,13 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccPickingListener.h"
-
+// Ui
 #include <ui_planeEditDlg.h>
 
 // CCCoreLib
 #include <CCGeom.h>
+
+// CCPluginAPI
+#include <ccPickingListener.h>
 
 // Qt
 #include <QDialog>

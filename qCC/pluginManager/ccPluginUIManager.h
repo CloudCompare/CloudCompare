@@ -1,5 +1,4 @@
-#ifndef CCPLUGINUIMANAGER_H
-#define CCPLUGINUIMANAGER_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -89,5 +88,3 @@ class ccPluginUIManager : public QObject
 	QToolBar* m_glFiltersToolbar;
 	QAction*  m_showGLFilterToolbar;
 };
-
-#endif

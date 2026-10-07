@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QWidget>
-
 // qCC_db
 #include <ccScalarField.h>
+
+// Qt
+#include <QWidget>
 
 class ccHistogramWindow;
 

@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include <ccOverlayDialog.h>
+// Ui
 #include <ui_graphicalTransformationDlg.h>
+
+// CCPluginAPI
+#include <ccOverlayDialog.h>
 
 // qCC_db
 #include <ccHObject.h>

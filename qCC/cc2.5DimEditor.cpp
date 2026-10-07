@@ -28,7 +28,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt

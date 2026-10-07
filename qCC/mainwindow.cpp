@@ -114,6 +114,9 @@
 #include <ccQtHelpers.h>
 #include <ccRenderToFileDlg.h>
 
+// PCP
+#include <Partition.h>
+
 // qCC_db
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
@@ -4727,11 +4730,9 @@ void MainWindow::doActionCutPursuit()
 				// more parallel cut pursuit params
 				size_t rgbDim = (useRGB && pc->hasColors()) ? 3 : 0;
 				size_t D      = 3 + sfIndices.size() + rgbDim;
-				size_t N      = static_cast<size_t>(pc->size());
 
 				params.D = static_cast<uint32_t>(D);
-				params.N = static_cast<uint32_t>(N);
-				params.Y.assign(N * D, 0.0f);
+				params.Y.assign(pc->size() * D, 0.0f);
 
 				CCVector3d posOffset(0, 0, 0);
 				for (unsigned i = 0; i < pc->size(); ++i)
@@ -4773,7 +4774,7 @@ void MainWindow::doActionCutPursuit()
 				}
 
 				// we try to label all CCs
-				componentCount = PCP::Partition::labelCutPursuitComponents(pc,
+				componentCount = PCP::Partition::LabelCutPursuitComponents(pc,
 				                                                           params,
 				                                                           componentLabels,
 				                                                           &pDlg,

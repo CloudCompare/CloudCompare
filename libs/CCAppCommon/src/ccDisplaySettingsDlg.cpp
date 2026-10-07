@@ -17,11 +17,11 @@
 
 #include "../include/ccDisplaySettingsDlg.h"
 
-// Ui
-#include "ui_displaySettingsDlg.h"
-
 // Local
 #include "../include/ccApplicationBase.h"
+
+// Ui
+#include <ui_displaySettingsDlg.h>
 
 // CCPluginAPI
 #include <ccPersistentSettings.h>

@@ -18,7 +18,7 @@
 #include "../include/ccPickOneElementDlg.h"
 
 // Ui
-#include "ui_pickOneElementDlg.h"
+#include <ui_pickOneElementDlg.h>
 
 ccPickOneElementDlg::ccPickOneElementDlg(const QString& label,
                                          const QString& windowTitle /*=QString()*/,

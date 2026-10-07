@@ -17,11 +17,11 @@
 
 #include "../include/AsciiOpenDlg.h"
 
-// Ui
-#include <ui_openAsciiFileDlg.h>
-
 // Local
 #include "../include/FileIOFilter.h"
+
+// Ui
+#include <ui_openAsciiFileDlg.h>
 
 // qCC_db
 #include <ccLog.h>

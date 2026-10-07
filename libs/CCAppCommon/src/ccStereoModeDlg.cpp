@@ -18,7 +18,7 @@
 #include "../include/ccStereoModeDlg.h"
 
 // Ui
-#include "ui_stereoModeDlg.h"
+#include <ui_stereoModeDlg.h>
 
 // System
 #include <cassert>

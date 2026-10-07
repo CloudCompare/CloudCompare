@@ -19,12 +19,12 @@
 
 #include "../include/ShpFilter.h"
 
-// Ui
-#include "ui_importDBFFieldDlg.h"
-#include "ui_saveSHPFileDlg.h"
-
 // Local
 #include "../include/ShpDBFFields.h"
+
+// Ui
+#include <ui_importDBFFieldDlg.h>
+#include <ui_saveSHPFileDlg.h>
 
 // CCCoreLib
 #include <MeshSamplingTools.h>

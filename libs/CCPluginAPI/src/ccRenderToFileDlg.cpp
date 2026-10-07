@@ -17,11 +17,11 @@
 
 #include "../include/ccRenderToFileDlg.h"
 
-// Ui
-#include "ui_renderToFileDialog.h"
-
 // Local
 #include "../include/ccInfoDlg.h"
+
+// Ui
+#include <ui_renderToFileDialog.h>
 
 // qCC_db
 #include <ccLog.h>

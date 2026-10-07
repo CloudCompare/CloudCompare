@@ -17,12 +17,12 @@
 
 #include "../include/ccShiftAndScaleCloudDlg.h"
 
+// Local
+#include "../include/ccGlobalShiftManager.h"
+
 // Ui
 #include <ui_globalShiftAndScaleAboutDlg.h>
 #include <ui_globalShiftAndScaleDlg.h>
-
-// Local
-#include "../include/ccGlobalShiftManager.h"
 
 // qCC_db
 #include <ccLog.h>

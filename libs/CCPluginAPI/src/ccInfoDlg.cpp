@@ -18,7 +18,7 @@
 #include "../include/ccInfoDlg.h"
 
 // Ui
-#include "ui_infoDlg.h"
+#include <ui_infoDlg.h>
 
 ccInfoDlg::ccInfoDlg(QWidget* parent)
     : QDialog(parent)

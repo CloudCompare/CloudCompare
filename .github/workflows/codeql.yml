@@ -67,9 +67,8 @@ jobs:
             -B build \
             -S . \
             -G Ninja \
+            -DOPTION_SUPPORT_3DMOUSE_WITH_HIDAPI=ON \
             -DEIGEN_ROOT_DIR=/usr/include/eigen3 \
-            -DJSON_ROOT_DIR=/usr/include/jsoncpp \
-            -DDLIB_ROOT=/usr/include \
             -DCCCORELIB_USE_TBB=ON \
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
@@ -84,6 +83,7 @@ jobs:
             -DPLUGIN_IO_QRDB=ON \
             -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
             -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
+            -DPLUGIN_STANDARD_3DFIN=ON \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF \
             -DPLUGIN_STANDARD_QBROOM=ON \

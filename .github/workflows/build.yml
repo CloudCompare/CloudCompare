@@ -90,6 +90,7 @@ jobs:
             -DPLUGIN_IO_QRDB=${{ matrix.config.compile_riegl }}  \
             -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
             -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
+            -DPLUGIN_STANDARD_3DFIN=ON \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
             -DPLUGIN_STANDARD_QBROOM=ON \
@@ -201,9 +202,7 @@ jobs:
           -S .
           -G Ninja
           -DEIGEN_ROOT_DIR=/usr/include/eigen3
-          -DJSON_ROOT_DIR=/usr/include/jsoncpp
           -DPCL_DIR=${{ github.workspace }}/pcl-cached/share/pcl-1.15
-          -DDLIB_ROOT=/usr/include
           -DOPTION_SUPPORT_3DMOUSE_WITH_HIDAPI=ON
           -DCCCORELIB_USE_TBB=ON
           -DPLUGIN_EXAMPLE_GL=ON
@@ -220,6 +219,7 @@ jobs:
           -DPLUGIN_IO_QRDB=ON
           -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON
           -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON
+          -DPLUGIN_STANDARD_3DFIN=ON
           -DPLUGIN_STANDARD_QANIMATION=ON
           -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF
           -DPLUGIN_STANDARD_QBROOM=ON
@@ -240,7 +240,6 @@ jobs:
           -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
           -DPLUGIN_STANDARD_QVOXFALL=ON
           -DBUILD_TESTING=ON
-          -DOPTION_SUPPORT_3DMOUSE_WITH_HIDAPI=ON
 
       - name: Build
         run: cmake --build build --parallel

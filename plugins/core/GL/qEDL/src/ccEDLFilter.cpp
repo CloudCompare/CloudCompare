@@ -15,20 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccEDLFilter.h"
+#include "../include/ccEDLFilter.h"
 
 // ccFBO
 #include <ccBilateralFilter.h>
 #include <ccFrameBufferObject.h>
 #include <ccShader.h>
-// qCC_gl
+
+// qCC_glWindow
 #include <ccGLUtils.h>
 
 // Qt
 #include <QOpenGLContext>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 #include <cmath>
 
 // For MSVC

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                       CLOUDCOMPARE PLUGIN: qEDL                        #
@@ -35,10 +37,8 @@
 //						Daniel Girardeau-Montaut (simplification)
 //
 /*****************************************************************/
-#ifndef CC_EDL_FILTER_HEADER
-#define CC_EDL_FILTER_HEADER
 
-// ccFBO
+// ccFbo
 #include <ccBilateralFilter.h>
 #include <ccGlFilter.h>
 
@@ -137,5 +137,3 @@ class ccEDLFilter : public ccGlFilter
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };
-
-#endif

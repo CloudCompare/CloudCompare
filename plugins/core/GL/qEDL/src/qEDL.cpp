@@ -15,9 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qEDL.h"
 
-#include "ccEDLFilter.h"
+#include "../include/qEDL.h"
+
+// Local
+#include "../include/ccEDLFilter.h"
 
 qEDL::qEDL(QObject* parent)
     : QObject(parent)

@@ -54,8 +54,6 @@ class ccEDLFilter : public ccGlFilter
   public:
 	//! Default constructor
 	ccEDLFilter();
-	//! Default destructor
-	~ccEDLFilter() override;
 
 	// inherited from ccGlFilter
 	ccGlFilter* clone() const override;
@@ -90,25 +88,25 @@ class ccEDLFilter : public ccGlFilter
 	unsigned m_screenHeight;
 
 	//! Number of FBOs
-	static const unsigned FBO_COUNT = 3;
+	static constexpr unsigned FBO_COUNT = 3;
 
-	ccFrameBufferObject* m_fbos[FBO_COUNT];
-	ccShader*            m_EDLShader;
+	std::array<std::unique_ptr<ccFrameBufferObject>, FBO_COUNT> m_fbos;
+	std::unique_ptr<ccShader>                                   m_EDLShader;
 
-	ccFrameBufferObject* m_fboMix;
-	ccShader*            m_mixShader;
+	std::unique_ptr<ccFrameBufferObject> m_fboMix;
+	std::unique_ptr<ccShader>            m_mixShader;
 
-	float m_neighbours[8 * 2];
-	float m_expScale;
+	std::array<float, 8 * 2> m_neighbours;
+	float                    m_expScale;
 
 	//! Bilateral filter descriptor
 	struct BilateralFilterDesc
 	{
-		ccBilateralFilter* filter;
-		unsigned           halfSize;
-		float              sigma;
-		float              sigmaZ;
-		bool               enabled;
+		std::unique_ptr<ccBilateralFilter> filter;
+		unsigned                           halfSize;
+		float                              sigma;
+		float                              sigmaZ;
+		bool                               enabled;
 
 		BilateralFilterDesc()
 		    : filter(nullptr)
@@ -119,10 +117,7 @@ class ccEDLFilter : public ccGlFilter
 		{
 		}
 
-		~BilateralFilterDesc()
-		{
-			delete filter;
-		}
+		~BilateralFilterDesc() = default;
 	};
 
 	//	Bilateral filters (one per FBO at most)

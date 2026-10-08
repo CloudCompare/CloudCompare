@@ -25,12 +25,10 @@
 // qCC_glWindow
 #include <ccGLUtils.h>
 
-// Qt
-#include <QOpenGLContext>
-
 // System
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 // For MSVC
 #ifndef M_PI
@@ -41,17 +39,9 @@ ccEDLFilter::ccEDLFilter()
     : ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)")
     , m_screenWidth(0)
     , m_screenHeight(0)
-    , m_EDLShader(nullptr)
-    , m_fboMix(nullptr)
-    , m_mixShader(nullptr)
     , m_expScale(100.0f)
     , m_glFuncIsValid(false)
 {
-	for (unsigned i = 0; i < FBO_COUNT; ++i)
-	{
-		m_fbos[i] = nullptr;
-	}
-
 	// smoothing filter for full resolution
 	m_bilateralFilters[0].enabled  = false;
 	m_bilateralFilters[0].halfSize = 1;
@@ -72,17 +62,11 @@ ccEDLFilter::ccEDLFilter()
 
 	setLightDir(static_cast<float>(M_PI / 2.0), static_cast<float>(M_PI / 2.0));
 
-	memset(m_neighbours, 0, sizeof(float) * 8 * 2);
 	for (unsigned c = 0; c < 8; c++)
 	{
 		m_neighbours[2 * c]     = static_cast<float>(std::cos(c * M_PI / 4.0));
 		m_neighbours[2 * c + 1] = static_cast<float>(std::sin(c * M_PI / 4.0));
 	}
-}
-
-ccEDLFilter::~ccEDLFilter()
-{
-	reset();
 }
 
 ccGlFilter* ccEDLFilter::clone() const
@@ -102,27 +86,13 @@ void ccEDLFilter::reset()
 {
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
-		if (m_fbos[i])
-		{
-			delete m_fbos[i];
-			m_fbos[i] = nullptr;
-		}
-
-		if (m_bilateralFilters[i].filter)
-		{
-			delete m_bilateralFilters[i].filter;
-			m_bilateralFilters[i].filter = nullptr;
-		}
+		m_fbos[i].reset();
+		m_bilateralFilters[i].filter.reset();
 	}
 
-	delete m_fboMix;
-	m_fboMix = nullptr;
-
-	delete m_EDLShader;
-	m_EDLShader = nullptr;
-
-	delete m_mixShader;
-	m_mixShader = nullptr;
+	m_fboMix.reset();
+	m_EDLShader.reset();
+	m_mixShader.reset();
 
 	m_screenWidth = m_screenHeight = 0;
 }
@@ -157,10 +127,10 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 		unsigned w     = width / scale;
 		unsigned h     = height / scale;
 
-		ccFrameBufferObject*& fbo = m_fbos[i];
+		auto& fbo = m_fbos[i];
 		if (!fbo)
 		{
-			fbo = new ccFrameBufferObject();
+			fbo = std::make_unique<ccFrameBufferObject>();
 		}
 		if (!fbo->init(w, h)
 		    || !fbo->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter))
@@ -174,7 +144,7 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 		{
 			if (!m_bilateralFilters[i].filter)
 			{
-				m_bilateralFilters[i].filter = new ccBilateralFilter();
+				m_bilateralFilters[i].filter = std::make_unique<ccBilateralFilter>();
 			}
 			if (m_bilateralFilters[i].filter->init(w, h, shadersPath, error, true))
 			{
@@ -182,21 +152,19 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 			}
 			else
 			{
-				delete m_bilateralFilters[i].filter;
-				m_bilateralFilters[i].filter  = nullptr;
+				m_bilateralFilters[i].filter.reset();
 				m_bilateralFilters[i].enabled = false;
 			}
 		}
 		else if (m_bilateralFilters[i].filter)
 		{
-			delete m_bilateralFilters[i].filter;
-			m_bilateralFilters[i].filter = nullptr;
+			m_bilateralFilters[i].filter.reset();
 		}
 	}
 
 	if (!m_fboMix)
 	{
-		m_fboMix = new ccFrameBufferObject();
+		m_fboMix = std::make_unique<ccFrameBufferObject>();
 	}
 	if (!m_fboMix->init(width, height))
 	{
@@ -204,11 +172,12 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 		reset();
 		return false;
 	}
+
 	m_fboMix->initColor(internalFormat, GL_RGBA, GL_FLOAT);
 
 	if (!m_EDLShader)
 	{
-		m_EDLShader = new ccShader();
+		m_EDLShader = std::make_unique<ccShader>();
 		if (!m_EDLShader->fromFile(shadersPath, "EDL/edl_shade", error))
 		{
 			reset();
@@ -218,7 +187,7 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 
 	if (!m_mixShader)
 	{
-		m_mixShader = new ccShader();
+		m_mixShader = std::make_unique<ccShader>();
 		if (!m_mixShader->fromFile(shadersPath, "EDL/edl_mix", error))
 		{
 			reset();
@@ -264,8 +233,8 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
-		ccFrameBufferObject* fbo   = m_fbos[i];
-		unsigned             scale = (1 << i); // 1, 2, 4
+		const auto& fbo   = m_fbos[i];
+		unsigned    scale = (1 << i); // 1, 2, 4
 
 		fbo->start();
 
@@ -282,7 +251,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		m_EDLShader->setUniformValue("Zm", static_cast<float>(parameters.zNear));
 		m_EDLShader->setUniformValue("ZM", static_cast<float>(parameters.zFar));
 		m_EDLShader->setUniformValueArray("Light_dir", reinterpret_cast<const GLfloat*>(m_lightDir), 1, 3);
-		m_EDLShader->setUniformValueArray("Neigh_pos_2D", reinterpret_cast<const GLfloat*>(m_neighbours), 8, 2);
+		m_EDLShader->setUniformValueArray("Neigh_pos_2D", reinterpret_cast<const GLfloat*>(m_neighbours.data()), 8, 2);
 
 		m_glFunc.glActiveTexture(GL_TEXTURE1);
 		m_glFunc.glBindTexture(GL_TEXTURE_2D, texColor);

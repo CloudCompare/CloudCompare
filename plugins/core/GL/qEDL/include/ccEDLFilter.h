@@ -55,13 +55,13 @@ class ccEDLFilter : public ccGlFilter
 	//! Default constructor
 	ccEDLFilter();
 	//! Default destructor
-	virtual ~ccEDLFilter();
+	~ccEDLFilter() override;
 
 	// inherited from ccGlFilter
-	virtual ccGlFilter* clone() const override;
-	virtual bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
-	virtual void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
-	virtual GLuint      getTexture() override;
+	ccGlFilter* clone() const override;
+	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	GLuint      getTexture() override;
 
 	//! Resets filter
 	void reset();
@@ -111,7 +111,7 @@ class ccEDLFilter : public ccGlFilter
 		bool               enabled;
 
 		BilateralFilterDesc()
-		    : filter(0)
+		    : filter(nullptr)
 		    , halfSize(0)
 		    , sigma(0)
 		    , sigmaZ(0)
@@ -121,8 +121,7 @@ class ccEDLFilter : public ccGlFilter
 
 		~BilateralFilterDesc()
 		{
-			if (filter)
-				delete filter;
+			delete filter;
 		}
 	};
 

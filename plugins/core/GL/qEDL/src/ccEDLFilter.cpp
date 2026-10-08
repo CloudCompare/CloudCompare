@@ -115,16 +115,13 @@ void ccEDLFilter::reset()
 		}
 	}
 
-	if (m_fboMix)
-		delete m_fboMix;
+	delete m_fboMix;
 	m_fboMix = nullptr;
 
-	if (m_EDLShader)
-		delete m_EDLShader;
+	delete m_EDLShader;
 	m_EDLShader = nullptr;
 
-	if (m_mixShader)
-		delete m_mixShader;
+	delete m_mixShader;
 	m_mixShader = nullptr;
 
 	m_screenWidth = m_screenHeight = 0;

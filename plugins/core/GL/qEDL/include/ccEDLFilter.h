@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                       CLOUDCOMPARE PLUGIN: qEDL                        #
@@ -35,10 +37,8 @@
 //						Daniel Girardeau-Montaut (simplification)
 //
 /*****************************************************************/
-#ifndef CC_EDL_FILTER_HEADER
-#define CC_EDL_FILTER_HEADER
 
-// ccFBO
+// ccFbo
 #include <ccBilateralFilter.h>
 #include <ccGlFilter.h>
 
@@ -54,14 +54,12 @@ class ccEDLFilter : public ccGlFilter
   public:
 	//! Default constructor
 	ccEDLFilter();
-	//! Default destructor
-	virtual ~ccEDLFilter();
 
 	// inherited from ccGlFilter
-	virtual ccGlFilter* clone() const override;
-	virtual bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
-	virtual void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
-	virtual GLuint      getTexture() override;
+	ccGlFilter* clone() const override;
+	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	GLuint      getTexture() override;
 
 	//! Resets filter
 	void reset();
@@ -90,28 +88,28 @@ class ccEDLFilter : public ccGlFilter
 	unsigned m_screenHeight;
 
 	//! Number of FBOs
-	static const unsigned FBO_COUNT = 3;
+	static constexpr unsigned FBO_COUNT = 3;
 
-	ccFrameBufferObject* m_fbos[FBO_COUNT];
-	ccShader*            m_EDLShader;
+	std::array<std::unique_ptr<ccFrameBufferObject>, FBO_COUNT> m_fbos;
+	std::unique_ptr<ccShader>                                   m_EDLShader;
 
-	ccFrameBufferObject* m_fboMix;
-	ccShader*            m_mixShader;
+	std::unique_ptr<ccFrameBufferObject> m_fboMix;
+	std::unique_ptr<ccShader>            m_mixShader;
 
-	float m_neighbours[8 * 2];
-	float m_expScale;
+	std::array<float, 8 * 2> m_neighbours;
+	float                    m_expScale;
 
 	//! Bilateral filter descriptor
 	struct BilateralFilterDesc
 	{
-		ccBilateralFilter* filter;
-		unsigned           halfSize;
-		float              sigma;
-		float              sigmaZ;
-		bool               enabled;
+		std::unique_ptr<ccBilateralFilter> filter;
+		unsigned                           halfSize;
+		float                              sigma;
+		float                              sigmaZ;
+		bool                               enabled;
 
 		BilateralFilterDesc()
-		    : filter(0)
+		    : filter(nullptr)
 		    , halfSize(0)
 		    , sigma(0)
 		    , sigmaZ(0)
@@ -119,11 +117,7 @@ class ccEDLFilter : public ccGlFilter
 		{
 		}
 
-		~BilateralFilterDesc()
-		{
-			if (filter)
-				delete filter;
-		}
+		~BilateralFilterDesc() = default;
 	};
 
 	//	Bilateral filters (one per FBO at most)
@@ -137,5 +131,3 @@ class ccEDLFilter : public ccGlFilter
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };
-
-#endif

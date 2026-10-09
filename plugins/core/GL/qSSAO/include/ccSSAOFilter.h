@@ -34,14 +34,11 @@
 //
 /*****************************************************************/
 
-// CC_FBO
+// CCFbo
 #include <ccGlFilter.h>
 
 // Qt
 #include <QOpenGLFunctions_2_1>
-
-// system
-#include <vector>
 
 class ccShader;
 class ccBilateralFilter;
@@ -51,7 +48,7 @@ class ccSSAOFilter : public ccGlFilter
 {
   public:
 	ccSSAOFilter();
-	virtual ~ccSSAOFilter();
+	~ccSSAOFilter() override;
 
 	void reset();
 
@@ -64,31 +61,34 @@ class ccSSAOFilter : public ccGlFilter
 	void setParameters(float Kz, float R, float F);
 
   protected:
+	//! Maximum number of sampling directions
+	static constexpr int MAX_N = 32; // see shader code
+
 	void initReflectTexture();
 	void sampleSphere();
 
 	unsigned m_w;
 	unsigned m_h;
 
-	ccFrameBufferObject* m_fbo;
-	ccShader*            m_shader;
-	GLuint               m_texReflect;
+	std::unique_ptr<ccFrameBufferObject> m_fbo;
+	std::unique_ptr<ccShader>            m_shader;
+	GLuint                               m_texReflect;
 
 	float m_Kz; // attenuation with distance
 	float m_R;  // radius in image of neighbour sphere
 	float m_F;  // amplification
 
 	//!	Full sphere sampling
-	std::vector<float> m_ssaoNeighbours;
+	std::array<float, MAX_N * 3> m_ssaoNeighbours;
 
 	//!	Random sampling seed
 	unsigned m_randSeed;
 
-	ccBilateralFilter* m_bilateralFilter;
-	bool               m_bilateralFilterEnabled;
-	unsigned           m_bilateralGHalfSize;
-	float              m_bilateralGSigma;
-	float              m_bilateralGSigmaZ;
+	std::unique_ptr<ccBilateralFilter> m_bilateralFilter;
+	bool                               m_bilateralFilterEnabled;
+	unsigned                           m_bilateralGHalfSize;
+	float                              m_bilateralGSigma;
+	float                              m_bilateralGSigmaZ;
 
 	//! Associated OpenGL functions set
 	QOpenGLFunctions_2_1 m_glFunc;

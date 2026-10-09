@@ -24,8 +24,8 @@ uniform float R;			// Radius of neighborhood sphere
 uniform float F;			// Amplification of shading
 uniform float Kz;			// Distance attenuation factor
 uniform int   UseReflect;	// If 1 use random reflect of neighbours
-uniform vec3  P[32];		// The neighbours in unit sphere
 const   int	  N = 32;		// Number of neighbours
+uniform vec3  P[N];		// The neighbours in unit sphere
 //
 //////////////////////////////////////////////////////////////////////////////////////
 

@@ -15,12 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccSSAOFilter.h"
+#include "../include/qSSAO.h"
 
-// Qt
-#include "qSSAO.h"
-
-#include <QtGui>
+// Local
+#include "../include/ccSSAOFilter.h"
 
 qSSAO::qSSAO(QObject* parent)
     : QObject(parent)

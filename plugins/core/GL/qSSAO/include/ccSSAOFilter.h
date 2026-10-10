@@ -44,6 +44,8 @@ class ccShader;
 class ccBilateralFilter;
 class ccFrameBufferObject;
 
+class QOpenGLTexture;
+
 class ccSSAOFilter : public ccGlFilter
 {
   public:
@@ -72,7 +74,7 @@ class ccSSAOFilter : public ccGlFilter
 
 	std::unique_ptr<ccFrameBufferObject> m_fbo;
 	std::unique_ptr<ccShader>            m_shader;
-	GLuint                               m_texReflect;
+	std::unique_ptr<QOpenGLTexture>      m_texReflect;
 
 	float m_Kz; // attenuation with distance
 	float m_R;  // radius in image of neighbour sphere

@@ -30,6 +30,7 @@
 
 // Qt
 #include <QDialog>
+#include <QOpenGLTexture>
 #include <QSettings>
 
 // System
@@ -106,7 +107,6 @@ ccSSAOFilter::ccSSAOFilter()
     : ccGlFilter("Screen Space Ambient Occlusion")
     , m_w(0)
     , m_h(0)
-    , m_texReflect(0)
     , m_Kz(500.0f) // attenuation with distance
     , m_R(0.05f)   // radius in image of neighbour sphere
     , m_F(50.0f)   // amplification
@@ -136,11 +136,7 @@ ccGlFilter* ccSSAOFilter::clone() const
 
 void ccSSAOFilter::reset()
 {
-	if (m_glFuncIsValid && m_glFunc.glIsTexture(m_texReflect))
-	{
-		m_glFunc.glDeleteTextures(1, &m_texReflect);
-	}
-	m_texReflect = 0;
+	m_texReflect.reset();
 
 	m_fbo.reset();
 	m_shader.reset();
@@ -187,7 +183,7 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 	else
 	{
 		enableBilateralFilter = m_bilateralFilterEnabled;
-		useReflectTexture     = (m_glFuncIsValid && m_glFunc.glIsTexture(m_texReflect));
+		useReflectTexture     = (m_texReflect && m_texReflect->isCreated());
 	}
 
 	sampleSphere();
@@ -257,11 +253,7 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 	m_h = height;
 
 	// remove the existing texture
-	if (m_glFunc.glIsTexture(m_texReflect))
-	{
-		m_glFunc.glDeleteTextures(1, &m_texReflect);
-	}
-	m_texReflect = 0;
+	m_texReflect.reset();
 
 	if (useReflectTexture)
 	{
@@ -315,7 +307,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	m_glFunc.glLoadIdentity();
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
-	bool hasReflectTexture = m_glFunc.glIsTexture(m_texReflect);
+	bool hasReflectTexture = (m_texReflect && m_texReflect->isCreated());
 
 	m_fbo->start();
 
@@ -334,8 +326,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 
 	if (hasReflectTexture)
 	{
-		m_glFunc.glActiveTexture(GL_TEXTURE1);
-		m_glFunc.glBindTexture(GL_TEXTURE_2D, m_texReflect);
+		m_texReflect->bind(1);
 	}
 
 	m_glFunc.glActiveTexture(GL_TEXTURE0);
@@ -343,8 +334,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 
 	if (hasReflectTexture)
 	{
-		m_glFunc.glActiveTexture(GL_TEXTURE1);
-		m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
+		m_texReflect->release(1);
 	}
 
 	m_glFunc.glActiveTexture(GL_TEXTURE2);
@@ -439,14 +429,14 @@ void ccSSAOFilter::initReflectTexture()
 	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
 	m_glFunc.glEnable(GL_TEXTURE_2D);
 
-	m_glFunc.glGenTextures(1, &m_texReflect);
-	m_glFunc.glBindTexture(GL_TEXTURE_2D, m_texReflect);
-	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_glFunc.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_w, m_h, 0, GL_RGB, GL_FLOAT, reflectTexture.data());
-	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
+	m_texReflect = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
+	m_texReflect->setFormat(QOpenGLTexture::RGB16F);
+	m_texReflect->setSize(m_w, m_h);
+	m_texReflect->setWrapMode(QOpenGLTexture::ClampToEdge);
+	m_texReflect->setMinificationFilter(QOpenGLTexture::Nearest);
+	m_texReflect->setMagnificationFilter(QOpenGLTexture::Nearest);
+	m_texReflect->allocateStorage();
+	m_texReflect->setData(QOpenGLTexture::RGB, QOpenGLTexture::Float32, reflectTexture.data());
 
 	m_glFunc.glPopAttrib();
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);

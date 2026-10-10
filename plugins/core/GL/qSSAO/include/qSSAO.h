@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                       CLOUDCOMPARE PLUGIN: qSSAO                       #
@@ -15,10 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef Q_SSAO_PLUGIN_HEADER
-#define Q_SSAO_PLUGIN_HEADER
-
-#include "ccGLPluginInterface.h"
+#include <ccGLPluginInterface.h>
 
 //! SSAO shader (Screen Space Ambient Occlusion)
 class qSSAO : public QObject
@@ -37,5 +36,3 @@ class qSSAO : public QObject
 	// inherited from ccGLFilterPluginInterface
 	ccGlFilter* getFilter() override;
 };
-
-#endif

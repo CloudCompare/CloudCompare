@@ -157,11 +157,11 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	{
 		QShortcut* plusKey = new QShortcut(QKeySequence(tr("+", "Zoom in")), this);
 		connect(plusKey, &QShortcut::activated, [this]()
-		        { m_glWindow->onWheelEvent(8.0); });
+		        { m_glWindow->onWheelEvent(15.0); });
 
 		QShortcut* minusKey = new QShortcut(QKeySequence(tr("=", "Zoom out")), this);
 		connect(minusKey, &QShortcut::activated, [this]()
-		        { m_glWindow->onWheelEvent(-8.0); });
+		        { m_glWindow->onWheelEvent(-15.0); });
 
 		QShortcut* shiftUpKey = new QShortcut(QKeySequence(Qt::SHIFT | Qt::Key_Up), this);
 		connect(shiftUpKey, &QShortcut::activated, [this]()

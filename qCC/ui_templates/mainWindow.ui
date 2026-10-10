@@ -414,6 +414,7 @@
      <property name="title">
       <string>Segmentation</string>
      </property>
+     <addaction name="actionCutPursuit"/>
      <addaction name="actionLabelConnectedComponents"/>
      <addaction name="actionCrossSection"/>
      <addaction name="actionExtractSections"/>
@@ -737,6 +738,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionCloudCloudDist"/>
    <addaction name="actionCloudMeshDist"/>
    <addaction name="actionCloudPrimitiveDist"/>
+   <addaction name="actionCutPursuit"/>
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
    <addaction name="actionRasterize"/>
@@ -1167,6 +1169,21 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Sample points on a mesh</string>
+   </property>
+  </action>
+  <action name="actionCutPursuit">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccCutPursuit.svg</normaloff>:/CC/images/ccCutPursuit.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Pursuit</string>
+   </property>
+   <property name="toolTip">
+    <string>Graph-based point cloud segmentation</string>
+   </property>
+   <property name="statusTip">
+    <string>Graph-based point cloud segmentation</string>
    </property>
   </action>
   <action name="actionLabelConnectedComponents">

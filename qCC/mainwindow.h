@@ -339,6 +339,7 @@ class MainWindow : public QMainWindow
 	void doActionLabelConnectedComponents();
 	void doActionComputeStatParams();
 	void doActionFilterByValue();
+	void doActionCutPursuit();
 
 	// Picking operations
 	void enablePickingOperation(ccGLWindowInterface* win, QString message);

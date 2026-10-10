@@ -1,0 +1,27 @@
+{
+	"type" : "Standard",
+	"name" : "Free Form Deformation (FFD)",
+	"description": "Apply non-rigid transformations to point clouds using a Free Form Deformation lattice. Move lattice nodes to smoothly deform the entire point cloud.",
+	"authors" : [
+		{
+			"name" : "Your Name",
+			"email" : "your.email@example.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Your Name",
+			"email" : "your.email@example.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Free Form Deformation by Sederberg and Parry (1986)",
+			"url" : "https://dl.acm.org/doi/10.1145/15886.15903"
+		},
+		{
+			"text" : "T-Spline Free Form Surface Deformation",
+			"url" : "https://www.cs.jhu.edu/~misha/Papers/FForm.pdf"
+		}
+	]
+}

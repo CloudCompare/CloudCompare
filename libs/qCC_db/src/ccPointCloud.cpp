@@ -221,7 +221,7 @@ static bool CreateProgramDrawNormals(QOpenGLContext* context)
 	// this program needs a geometry shader (i.e. OpenGL 3.2 or later), which is not available everywhere
 	if (!QOpenGLShader::hasOpenGLShaders(QOpenGLShader::Geometry, context))
 	{
-		ccLog::Warning("[ccPointCloud] Can't draw the normals as lines: this system doesn't support geometry shaders");
+		ccLog::Print("[ccPointCloud] This system doesn't support geometry shaders, the normals will be drawn without them");
 		return false;
 	}
 
@@ -6757,16 +6757,55 @@ void ccPointCloud::setNormalLineColor(int colorIdx)
 	}
 }
 
-void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
+//! Draws the normals as lines without the geometry shader (OpenGL 2.1 is enough, as on macOS)
+static void DrawNormalsAsLinesWithoutShader(QOpenGLFunctions_2_1*         glFunc,
+                                            const std::vector<CCVector3>& points,
+                                            const std::vector<CCVector3>& normals,
+                                            PointCoordinateType           length,
+                                            const ccColor::Rgba&          color)
 {
-	if (!InitProgramDrawNormals(context.qGLContext))
+	ccGL::Color(glFunc, color);
+
+	glFunc->glEnableClientState(GL_VERTEX_ARRAY);
+	glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
+
+	// each line needs two vertices
+	const size_t maxLineCountPerPass = MAX_POINT_COUNT_PER_LOD_RENDER_PASS / 2;
+	const size_t lineCount           = std::min(points.size(), normals.size());
+	for (size_t startIndex = 0; startIndex < lineCount; startIndex += maxLineCountPerPass)
 	{
-		// the reason has already been logged once, don't spam the console at each frame
-		return;
+		const size_t stopIndex = std::min(startIndex + maxLineCountPerPass, lineCount);
+
+		PointCoordinateType* _vertices = s_pointBuffer;
+		for (size_t i = startIndex; i < stopIndex; ++i)
+		{
+			const CCVector3& P = points[i];
+			CCVector3        Q = P + normals[i] * length;
+			*(_vertices)++     = P.x;
+			*(_vertices)++     = P.y;
+			*(_vertices)++     = P.z;
+			*(_vertices)++     = Q.x;
+			*(_vertices)++     = Q.y;
+			*(_vertices)++     = Q.z;
+		}
+
+		glFunc->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * (stopIndex - startIndex)));
 	}
 
+	glFunc->glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
+{
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
+
+	if (!InitProgramDrawNormals(context.qGLContext))
+	{
+		// the reason has already been logged once, we draw the lines without the shader
+		DrawNormalsAsLinesWithoutShader(glFunc, m_points, m_decompressedNormals, m_normalLineParameters.length, m_normalLineParameters.color);
+		return;
+	}
 
 	QMatrix4x4 projection;
 	QMatrix4x4 modelView;

@@ -67,13 +67,15 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent)
+bool ccBilateralFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback)
 {
 	if (width == 0 || height == 0)
 	{
 		error = "[Bilateral] Null texture size";
 		return false;
 	}
+
+	makeCurrentCallaback();
 
 	if (!m_glFuncIsValid)
 	{

@@ -2675,14 +2675,17 @@ void ccPropertiesTreeDelegate::discRadiusChanged(double val)
 	if (!disc)
 		return;
 
-	if (disc->getRadius() != val)
+	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
+	if (disc->getRadius() != radius)
 	{
-		disc->setRadius(val);
+		bool wasVisible = disc->isVisible();
+		disc->setRadius(radius);
+		disc->setVisible(wasVisible);
 
 		updateDisplay();
 
 		// record item role to force the scroll focus (see 'createEditor').
-		m_lastFocusItemRole = OBJECT_CIRCLE_RADIUS;
+		m_lastFocusItemRole = OBJECT_DISC_RADIUS;
 
 		// we must also reset the properties display!
 		updateModel();

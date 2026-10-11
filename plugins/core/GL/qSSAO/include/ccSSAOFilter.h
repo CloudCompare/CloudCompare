@@ -57,7 +57,7 @@ class ccSSAOFilter : public ccGlFilter
 
 	// inherited from ccGlFilter
 	ccGlFilter* clone() const override;
-	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback) override;
 	void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	GLuint      getTexture() override;
 

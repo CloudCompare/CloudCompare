@@ -57,7 +57,7 @@ class ccEDLFilter : public ccGlFilter
 
 	// inherited from ccGlFilter
 	ccGlFilter* clone() const override;
-	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback) override;
 	void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	GLuint      getTexture() override;
 
@@ -65,12 +65,13 @@ class ccEDLFilter : public ccGlFilter
 	void reset();
 
 	//! Inits filter
-	bool init(unsigned       width,
-	          unsigned       height,
-	          GLenum         internalFormat,
-	          GLenum         minMagFilter,
-	          const QString& shadersPath,
-	          QString&       error);
+	bool init(unsigned               width,
+	          unsigned               height,
+	          GLenum                 internalFormat,
+	          GLenum                 minMagFilter,
+	          const QString&         shadersPath,
+	          QString&               error,
+	          std::function<void()>& makeCurrentCallaback);
 
 	//! Sets light direction
 	void setLightDir(float theta_rad, float phi_rad);

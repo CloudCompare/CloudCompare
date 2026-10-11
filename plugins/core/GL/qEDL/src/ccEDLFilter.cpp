@@ -97,18 +97,20 @@ void ccEDLFilter::reset()
 	m_screenWidth = m_screenHeight = 0;
 }
 
-bool ccEDLFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent)
+bool ccEDLFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback)
 {
-	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath, error);
+	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath, error, makeCurrentCallaback);
 }
 
-bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, GLenum minMagFilter, const QString& shadersPath, QString& error)
+bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, GLenum minMagFilter, const QString& shadersPath, QString& error, std::function<void()>& makeCurrentCallaback)
 {
 	if (width == 0 || height == 0)
 	{
 		error = "Invalid texture size";
 		return false;
 	}
+
+	makeCurrentCallaback();
 
 	if (!m_glFuncIsValid)
 	{
@@ -146,7 +148,7 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 			{
 				m_bilateralFilters[i].filter = std::make_unique<ccBilateralFilter>();
 			}
-			if (m_bilateralFilters[i].filter->init(w, h, shadersPath, error, true))
+			if (m_bilateralFilters[i].filter->init(w, h, shadersPath, error, true, makeCurrentCallaback))
 			{
 				m_bilateralFilters[i].filter->useExistingViewport(true);
 			}

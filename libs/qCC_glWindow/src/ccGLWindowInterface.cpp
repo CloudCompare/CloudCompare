@@ -3592,8 +3592,11 @@ bool ccGLWindowInterface::initGLFilter(int w, int h, bool silent /*=false*/)
 	ccGlFilter* _filter = nullptr;
 	std::swap(_filter, m_activeGLFilter);
 
+	std::function<void()> makeCurrentCallaback([this]()
+	                                           { doMakeCurrent(); });
+
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error, silent))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error, silent, makeCurrentCallaback))
 	{
 		if (!silent)
 		{
@@ -6050,8 +6053,11 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		// and we change the current GL filter size (temporarily)
 		if (m_activeGLFilter)
 		{
+			std::function<void()> makeCurrentCallaback([this]()
+			                                           { doMakeCurrent(); });
+
 			QString error;
-			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true))
+			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true, makeCurrentCallaback))
 			{
 				if (!silent)
 				{
@@ -6201,8 +6207,11 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 
 	if (glFilter && zoomFactor != 1.0f)
 	{
+		std::function<void()> makeCurrentCallaback([this]()
+		                                           { doMakeCurrent(); });
+
 		QString error;
-		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true);
+		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true, makeCurrentCallaback);
 	}
 
 	// we restore viewport parameters

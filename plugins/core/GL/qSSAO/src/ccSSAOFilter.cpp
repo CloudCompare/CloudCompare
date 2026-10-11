@@ -167,7 +167,7 @@ void ccSSAOFilter::reset()
 	}
 }
 
-bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent)
+bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback)
 {
 	if (width == 0 || height == 0)
 	{
@@ -212,6 +212,8 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 
 	sampleSphere();
 
+	makeCurrentCallaback();
+
 	if (!m_glFuncIsValid)
 	{
 		if (!m_glFunc.initializeOpenGLFunctions())
@@ -220,6 +222,7 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 		}
 		m_glFuncIsValid = true;
 	}
+	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
 	setValid(false);
 
@@ -255,7 +258,7 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 		{
 			m_bilateralFilter = new ccBilateralFilter();
 		}
-		if (!m_bilateralFilter->init(width, height, shadersPath, error, silent))
+		if (!m_bilateralFilter->init(width, height, shadersPath, error, silent, makeCurrentCallaback))
 		{
 			delete m_bilateralFilter;
 			m_bilateralFilter        = nullptr;

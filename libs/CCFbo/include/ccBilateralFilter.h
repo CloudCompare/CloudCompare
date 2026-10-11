@@ -62,7 +62,7 @@ class CCFBO_LIB_API ccBilateralFilter : public ccGlFilter
 
 	// inherited from ccGlFilter
 	ccGlFilter*   clone() const override;
-	bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent, std::function<void()>& makeCurrentCallaback) override;
 	void          shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	inline GLuint getTexture() override
 	{

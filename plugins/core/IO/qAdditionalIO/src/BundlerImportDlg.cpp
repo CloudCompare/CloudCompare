@@ -15,7 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "BundlerImportDlg.h"
+#include "../include/BundlerImportDlg.h"
+
+// qCC_db
+#include <ccGLMatrix.h>
 
 // Qt
 #include <QDoubleSpinBox>
@@ -27,11 +30,7 @@
 #include <QToolButton>
 
 // system
-#include <assert.h>
-#include <stdio.h>
-
-// qCC_db
-#include <ccGLMatrix.h>
+#include <cassert>
 
 BundlerImportDlg::BundlerImportDlg(QWidget* parent)
     : QDialog(parent)
@@ -264,7 +263,7 @@ bool BundlerImportDlg::getOptionalTransfoMatrix(ccGLMatrix& mat)
 		mat.data()[15] = 1.0f;
 		return true;
 	}
-	else if (yVertAxisRadioButton->isChecked())
+	if (yVertAxisRadioButton->isChecked())
 	{
 		// rotation around X
 		mat.toZero();
@@ -274,7 +273,7 @@ bool BundlerImportDlg::getOptionalTransfoMatrix(ccGLMatrix& mat)
 		mat.data()[15] = 1.0f;
 		return true;
 	}
-	else if (customVertAxisRadioButton->isChecked())
+	if (customVertAxisRadioButton->isChecked())
 	{
 		bool success = false;
 		mat          = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(), success);

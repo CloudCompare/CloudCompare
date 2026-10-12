@@ -15,15 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "BundlerCommand.h"
+#include "../include/BundlerCommand.h"
 
-#include "BundlerFilter.h"
+// Local
+#include "../include/BundlerFilter.h"
 
-static const char COMMAND_BUNDLER[]               = "BUNDLER_IMPORT"; // Import Bundler file + orthorectification
-static const char COMMAND_BUNDLER_ALT_KEYPOINTS[] = "ALT_KEYPOINTS";
-static const char COMMAND_BUNDLER_SCALE_FACTOR[]  = "SCALE_FACTOR";
-static const char COMMAND_BUNDLER_UNDISTORT[]     = "UNDISTORT";
-static const char COMMAND_BUNDLER_COLOR_DTM[]     = "COLOR_DTM";
+static constexpr char COMMAND_BUNDLER[]               = "BUNDLER_IMPORT"; // Import Bundler file + orthorectification
+static constexpr char COMMAND_BUNDLER_ALT_KEYPOINTS[] = "ALT_KEYPOINTS";
+static constexpr char COMMAND_BUNDLER_SCALE_FACTOR[]  = "SCALE_FACTOR";
+static constexpr char COMMAND_BUNDLER_UNDISTORT[]     = "UNDISTORT";
+static constexpr char COMMAND_BUNDLER_COLOR_DTM[]     = "COLOR_DTM";
 
 BundlerCommand::BundlerCommand()
     : ccCommandLineInterface::Command("Bundler", COMMAND_BUNDLER)

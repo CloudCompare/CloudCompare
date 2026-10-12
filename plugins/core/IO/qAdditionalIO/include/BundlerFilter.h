@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_BUNDLER_FILTER_HEADER
-#define CC_BUNDLER_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Noah Snavely's Bundler output file filter
 /** See http://phototour.cs.washington.edu/
@@ -41,5 +41,3 @@ class BundlerFilter : public FileIOFilter
 	                               unsigned        coloredDTMVerticesCount = 1000000,
 	                               float           scaleFactor             = 1.0f);
 };
-
-#endif // CC_BUNDLER_FILTER_HEADER

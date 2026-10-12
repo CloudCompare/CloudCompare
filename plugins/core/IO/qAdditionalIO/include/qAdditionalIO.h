@@ -1,5 +1,4 @@
-#ifndef Q_ADDITIONAL_IO_PLUGIN_HEADER
-#define Q_ADDITIONAL_IO_PLUGIN_HEADER
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// CCPluginStub
 #include <ccIOPluginInterface.h>
 
 //! Additional I/O Formats
@@ -39,5 +39,3 @@ class qAdditionalIO : public QObject
 	// inherited from ccIOPluginInterface
 	FilterList getFilters() override;
 };
-
-#endif

@@ -15,10 +15,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_PN_FILTER_HEADER
-#define CC_PN_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Point+Normal binary point cloud file I/O filter
 class PNFilter : public FileIOFilter
@@ -32,5 +30,3 @@ class PNFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_PN_FILTER_HEADER

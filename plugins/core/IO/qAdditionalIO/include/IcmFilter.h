@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ICM_FILTER_HEADER
-#define CC_ICM_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Calibrated images and cloud meta-file I/O filter
 class IcmFilter : public FileIOFilter
@@ -32,5 +32,3 @@ class IcmFilter : public FileIOFilter
   private:
 	static int LoadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename, const ccBBox& globalBBox);
 };
-
-#endif // CC_ICM_FILTER_HEADER

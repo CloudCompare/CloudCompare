@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_BUNDLER_IMPORT_DIALOG_HEADER
-#define CC_BUNDLER_IMPORT_DIALOG_HEADER
+// Ui
+#include <ui_openBundlerFileDlg.h>
 
+// Qt
 #include <QDialog>
-
-// local
-#include "qCC_io.h"
-#include "ui_openBundlerFileDlg.h"
 
 class ccGLMatrix;
 
@@ -37,7 +36,7 @@ class /*QCC_IO_LIB_API*/ BundlerImportDlg : public QDialog
 	explicit BundlerImportDlg(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~BundlerImportDlg() = default;
+	~BundlerImportDlg() override = default;
 
 	//! Returns whether keypoints should be imported
 	bool importKeypoints() const;
@@ -104,5 +103,3 @@ class /*QCC_IO_LIB_API*/ BundlerImportDlg : public QDialog
 	//! Saves dialog state from persistent settings
 	void saveToPersistentSettings();
 };
-
-#endif // CC_BUNDLER_IMPORT_DIALOG_HEADER

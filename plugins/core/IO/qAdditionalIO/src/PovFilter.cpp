@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PovFilter.h"
+#include "../include/PovFilter.h"
 
-// Local
-#include "BinFilter.h"
+// qCC_io
+#include <BinFilter.h>
 
 // qCC_db
 #include <ccGBLSensor.h>
@@ -34,17 +34,17 @@
 
 // Max number of characters per line in an ASCII file
 // TODO: use QFile instead!
-const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
+constexpr int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
 // Ground based LiDAR sensor mirror and body rotation order
 // Refer to ccGBLSensor::ROTATION_ORDER
-const char CC_SENSOR_ROTATION_ORDER_NAMES[][15] = {
+constexpr char CC_SENSOR_ROTATION_ORDER_NAMES[][15] = {
     "YAW_THEN_PITCH", // Rotation: body then mirror
     "PITCH_THEN_YAW"  // Rotation: mirror then body
 };
 
 // same as CC_SENSOR_ROTATION_ORDER_NAMES but with the old names (used in versions prior to 2.5.6)
-const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {
+constexpr char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {
     "THETA_PHI", // Rotation: body then mirror
     "PHI_THETA"  // Rotation: mirror then body
 };
@@ -87,15 +87,15 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	std::vector<ccGBLSensor*>         sensors;
 	std::vector<ccGenericPointCloud*> clouds;
 	{
-		for (unsigned i = 0; i < hClouds.size(); ++i)
+		for (auto* cloud : hClouds)
 		{
 			ccHObject::Container cloudSensors;
-			hClouds[i]->filterChildren(cloudSensors, false, CC_TYPES::GBL_SENSOR);
+			cloud->filterChildren(cloudSensors, false, CC_TYPES::GBL_SENSOR);
 			if (!cloudSensors.empty())
 			{
-				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
+				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(cloud));
 				if (cloudSensors.size() > 1)
-					ccLog::Warning(QString("Found more than one GBL sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
+					ccLog::Warning(QString("Found more than one GBL sensor associated to entity '%1'. Only the first will be saved!").arg(cloud->getName()));
 
 				sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
 			}
@@ -309,7 +309,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					if (line[0] == '#')
 						break;
-					else if (line[0] == 'C')
+					if (line[0] == 'C')
 					{
 						float C[3];
 						sscanf(line, "C %f %f %f\n", C, C + 1, C + 2);
@@ -384,10 +384,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					break;
 				}
-				else
-				{
-					ccLog::Printf("[PovFilter::loadFile] File '%s' not found or empty!", subFileName);
-				}
+				ccLog::Printf("[PovFilter::loadFile] File '%s' not found or empty!", subFileName);
 			}
 		}
 	}

@@ -15,12 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "SoiFilter.h"
+#include "../include/SoiFilter.h"
 
 // qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+#include <memory>
 
 // Max number of characters per line in an ASCII file
 // TODO: use QFile instead!
@@ -87,7 +88,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget)); // cancel is not supported
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget); // cancel is not supported
 		pDlg->setMethodTitle(QObject::tr("Open SOI file"));
 		pDlg->setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
 		pDlg->start();

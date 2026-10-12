@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PNFilter.h"
+#include "../include/PNFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -25,6 +25,7 @@
 
 // Qt
 #include <QFile>
+#include <memory>
 
 // default normal value
 static const CCVector3 s_defaultNorm(0, 0, 1);
@@ -88,14 +89,11 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	                 static_cast<float>(s_defaultNorm.z)};
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
-	if (pDlg)
-	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
-		pDlg->setMethodTitle(QObject::tr("Save PN file"));
-		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
-		pDlg->start();
-	}
+	auto pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
+	pDlg->setMethodTitle(QObject::tr("Save PN file"));
+	pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
+	pDlg->start();
+
 	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -163,7 +161,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Open PN file"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
@@ -192,8 +190,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->reserveTheNormsTable())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
-				if (loadedCloud)
-					delete loadedCloud;
+				delete loadedCloud;
 				loadedCloud = nullptr;
 				break;
 			}

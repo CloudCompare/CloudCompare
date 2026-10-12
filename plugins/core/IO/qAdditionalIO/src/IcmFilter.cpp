@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "IcmFilter.h"
+#include "../include/IcmFilter.h"
 
 // qCC_db
 #include <ccCameraSensor.h>
@@ -133,19 +133,17 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		fclose(fp);
 		return CC_FERR_READING;
 	}
-	else
-	{
-		if (strncmp(line, "IMAGES_DESCRIPTOR=", 18) != 0)
-		{
-			fclose(fp);
-			return CC_FERR_WRONG_FILE_TYPE;
-		}
-		char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
-		sscanf(line, "IMAGES_DESCRIPTOR=%s", imagesDescriptorFileName);
 
-		int n = LoadCalibratedImages(entities, path, imagesDescriptorFileName, entities->getBB_recursive());
-		ccLog::Printf("[ICM] %i image(s) loaded ...", n);
+	if (strncmp(line, "IMAGES_DESCRIPTOR=", 18) != 0)
+	{
+		fclose(fp);
+		return CC_FERR_WRONG_FILE_TYPE;
 	}
+	char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
+	sscanf(line, "IMAGES_DESCRIPTOR=%s", imagesDescriptorFileName);
+
+	int n = LoadCalibratedImages(entities, path, imagesDescriptorFileName, entities->getBB_recursive());
+	ccLog::Printf("[ICM] %i image(s) loaded ...", n);
 
 	fclose(fp);
 	return CC_FERR_NO_ERROR;

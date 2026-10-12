@@ -15,17 +15,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qAdditionalIO.h"
+#include "../include/qAdditionalIO.h"
 
-#include "BundlerCommand.h"
-#include "BundlerFilter.h"
-#include "IcmFilter.h"
-#include "PNFilter.h"
-#include "PVFilter.h"
-#include "PovFilter.h"
-#include "SalomeHydroFilter.h"
-#include "SinusxFilter.h"
-#include "SoiFilter.h"
+// Local
+#include "../include/BundlerCommand.h"
+#include "../include/BundlerFilter.h"
+#include "../include/IcmFilter.h"
+#include "../include/PNFilter.h"
+#include "../include/PVFilter.h"
+#include "../include/PovFilter.h"
+#include "../include/SalomeHydroFilter.h"
+#include "../include/SinusxFilter.h"
+#include "../include/SoiFilter.h"
 
 qAdditionalIO::qAdditionalIO(QObject* parent)
     : QObject(parent)

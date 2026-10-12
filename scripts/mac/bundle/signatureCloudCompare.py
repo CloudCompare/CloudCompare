@@ -193,10 +193,10 @@ class CCSignBundle:
             logger.info("Add entitlements to CC binary")
             # TODO: the original shell script sign the binary AND add entitlements...
             # is it necessary?
-            self._add_entitlements(self.config.cc_bin_path, HARDENED_CCAPP_ENTITLEMENTS)
+            self._add_entitlements(self.config.cc_bin_path, CCAPP_ENTITLEMENTS)
 
             logger.warning("Add entitlements to CC bundle (CloudCompare.app)")
-            self._add_entitlements(self.config.bundle_abs_path, HARDENED_CCAPP_ENTITLEMENTS)
+            self._add_entitlements(self.config.bundle_abs_path, CCAPP_ENTITLEMENTS)
         process_pool.close()
         return 0
 

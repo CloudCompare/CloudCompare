@@ -411,6 +411,7 @@ Improvements:
 		- the ASCII loading dialog now warns the user when a file has more columns than it can handle
 			(only the first 512 columns are loaded, the other ones were previously ignored silently)
 		- the PoissonRecon library (used by the Poisson Surface reconstruction plugin) has been updated to version 18.76
+		- dxflib upgraded from version 3.17.0 to 3.26.4
 
 Bug fixes:
 	- ASCII files saved with legacy Mac line endings (a lone CR) were read as a single line, silently loading only one point

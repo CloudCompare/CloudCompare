@@ -191,7 +191,7 @@ public:
      * Called for every angular dimension (2 lines version) entity. 
      */
     virtual void addDimAngular(const DL_DimensionData& data,
-                              const DL_DimAngularData& edata) = 0;
+                              const DL_DimAngular2LData& edata) = 0;
 
     /**
      * Called for every angular dimension (3 points version) entity. 

@@ -48,12 +48,7 @@
  */
 class DXFLIB_EXPORT DL_WriterA : public DL_Writer {
 public:
-#ifdef _WIN32
-    DL_WriterA(const std::wstring& fname,
-#else
-	DL_WriterA(const std::string& fname,
-#endif
-               DL_Codes::version version=DL_VERSION_2000)
+    DL_WriterA(const char* fname, DL_Codes::version version=DL_VERSION_2000)
             : DL_Writer(version), m_ofile(fname) {}
     virtual ~DL_WriterA() {}
 
@@ -71,11 +66,7 @@ private:
     /**
      * DXF file to be created.
      */
-//#ifdef _WIN32
-//	mutable std::wofstream m_ofile;
-//#else
-	mutable std::ofstream m_ofile;
-//#endif
+    mutable std::ofstream m_ofile;
 
 };
 

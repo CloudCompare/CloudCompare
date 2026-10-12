@@ -22,6 +22,14 @@
 **
 **********************************************************************/
 
+// For feof_unlocked and fgets_unlocked
+#if !defined(_GNU_SOURCE)
+#define _DEFAULT_SOURCE
+#endif
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
+
 #include "dl_dxf.h"
 
 #include <algorithm>
@@ -107,21 +115,12 @@ DL_Dxf::~DL_Dxf() {
  * @retval true If \p file could be opened.
  * @retval false If \p file could not be opened.
  */
-#ifdef _MSC_VER
-bool DL_Dxf::in(const std::wstring& file,
-#else
-bool DL_Dxf::in(const std::string& file,
-#endif
-                DL_CreationInterface* creationInterface) {
+bool DL_Dxf::in(const std::string& file, DL_CreationInterface* creationInterface) {
     FILE *fp;
     firstCall = true;
     currentObjectType = DL_UNKNOWN;
 
-#ifdef _MSC_VER
-	fp = _wfopen(file.c_str(), L"rt");
-#else
-	fp = fopen(file.c_str(), "rt");
-#endif
+    fp = fopen(file.c_str(), "rt");
     if (fp) {
         std::locale oldLocale = std::locale::global(std::locale("C"));	// use dot in numbers
         while (readDxfGroups(fp, creationInterface)) {}
@@ -138,14 +137,14 @@ bool DL_Dxf::in(const std::string& file,
 /**
  * Reads a DXF file from an existing stream.
  *
- * @param stream The string stream.
+ * @param stream The input stream.
  * @param creationInterface
  *      Pointer to the class which takes care of the entities in the file.
  *
  * @retval true If \p file could be opened.
  * @retval false If \p file could not be opened.
  */
-bool DL_Dxf::in(std::stringstream& stream,
+bool DL_Dxf::in(std::istream& stream,
                 DL_CreationInterface* creationInterface) {
     
     if (stream.good()) {
@@ -186,8 +185,8 @@ bool DL_Dxf::readDxfGroups(FILE *fp, DL_CreationInterface* creationInterface) {
     static int line = 1;
 
     // Read one group of the DXF file and strip the lines:
-    if (DL_Dxf::getStrippedLine(groupCodeTmp, DL_DXF_MAXLINE, fp) &&
-            DL_Dxf::getStrippedLine(groupValue, DL_DXF_MAXLINE, fp, false) ) {
+    if (DL_Dxf::getStrippedLine(groupCodeTmp, fp) &&
+            DL_Dxf::getStrippedLine(groupValue, fp, false) ) {
 
         groupCode = (unsigned int)toInt(groupCodeTmp);
 
@@ -196,15 +195,21 @@ bool DL_Dxf::readDxfGroups(FILE *fp, DL_CreationInterface* creationInterface) {
         processDXFGroup(creationInterface, groupCode, groupValue);
     }
 
+    // Nonlocking stdio functions are not thread-safe but they are faster.
+    // Thread safety shouldn't be a concern since we are accessing the file only in one thread.
+#ifdef __GLIBC__
+    return !feof_unlocked(fp);
+#else
     return !feof(fp);
+#endif
 }
 
 
 
 /**
- * Same as above but for stringstreams.
+ * Same as above but for input streams.
  */
-bool DL_Dxf::readDxfGroups(std::stringstream& stream,
+bool DL_Dxf::readDxfGroups(std::istream& stream,
                            DL_CreationInterface* creationInterface) {
 
     static int line = 1;
@@ -240,14 +245,22 @@ bool DL_Dxf::readDxfGroups(std::stringstream& stream,
  * @todo Is it a problem if line is blank (i.e., newline only)?
  *      Then, when function returns, (s==NULL).
  */
-bool DL_Dxf::getStrippedLine(std::string& s, unsigned int size, FILE *fp, bool stripSpace) {
+bool DL_Dxf::getStrippedLine(std::string& s, FILE *fp, bool stripSpace) {
+#ifdef __GLIBC__
+    if (!feof_unlocked(fp)) {
+#else
     if (!feof(fp)) {
+#endif
         // The whole line in the file.  Includes space for NULL.
-        char* wholeLine = new char[size];
+        char wholeLine[DL_DXF_MAXLINE];
         // Only the useful part of the line
         char* line;
 
-        line = fgets(wholeLine, size, fp);
+#ifdef __GLIBC__
+        line = fgets_unlocked(wholeLine, sizeof(wholeLine), fp);
+#else
+        line = fgets(wholeLine, sizeof(wholeLine), fp);
+#endif
 
         if (line!=NULL && line[0] != '\0') { // Evaluates to fgets() retval
             // line == wholeLine at this point.
@@ -257,10 +270,8 @@ bool DL_Dxf::getStrippedLine(std::string& s, unsigned int size, FILE *fp, bool s
             stripWhiteSpace(&line, stripSpace);
 
             s = line;
-            assert(size > s.length());
+            assert(sizeof(wholeLine) > s.length());
         }
-
-        delete[] wholeLine; // Done with wholeLine
 
         return true;
     } else {
@@ -272,10 +283,10 @@ bool DL_Dxf::getStrippedLine(std::string& s, unsigned int size, FILE *fp, bool s
 
 
 /**
- * Same as above but for stringstreams.
+ * Same as above but for input streams.
  */
 bool DL_Dxf::getStrippedLine(std::string &s, unsigned int size,
-                            std::stringstream& stream, bool stripSpace) {
+                            std::istream& stream, bool stripSpace) {
 
     if (!stream.eof()) {
         // Only the useful part of the line
@@ -307,7 +318,7 @@ bool DL_Dxf::getStrippedLine(std::string &s, unsigned int size,
  */
 bool DL_Dxf::stripWhiteSpace(char** s, bool stripSpace) {
     // last non-NULL char:
-    int lastChar = static_cast<int>(strlen(*s)) - 1;
+    int lastChar = strlen(*s) - 1;
 
     // Is last character CR or LF?
     while ( (lastChar >= 0) &&
@@ -785,7 +796,11 @@ void DL_Dxf::addDictionaryEntry(DL_CreationInterface* creationInterface) {
  */
 void DL_Dxf::addSetting(DL_CreationInterface* creationInterface) {
     int c = -1;
+#if __cplusplus >= 201103L
+    std::unordered_map<int,std::string>::iterator it = values.begin();
+#else
     std::map<int,std::string>::iterator it = values.begin();
+#endif
     if (it!=values.end()) {
         c = it->first;
     }
@@ -1457,10 +1472,10 @@ bool DL_Dxf::handleLWPolylineData(DL_CreationInterface* /*creationInterface*/) {
         }
 
         if (groupCode<=30) {
-            if (vertexIndex>=0 && vertexIndex<maxVertices) {
+            if (vertexIndex>=0 && vertexIndex<maxVertices && vertexIndex>=0) {
                 vertices[4*vertexIndex + (groupCode/10-1)] = toReal(groupValue);
             }
-        } else if (groupCode==42 && vertexIndex<maxVertices) {
+        } else if (groupCode==42 && vertexIndex<maxVertices && vertexIndex>=0) {
             vertices[4*vertexIndex + 3] = toReal(groupValue);
         }
         return true;
@@ -1744,7 +1759,7 @@ void DL_Dxf::addAttribute(DL_CreationInterface* creationInterface) {
  */
 DL_DimensionData DL_Dxf::getDimData() {
     // generic dimension data:
-    return DL_DimensionData(
+    DL_DimensionData ret(
                // def point
                getRealValue(10, 0.0),
                getRealValue(20, 0.0),
@@ -1767,6 +1782,9 @@ DL_DimensionData DL_Dxf::getDimData() {
                getStringValue(3, ""),
                // angle
                getRealValue(53, 0.0));
+    ret.arrow1Flipped = getIntValue(74, 0)==1;
+    ret.arrow2Flipped = getIntValue(75, 0)==1;
+    return ret;
 }
 
 
@@ -1861,7 +1879,7 @@ void DL_Dxf::addDimAngular(DL_CreationInterface* creationInterface) {
     DL_DimensionData d = getDimData();
 
     // angular dimension:
-    DL_DimAngularData da(
+    DL_DimAngular2LData da(
         // definition point 1
         getRealValue(13, 0.0),
         getRealValue(23, 0.0),
@@ -1978,7 +1996,7 @@ void DL_Dxf::addHatch(DL_CreationInterface* creationInterface) {
     creationInterface->addHatch(hd);
 
     for (unsigned int i=0; i<hatchEdges.size(); i++) {
-        creationInterface->addHatchLoop(DL_HatchLoopData(static_cast<int>(hatchEdges[i].size())));
+        creationInterface->addHatchLoop(DL_HatchLoopData(hatchEdges[i].size()));
         for (unsigned int k=0; k<hatchEdges[i].size(); k++) {
             creationInterface->addHatchEdge(DL_HatchEdgeData(hatchEdges[i][k]));
         }
@@ -2317,19 +2335,18 @@ void DL_Dxf::endSequence(DL_CreationInterface* creationInterface) {
  *
  * @return Pointer to an ascii dxf writer object.
  */
-#ifdef _MSC_VER
-DL_WriterA* DL_Dxf::out(const std::wstring& file,
-#else
-DL_WriterA* DL_Dxf::out(const std::string& file,
-#endif
-        DL_Codes::version version) {
+DL_WriterA* DL_Dxf::out(const char* file, DL_Codes::version version) {
+    char* f = new char[strlen(file)+1];
+    strcpy(f, file);
     this->version = version;
 
-    DL_WriterA* dw = new DL_WriterA(file, version);
+    DL_WriterA* dw = new DL_WriterA(f, version);
     if (dw->openFailed()) {
         delete dw;
+        delete[] f;
         return NULL;
     } else {
+        delete[] f;
         return dw;
     }
 }
@@ -2515,7 +2532,6 @@ void DL_Dxf::writeVertex(DL_WriterA& dw,
     if (version==DL_VERSION_2000) {
         dw.dxfReal(10, data.x);
         dw.dxfReal(20, data.y);
-        dw.dxfReal(30, data.z);
         if (fabs(data.bulge)>1.0e-10) {
             dw.dxfReal(42, data.bulge);
         }
@@ -2585,6 +2601,7 @@ void DL_Dxf::writeControlPoint(DL_WriterA& dw,
     dw.dxfReal(10, data.x);
     dw.dxfReal(20, data.y);
     dw.dxfReal(30, data.z);
+	dw.dxfReal(41, data.w);
 }
 
 
@@ -2865,7 +2882,7 @@ void DL_Dxf::writeMText(DL_WriterA& dw,
     dw.dxfInt(72, data.drawingDirection);
 
     // Creare text chunks of 250 characters each:
-    int length = static_cast<int>(data.text.length());
+    int length = data.text.length();
     char chunk[251];
     int i;
     for (i=250; i<length; i+=250) {
@@ -2974,10 +2991,18 @@ void DL_Dxf::writeDimStyleOverrides(DL_WriterA& dw,
         dw.dxfString(1001, "ACAD");
         dw.dxfString(1000, "DSTYLE");
         dw.dxfString(1002, "{");
+
+        if (data.type&128) {
+            // custom text position:
+            dw.dxfInt(1070, 279);
+            dw.dxfInt(1070, 2);
+        }
         dw.dxfInt(1070, 144);
         dw.dxfReal(1040, data.linearFactor);
+
         dw.dxfInt(1070,40);
         dw.dxfReal(1040, data.dimScale);
+
         dw.dxfString(1002, "}");
     }
 }
@@ -3018,6 +3043,8 @@ void DL_Dxf::writeDimAligned(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3079,6 +3106,8 @@ void DL_Dxf::writeDimLinear(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3146,6 +3175,8 @@ void DL_Dxf::writeDimRadial(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        //dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3205,6 +3236,8 @@ void DL_Dxf::writeDimDiametric(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3237,9 +3270,9 @@ void DL_Dxf::writeDimDiametric(DL_WriterA& dw,
  * @param data Specific angular dimension data from the file
  * @param attrib Attributes
  */
-void DL_Dxf::writeDimAngular(DL_WriterA& dw,
+void DL_Dxf::writeDimAngular2L(DL_WriterA& dw,
                              const DL_DimensionData& data,
-                             const DL_DimAngularData& edata,
+                             const DL_DimAngular2LData& edata,
                              const DL_Attributes& attrib) {
 
     dw.entity("DIMENSION");
@@ -3264,6 +3297,8 @@ void DL_Dxf::writeDimAngular(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3331,6 +3366,8 @@ void DL_Dxf::writeDimAngular3P(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        dw.dxfInt(74, data.arrow1Flipped);
+        dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3400,6 +3437,8 @@ void DL_Dxf::writeDimOrdinate(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfInt(71, data.attachmentPoint);
         dw.dxfInt(72, data.lineSpacingStyle); // opt
+        //dw.dxfInt(74, data.arrow1Flipped);
+        //dw.dxfInt(75, data.arrow2Flipped);
         dw.dxfReal(41, data.lineSpacingFactor); // opt
     }
 
@@ -3467,6 +3506,18 @@ void DL_Dxf::writeLeaderVertex(DL_WriterA& dw,
     if (version>DL_VERSION_R12) {
         dw.dxfReal(10, data.x);
         dw.dxfReal(20, data.y);
+    }
+}
+
+void DL_Dxf::writeLeaderEnd(DL_WriterA& dw,
+                 const DL_LeaderData& data) {
+    if (version==DL_VERSION_2000) {
+        dw.dxfString(1001, "ACAD");
+        dw.dxfString(1000, "DSTYLE");
+        dw.dxfString(1002, "{");
+        dw.dxfInt(1070,40);
+        dw.dxfReal(1040, data.dimScale);
+        dw.dxfString(1002, "}");
     }
 }
 
@@ -3543,7 +3594,7 @@ void DL_Dxf::writeHatch2(DL_WriterA& dw,
         dw.dxfString(1001, "ACAD");
         dw.dxfReal(1010, data.originX);
         dw.dxfReal(1020, data.originY);
-        dw.dxfInt(1030, 0);
+        dw.dxfInt(1030, 0.0);
     }
 }
 
@@ -3674,7 +3725,7 @@ void DL_Dxf::writeHatchEdge(DL_WriterA& dw,
  *
  * @return IMAGEDEF handle. Needed for the IMAGEDEF counterpart.
  */
-int DL_Dxf::writeImage(DL_WriterA& dw,
+unsigned long DL_Dxf::writeImage(DL_WriterA& dw,
                        const DL_ImageData& data,
                        const DL_Attributes& attrib) {
 
@@ -3714,8 +3765,7 @@ int DL_Dxf::writeImage(DL_WriterA& dw,
     dw.dxfReal(23, data.height);
 
     // handle of IMAGEDEF object
-    int handle = dw.incHandle();
-    dw.dxfHex(340, handle);
+    unsigned long handle = dw.handle(340);
 
     // flags
     dw.dxfInt(70, 15);
@@ -4172,7 +4222,7 @@ void DL_Dxf::writeUcs(DL_WriterA& dw) {
  */
 void DL_Dxf::writeDimStyle(DL_WriterA& dw,
                     double dimasz, double dimexe, double dimexo,
-                    double dimgap, double dimtxt) {
+                    double dimgap, double dimtxt, int dimtad, bool dimtih) {
 
     dw.dxfString(  0, "TABLE");
     dw.dxfString(  2, "DIMSTYLE");
@@ -4222,13 +4272,15 @@ void DL_Dxf::writeDimStyle(DL_WriterA& dw,
         dw.dxfInt( 71, 0);
         dw.dxfInt( 72, 0);
     }
-    dw.dxfInt( 73, 0);
+    // DIMTIH:
+    dw.dxfInt( 73, (int)dimtih);
     dw.dxfInt( 74, 0);
     if (version==DL_VERSION_R12) {
         dw.dxfInt( 75, 0);
         dw.dxfInt( 76, 0);
     }
-    dw.dxfInt( 77, 1);
+    // DIMTAD:
+    dw.dxfInt( 77, dimtad);
     dw.dxfInt( 78, 8);
     dw.dxfReal(140, dimtxt);
     dw.dxfReal(141, 2.5);
@@ -4362,7 +4414,6 @@ void DL_Dxf::writeBlockRecord(DL_WriterA& dw, const std::string& name) {
 void DL_Dxf::writeObjects(DL_WriterA& dw, const std::string& appDictionaryName) {
     dw.dxfString(  0, "SECTION");
     dw.dxfString(  2, "OBJECTS");
-
 
     dw.dxfString(  0, "DICTIONARY");
     dw.dxfHex(5, 0xC);
@@ -4713,12 +4764,9 @@ void DL_Dxf::writeAppDictionary(DL_WriterA& dw) {
     dw.dxfInt(281, 1);
 }
 
-int DL_Dxf::writeDictionaryEntry(DL_WriterA& dw, const std::string& name) {
+unsigned long DL_Dxf::writeDictionaryEntry(DL_WriterA& dw, const std::string& name) {
     dw.dxfString(  3, name);
-    int handle = dw.getNextHandle();
-    dw.dxfHex(350, handle);
-    dw.incHandle();
-    return handle;
+    return dw.handle(350);
 }
 
 void DL_Dxf::writeXRecord(DL_WriterA& dw, int handle, int value) {
@@ -4784,427 +4832,427 @@ bool DL_Dxf::checkVariable(const char* var, DL_Codes::version version) {
         return true;
     } else if (version==DL_VERSION_R12) {
         // these are all the variables recognized by dxf r12:
-        if (!strcmp(var, "$ACADVER")) {
+        if (!strcmp(var, "ACADVER")) {
             return true;
         }
-        if (!strcmp(var, "$ACADVER")) {
+        if (!strcmp(var, "ACADVER")) {
             return true;
         }
-        if (!strcmp(var, "$ANGBASE")) {
+        if (!strcmp(var, "ANGBASE")) {
             return true;
         }
-        if (!strcmp(var, "$ANGDIR")) {
+        if (!strcmp(var, "ANGDIR")) {
             return true;
         }
-        if (!strcmp(var, "$ATTDIA")) {
+        if (!strcmp(var, "ATTDIA")) {
             return true;
         }
-        if (!strcmp(var, "$ATTMODE")) {
+        if (!strcmp(var, "ATTMODE")) {
             return true;
         }
-        if (!strcmp(var, "$ATTREQ")) {
+        if (!strcmp(var, "ATTREQ")) {
             return true;
         }
-        if (!strcmp(var, "$AUNITS")) {
+        if (!strcmp(var, "AUNITS")) {
             return true;
         }
-        if (!strcmp(var, "$AUPREC")) {
+        if (!strcmp(var, "AUPREC")) {
             return true;
         }
-        if (!strcmp(var, "$AXISMODE")) {
+        if (!strcmp(var, "AXISMODE")) {
             return true;
         }
-        if (!strcmp(var, "$AXISUNIT")) {
+        if (!strcmp(var, "AXISUNIT")) {
             return true;
         }
-        if (!strcmp(var, "$BLIPMODE")) {
+        if (!strcmp(var, "BLIPMODE")) {
             return true;
         }
-        if (!strcmp(var, "$CECOLOR")) {
+        if (!strcmp(var, "CECOLOR")) {
             return true;
         }
-        if (!strcmp(var, "$CELTYPE")) {
+        if (!strcmp(var, "CELTYPE")) {
             return true;
         }
-        if (!strcmp(var, "$CHAMFERA")) {
+        if (!strcmp(var, "CHAMFERA")) {
             return true;
         }
-        if (!strcmp(var, "$CHAMFERB")) {
+        if (!strcmp(var, "CHAMFERB")) {
             return true;
         }
-        if (!strcmp(var, "$CLAYER")) {
+        if (!strcmp(var, "CLAYER")) {
             return true;
         }
-        if (!strcmp(var, "$COORDS")) {
+        if (!strcmp(var, "COORDS")) {
             return true;
         }
-        if (!strcmp(var, "$DIMALT")) {
+        if (!strcmp(var, "DIMALT")) {
             return true;
         }
-        if (!strcmp(var, "$DIMALTD")) {
+        if (!strcmp(var, "DIMALTD")) {
             return true;
         }
-        if (!strcmp(var, "$DIMALTF")) {
+        if (!strcmp(var, "DIMALTF")) {
             return true;
         }
-        if (!strcmp(var, "$DIMAPOST")) {
+        if (!strcmp(var, "DIMAPOST")) {
             return true;
         }
-        if (!strcmp(var, "$DIMASO")) {
+        if (!strcmp(var, "DIMASO")) {
             return true;
         }
-        if (!strcmp(var, "$DIMASZ")) {
+        if (!strcmp(var, "DIMASZ")) {
             return true;
         }
-        if (!strcmp(var, "$DIMBLK")) {
+        if (!strcmp(var, "DIMBLK")) {
             return true;
         }
-        if (!strcmp(var, "$DIMBLK1")) {
+        if (!strcmp(var, "DIMBLK1")) {
             return true;
         }
-        if (!strcmp(var, "$DIMBLK2")) {
+        if (!strcmp(var, "DIMBLK2")) {
             return true;
         }
-        if (!strcmp(var, "$DIMCEN")) {
+        if (!strcmp(var, "DIMCEN")) {
             return true;
         }
-        if (!strcmp(var, "$DIMCLRD")) {
+        if (!strcmp(var, "DIMCLRD")) {
             return true;
         }
-        if (!strcmp(var, "$DIMCLRE")) {
+        if (!strcmp(var, "DIMCLRE")) {
             return true;
         }
-        if (!strcmp(var, "$DIMCLRT")) {
+        if (!strcmp(var, "DIMCLRT")) {
             return true;
         }
-        if (!strcmp(var, "$DIMDLE")) {
+        if (!strcmp(var, "DIMDLE")) {
             return true;
         }
-        if (!strcmp(var, "$DIMDLI")) {
+        if (!strcmp(var, "DIMDLI")) {
             return true;
         }
-        if (!strcmp(var, "$DIMEXE")) {
+        if (!strcmp(var, "DIMEXE")) {
             return true;
         }
-        if (!strcmp(var, "$DIMEXO")) {
+        if (!strcmp(var, "DIMEXO")) {
             return true;
         }
-        if (!strcmp(var, "$DIMGAP")) {
+        if (!strcmp(var, "DIMGAP")) {
             return true;
         }
-        if (!strcmp(var, "$DIMLFAC")) {
+        if (!strcmp(var, "DIMLFAC")) {
             return true;
         }
-        if (!strcmp(var, "$DIMLIM")) {
+        if (!strcmp(var, "DIMLIM")) {
             return true;
         }
-        if (!strcmp(var, "$DIMPOST")) {
+        if (!strcmp(var, "DIMPOST")) {
             return true;
         }
-        if (!strcmp(var, "$DIMRND")) {
+        if (!strcmp(var, "DIMRND")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSAH")) {
+        if (!strcmp(var, "DIMSAH")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSCALE")) {
+        if (!strcmp(var, "DIMSCALE")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSE1")) {
+        if (!strcmp(var, "DIMSE1")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSE2")) {
+        if (!strcmp(var, "DIMSE2")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSHO")) {
+        if (!strcmp(var, "DIMSHO")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSOXD")) {
+        if (!strcmp(var, "DIMSOXD")) {
             return true;
         }
-        if (!strcmp(var, "$DIMSTYLE")) {
+        if (!strcmp(var, "DIMSTYLE")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTAD")) {
+        if (!strcmp(var, "DIMTAD")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTFAC")) {
+        if (!strcmp(var, "DIMTFAC")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTIH")) {
+        if (!strcmp(var, "DIMTIH")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTIX")) {
+        if (!strcmp(var, "DIMTIX")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTM")) {
+        if (!strcmp(var, "DIMTM")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTOFL")) {
+        if (!strcmp(var, "DIMTOFL")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTOH")) {
+        if (!strcmp(var, "DIMTOH")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTOL")) {
+        if (!strcmp(var, "DIMTOL")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTP")) {
+        if (!strcmp(var, "DIMTP")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTSZ")) {
+        if (!strcmp(var, "DIMTSZ")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTVP")) {
+        if (!strcmp(var, "DIMTVP")) {
             return true;
         }
-        if (!strcmp(var, "$DIMTXT")) {
+        if (!strcmp(var, "DIMTXT")) {
             return true;
         }
-        if (!strcmp(var, "$DIMZIN")) {
+        if (!strcmp(var, "DIMZIN")) {
             return true;
         }
-        if (!strcmp(var, "$DWGCODEPAGE")) {
+        if (!strcmp(var, "DWGCODEPAGE")) {
             return true;
         }
-        if (!strcmp(var, "$DRAGMODE")) {
+        if (!strcmp(var, "DRAGMODE")) {
             return true;
         }
-        if (!strcmp(var, "$ELEVATION")) {
+        if (!strcmp(var, "ELEVATION")) {
             return true;
         }
-        if (!strcmp(var, "$EXTMAX")) {
+        if (!strcmp(var, "EXTMAX")) {
             return true;
         }
-        if (!strcmp(var, "$EXTMIN")) {
+        if (!strcmp(var, "EXTMIN")) {
             return true;
         }
-        if (!strcmp(var, "$FILLETRAD")) {
+        if (!strcmp(var, "FILLETRAD")) {
             return true;
         }
-        if (!strcmp(var, "$FILLMODE")) {
+        if (!strcmp(var, "FILLMODE")) {
             return true;
         }
-        if (!strcmp(var, "$HANDLING")) {
+        if (!strcmp(var, "HANDLING")) {
             return true;
         }
-        if (!strcmp(var, "$HANDSEED")) {
+        if (!strcmp(var, "HANDSEED")) {
             return true;
         }
-        if (!strcmp(var, "$INSBASE")) {
+        if (!strcmp(var, "INSBASE")) {
             return true;
         }
-        if (!strcmp(var, "$LIMCHECK")) {
+        if (!strcmp(var, "LIMCHECK")) {
             return true;
         }
-        if (!strcmp(var, "$LIMMAX")) {
+        if (!strcmp(var, "LIMMAX")) {
             return true;
         }
-        if (!strcmp(var, "$LIMMIN")) {
+        if (!strcmp(var, "LIMMIN")) {
             return true;
         }
-        if (!strcmp(var, "$LTSCALE")) {
+        if (!strcmp(var, "LTSCALE")) {
             return true;
         }
-        if (!strcmp(var, "$LUNITS")) {
+        if (!strcmp(var, "LUNITS")) {
             return true;
         }
-        if (!strcmp(var, "$LUPREC")) {
+        if (!strcmp(var, "LUPREC")) {
             return true;
         }
-        if (!strcmp(var, "$MAXACTVP")) {
+        if (!strcmp(var, "MAXACTVP")) {
             return true;
         }
-        if (!strcmp(var, "$MENU")) {
+        if (!strcmp(var, "MENU")) {
             return true;
         }
-        if (!strcmp(var, "$MIRRTEXT")) {
+        if (!strcmp(var, "MIRRTEXT")) {
             return true;
         }
-        if (!strcmp(var, "$ORTHOMODE")) {
+        if (!strcmp(var, "ORTHOMODE")) {
             return true;
         }
-        if (!strcmp(var, "$OSMODE")) {
+        if (!strcmp(var, "OSMODE")) {
             return true;
         }
-        if (!strcmp(var, "$PDMODE")) {
+        if (!strcmp(var, "PDMODE")) {
             return true;
         }
-        if (!strcmp(var, "$PDSIZE")) {
+        if (!strcmp(var, "PDSIZE")) {
             return true;
         }
-        if (!strcmp(var, "$PELEVATION")) {
+        if (!strcmp(var, "PELEVATION")) {
             return true;
         }
-        if (!strcmp(var, "$PEXTMAX")) {
+        if (!strcmp(var, "PEXTMAX")) {
             return true;
         }
-        if (!strcmp(var, "$PEXTMIN")) {
+        if (!strcmp(var, "PEXTMIN")) {
             return true;
         }
-        if (!strcmp(var, "$PLIMCHECK")) {
+        if (!strcmp(var, "PLIMCHECK")) {
             return true;
         }
-        if (!strcmp(var, "$PLIMMAX")) {
+        if (!strcmp(var, "PLIMMAX")) {
             return true;
         }
-        if (!strcmp(var, "$PLIMMIN")) {
+        if (!strcmp(var, "PLIMMIN")) {
             return true;
         }
-        if (!strcmp(var, "$PLINEGEN")) {
+        if (!strcmp(var, "PLINEGEN")) {
             return true;
         }
-        if (!strcmp(var, "$PLINEWID")) {
+        if (!strcmp(var, "PLINEWID")) {
             return true;
         }
-        if (!strcmp(var, "$PSLTSCALE")) {
+        if (!strcmp(var, "PSLTSCALE")) {
             return true;
         }
-        if (!strcmp(var, "$PUCSNAME")) {
+        if (!strcmp(var, "PUCSNAME")) {
             return true;
         }
-        if (!strcmp(var, "$PUCSORG")) {
+        if (!strcmp(var, "PUCSORG")) {
             return true;
         }
-        if (!strcmp(var, "$PUCSXDIR")) {
+        if (!strcmp(var, "PUCSXDIR")) {
             return true;
         }
-        if (!strcmp(var, "$PUCSYDIR")) {
+        if (!strcmp(var, "PUCSYDIR")) {
             return true;
         }
-        if (!strcmp(var, "$QTEXTMODE")) {
+        if (!strcmp(var, "QTEXTMODE")) {
             return true;
         }
-        if (!strcmp(var, "$REGENMODE")) {
+        if (!strcmp(var, "REGENMODE")) {
             return true;
         }
-        if (!strcmp(var, "$SHADEDGE")) {
+        if (!strcmp(var, "SHADEDGE")) {
             return true;
         }
-        if (!strcmp(var, "$SHADEDIF")) {
+        if (!strcmp(var, "SHADEDIF")) {
             return true;
         }
-        if (!strcmp(var, "$SKETCHINC")) {
+        if (!strcmp(var, "SKETCHINC")) {
             return true;
         }
-        if (!strcmp(var, "$SKPOLY")) {
+        if (!strcmp(var, "SKPOLY")) {
             return true;
         }
-        if (!strcmp(var, "$SPLFRAME")) {
+        if (!strcmp(var, "SPLFRAME")) {
             return true;
         }
-        if (!strcmp(var, "$SPLINESEGS")) {
+        if (!strcmp(var, "SPLINESEGS")) {
             return true;
         }
-        if (!strcmp(var, "$SPLINETYPE")) {
+        if (!strcmp(var, "SPLINETYPE")) {
             return true;
         }
-        if (!strcmp(var, "$SURFTAB1")) {
+        if (!strcmp(var, "SURFTAB1")) {
             return true;
         }
-        if (!strcmp(var, "$SURFTAB2")) {
+        if (!strcmp(var, "SURFTAB2")) {
             return true;
         }
-        if (!strcmp(var, "$SURFTYPE")) {
+        if (!strcmp(var, "SURFTYPE")) {
             return true;
         }
-        if (!strcmp(var, "$SURFU")) {
+        if (!strcmp(var, "SURFU")) {
             return true;
         }
-        if (!strcmp(var, "$SURFV")) {
+        if (!strcmp(var, "SURFV")) {
             return true;
         }
-        if (!strcmp(var, "$TDCREATE")) {
+        if (!strcmp(var, "TDCREATE")) {
             return true;
         }
-        if (!strcmp(var, "$TDINDWG")) {
+        if (!strcmp(var, "TDINDWG")) {
             return true;
         }
-        if (!strcmp(var, "$TDUPDATE")) {
+        if (!strcmp(var, "TDUPDATE")) {
             return true;
         }
-        if (!strcmp(var, "$TDUSRTIMER")) {
+        if (!strcmp(var, "TDUSRTIMER")) {
             return true;
         }
-        if (!strcmp(var, "$TEXTSIZE")) {
+        if (!strcmp(var, "TEXTSIZE")) {
             return true;
         }
-        if (!strcmp(var, "$TEXTSTYLE")) {
+        if (!strcmp(var, "TEXTSTYLE")) {
             return true;
         }
-        if (!strcmp(var, "$THICKNESS")) {
+        if (!strcmp(var, "THICKNESS")) {
             return true;
         }
-        if (!strcmp(var, "$TILEMODE")) {
+        if (!strcmp(var, "TILEMODE")) {
             return true;
         }
-        if (!strcmp(var, "$TRACEWID")) {
+        if (!strcmp(var, "TRACEWID")) {
             return true;
         }
-        if (!strcmp(var, "$UCSNAME")) {
+        if (!strcmp(var, "UCSNAME")) {
             return true;
         }
-        if (!strcmp(var, "$UCSORG")) {
+        if (!strcmp(var, "UCSORG")) {
             return true;
         }
-        if (!strcmp(var, "$UCSXDIR")) {
+        if (!strcmp(var, "UCSXDIR")) {
             return true;
         }
-        if (!strcmp(var, "$UCSYDIR")) {
+        if (!strcmp(var, "UCSYDIR")) {
             return true;
         }
-        if (!strcmp(var, "$UNITMODE")) {
+        if (!strcmp(var, "UNITMODE")) {
             return true;
         }
-        if (!strcmp(var, "$USERI1")) {
+        if (!strcmp(var, "USERI1")) {
             return true;
         }
-        if (!strcmp(var, "$USERR1")) {
+        if (!strcmp(var, "USERR1")) {
             return true;
         }
-        if (!strcmp(var, "$USRTIMER")) {
+        if (!strcmp(var, "USRTIMER")) {
             return true;
         }
-        if (!strcmp(var, "$VISRETAIN")) {
+        if (!strcmp(var, "VISRETAIN")) {
             return true;
         }
-        if (!strcmp(var, "$WORLDVIEW")) {
+        if (!strcmp(var, "WORLDVIEW")) {
             return true;
         }
-        if (!strcmp(var, "$FASTZOOM")) {
+        if (!strcmp(var, "FASTZOOM")) {
             return true;
         }
-        if (!strcmp(var, "$GRIDMODE")) {
+        if (!strcmp(var, "GRIDMODE")) {
             return true;
         }
-        if (!strcmp(var, "$GRIDUNIT")) {
+        if (!strcmp(var, "GRIDUNIT")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPANG")) {
+        if (!strcmp(var, "SNAPANG")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPBASE")) {
+        if (!strcmp(var, "SNAPBASE")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPISOPAIR")) {
+        if (!strcmp(var, "SNAPISOPAIR")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPMODE")) {
+        if (!strcmp(var, "SNAPMODE")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPSTYLE")) {
+        if (!strcmp(var, "SNAPSTYLE")) {
             return true;
         }
-        if (!strcmp(var, "$SNAPUNIT")) {
+        if (!strcmp(var, "SNAPUNIT")) {
             return true;
         }
-        if (!strcmp(var, "$VIEWCTR")) {
+        if (!strcmp(var, "VIEWCTR")) {
             return true;
         }
-        if (!strcmp(var, "$VIEWDIR")) {
+        if (!strcmp(var, "VIEWDIR")) {
             return true;
         }
-        if (!strcmp(var, "$VIEWSIZE")) {
+        if (!strcmp(var, "VIEWSIZE")) {
             return true;
         }
         return false;
@@ -5234,7 +5282,7 @@ int DL_Dxf::getLibVersion(const std::string& str) {
     }
 
     if (idx>=2) {
-        d[3] = static_cast<int>(str.length());
+        d[3] = str.length();
 
         v[0] = str.substr(0, d[0]);
         v[1] = str.substr(d[0]+1, d[1]-d[0]-1);

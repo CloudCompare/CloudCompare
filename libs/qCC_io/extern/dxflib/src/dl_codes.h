@@ -501,7 +501,7 @@ const double dxfColors[][3] = {
 // Flags
 #define DL_OPEN_PLINE       0x00
 #define DL_CLOSED_PLINE     0x01
-#define DL_POLYLINE3D       0x80
+#define DL_POLYLINE3D       0x08
 #define DL_PFACE_MESH       0x40
 #define DL_PGON_MESH        0x10
 // Vertices follow entity, required in POLYLINES

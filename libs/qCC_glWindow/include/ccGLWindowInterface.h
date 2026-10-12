@@ -1030,6 +1030,9 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	void processMouseReleaseEvent(QMouseEvent* event);
 	void processWheelEvent(QWheelEvent* event);
 
+	//! Converts the wheel rotation of a modifier + wheel action to a number of steps (one per wheel notch)
+	int modifierWheelSteps(const QWheelEvent* event, Qt::KeyboardModifiers modifiers);
+
 	//! Enables stereo display mode (advanced mode)
 	bool enableStereoMode(const StereoParams& params, bool needSecondFBO, bool needAutoRefresh);
 
@@ -1483,6 +1486,11 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	bool m_touchInProgress;
 	//! Touch gesture initial distance
 	qreal m_touchBaseDist;
+
+	//! Wheel rotation of the current modifier + wheel action not turned into steps yet (in degrees)
+	float m_modifierWheelRotation_deg;
+	//! Keyboard modifiers of the current modifier + wheel action
+	Qt::KeyboardModifiers m_modifierWheelModifiers;
 
 	//! Scheduler timer
 	QTimer m_scheduleTimer;

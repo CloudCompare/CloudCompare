@@ -33,3 +33,4 @@ target_compile_definitions(dxflib PRIVATE
     DXFLIB_LIBRARY
 )
 
+target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_DXF_SUPPORT )

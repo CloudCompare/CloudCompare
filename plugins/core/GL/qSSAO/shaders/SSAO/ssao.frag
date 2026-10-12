@@ -65,7 +65,7 @@ float computeSSAO()
 		SSAO += dz / (1.0 + Kz*dz*dz);
 	}
 
-	SSAO = (SSAO*F) / N;
+	SSAO = (SSAO*F) / float(N);
 	return max(1.0 - SSAO, 0.0);
 }
 //

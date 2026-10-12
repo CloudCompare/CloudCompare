@@ -121,6 +121,8 @@ class CCSignBundle:
                 self.config.signature,
                 "-f",
                 "--timestamp",
+                "--options",
+                "runtime",
                 "-i",
                 self.config.identifier,
                 "--entitlements",

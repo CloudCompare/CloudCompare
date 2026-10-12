@@ -1,3 +1,20 @@
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CNRS / OSERen / University of Rennes, France       #
+// #                                                                        #
+// ##########################################################################
+
 #include "../include/ccDisc.h"
 
 // Local
@@ -14,7 +31,7 @@ ccDisc::ccDisc(PointCoordinateType radius,
 	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls buildUp & applyTransformationToVertices
 }
 
-ccDisc::ccDisc(QString name /*="Cylinder"*/)
+ccDisc::ccDisc(QString name /*="Disc"*/)
     : ccGenericPrimitive(name)
     , m_radius(0)
 {

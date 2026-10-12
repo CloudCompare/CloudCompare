@@ -459,7 +459,6 @@ public:
     }
 
     double toReal(const std::string& str) {
-        double ret;
         // make sure the real value uses '.' not ',':
         std::string str2 = str;
         std::replace(str2.begin(), str2.end(), ',', '.');

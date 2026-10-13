@@ -11411,14 +11411,14 @@ void MainWindow::doActionSaveIndividualFiles()
 		QString relativeFolder;
 		if (folderStructure == ccSaveIndividualFilesDlg::FolderStructure::FullTree)
 		{
-			relativeFolder = ccIndividualFilesCollector::GetParentRelativeFolder(entity, rootEntity);
+			relativeFolder = collector.getParentRelativeFolder(entity, rootEntity);
 		}
 		collector.collect(entity, relativeFolder);
 	}
 
 	if (!collector.ignored().empty())
 	{
-		ccConsole::Warning(tr("[I/O] The following selected entities won't be saved:"));
+		ccConsole::Warning(tr("[I/O] The following entities can't be saved this way and will be ignored:"));
 		for (ccHObject* entity : collector.ignored())
 		{
 			ccConsole::Warning(QString("\t- %1").arg(entity->getName()));

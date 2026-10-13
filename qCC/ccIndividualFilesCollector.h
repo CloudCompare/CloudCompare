@@ -25,13 +25,15 @@
 #include <QString>
 
 // System
+#include <map>
 #include <set>
 #include <vector>
 
 //! Collects the entities to be saved as individual files (one file per entity)
 /** Groups of the DB tree become sub-folders. The children of a saved entity
-    are saved in a sub-folder named after the entity. The vertices of meshes
-    and polylines are not saved separately.
+    are saved in a sub-folder named after the entity. Sibling folders with the
+    same name get a suffix (_1, _2, etc.). The vertices of meshes and polylines,
+    and the sub-meshes of a saved mesh, are not saved separately.
 **/
 class ccIndividualFilesCollector
 {
@@ -63,6 +65,9 @@ class ccIndividualFilesCollector
 	    \param reportIfIgnored whether to add the entity to the 'ignored' list if it can't be saved this way
 	**/
 	void collect(ccHObject* entity, const QString& relativeFolder = QString(), bool reportIfIgnored = true);
+
+	//! Returns the folder of an entity, relative to the root entity (i.e. the folders of its ancestors)
+	QString getParentRelativeFolder(const ccHObject* entity, const ccHObject* root);
 
 	//! Collected entities
 	const std::vector<File>& files() const
@@ -97,9 +102,6 @@ class ccIndividualFilesCollector
 	 **/
 	static QString GetSubFolderName(const ccHObject* entity);
 
-	//! Returns the folder of an entity, relative to the root entity (i.e. the folders of its ancestors)
-	static QString GetParentRelativeFolder(const ccHObject* entity, const ccHObject* root);
-
 	//! Removes the entities that have an ancestor in the same list
 	static ccHObject::Container RemoveDescendants(const ccHObject::Container& entities);
 
@@ -109,13 +111,18 @@ class ccIndividualFilesCollector
 	static QString MakeUniqueFilename(QSet<QString>& usedFilenames, const QString& folder, const QString& baseName, const QString& extension);
 
   protected:
-	void    collectChildren(ccHObject* entity, const QString& relativeFolder);
-	QString subFolder(const QString& relativeFolder, const QString& name) const;
+	void collectChildren(ccHObject* entity, const QString& relativeFolder);
+	//! Returns the (unique) sub-folder of an entity
+	QString subFolder(const ccHObject* entity, const QString& parentFolder);
 
 	std::vector<File>       m_files;
 	std::vector<ccHObject*> m_ignored;
 	std::set<unsigned>      m_visited;
-	unsigned                m_cloudCount    = 0;
-	unsigned                m_meshCount     = 0;
-	unsigned                m_polylineCount = 0;
+	//! Folder of each entity (by unique ID)
+	std::map<unsigned, QString> m_entityFolders;
+	//! Already used folders (in lower case)
+	QSet<QString> m_usedFolders;
+	unsigned      m_cloudCount    = 0;
+	unsigned      m_meshCount     = 0;
+	unsigned      m_polylineCount = 0;
 };

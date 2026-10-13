@@ -29,14 +29,13 @@
 // Qt
 #include <QFileInfo>
 #include <QRegularExpression>
-#include <QStringList>
 
-// Helper: returns whether a child entity is the vertices of its parent (mesh or polyline)
-static bool IsVerticesOf(ccHObject* parent, const ccHObject* child)
+// Helper: returns whether a child entity is a part of its parent (vertices of a mesh or polyline, or sub-mesh)
+static bool IsPartOf(ccHObject* parent, const ccHObject* child)
 {
 	if (parent->isKindOf(CC_TYPES::MESH))
 	{
-		return (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == child);
+		return (child->isA(CC_TYPES::SUB_MESH) || ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == child);
 	}
 	if (parent->isKindOf(CC_TYPES::POLY_LINE))
 	{
@@ -61,7 +60,7 @@ void ccIndividualFilesCollector::collect(ccHObject* entity, const QString& relat
 	// groups become sub-folders
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
-		QString childFolder = subFolder(relativeFolder, GetSubFolderName(entity));
+		QString childFolder = subFolder(entity, relativeFolder);
 		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 		{
 			collect(entity->getChild(i), childFolder, true);
@@ -75,7 +74,7 @@ void ccIndividualFilesCollector::collect(ccHObject* entity, const QString& relat
 		fileFilter = cloudFilter;
 		++m_cloudCount;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH) && !entity->isA(CC_TYPES::SUB_MESH))
+	else if (entity->isKindOf(CC_TYPES::MESH)) // sub-meshes are only collected if not reached through their parent mesh
 	{
 		fileFilter = meshFilter;
 		++m_meshCount;
@@ -92,7 +91,7 @@ void ccIndividualFilesCollector::collect(ccHObject* entity, const QString& relat
 			m_ignored.push_back(entity);
 		}
 		// there may be compatible entities below it
-		collectChildren(entity, subFolder(relativeFolder, GetSubFolderName(entity)));
+		collectChildren(entity, subFolder(entity, relativeFolder));
 		return;
 	}
 
@@ -105,7 +104,7 @@ void ccIndividualFilesCollector::collect(ccHObject* entity, const QString& relat
 	}
 
 	// the children of an entity are saved in a sub-folder named after the entity
-	collectChildren(entity, subFolder(relativeFolder, GetSubFolderName(entity)));
+	collectChildren(entity, subFolder(entity, relativeFolder));
 }
 
 void ccIndividualFilesCollector::collectChildren(ccHObject* entity, const QString& relativeFolder)
@@ -113,20 +112,39 @@ void ccIndividualFilesCollector::collectChildren(ccHObject* entity, const QStrin
 	for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = entity->getChild(i);
-		if (!IsVerticesOf(entity, child))
+		if (!IsPartOf(entity, child))
 		{
 			collect(child, relativeFolder, false);
 		}
 	}
 }
 
-QString ccIndividualFilesCollector::subFolder(const QString& relativeFolder, const QString& name) const
+QString ccIndividualFilesCollector::subFolder(const ccHObject* entity, const QString& parentFolder)
 {
 	if (!createSubFolders)
 	{
-		return relativeFolder;
+		return parentFolder;
 	}
-	return relativeFolder.isEmpty() ? name : relativeFolder + '/' + name;
+
+	// an entity always gets the same folder
+	auto it = m_entityFolders.find(entity->getUniqueID());
+	if (it != m_entityFolders.end())
+	{
+		return it->second;
+	}
+
+	// make sure the folder is not already used by another entity (Windows paths are not case-sensitive)
+	const QString baseName = GetSubFolderName(entity);
+	const QString prefix   = parentFolder.isEmpty() ? QString() : parentFolder + '/';
+	QString       folder   = prefix + baseName;
+	for (unsigned index = 1; m_usedFolders.contains(folder.toLower()); ++index)
+	{
+		folder = prefix + baseName + '_' + QString::number(index);
+	}
+	m_usedFolders.insert(folder.toLower());
+	m_entityFolders[entity->getUniqueID()] = folder;
+
+	return folder;
 }
 
 QString ccIndividualFilesCollector::ToValidFileName(QString name)
@@ -176,14 +194,21 @@ QString ccIndividualFilesCollector::GetSubFolderName(const ccHObject* entity)
 	return ToValidFileName(name);
 }
 
-QString ccIndividualFilesCollector::GetParentRelativeFolder(const ccHObject* entity, const ccHObject* root)
+QString ccIndividualFilesCollector::getParentRelativeFolder(const ccHObject* entity, const ccHObject* root)
 {
-	QStringList folders;
+	std::vector<const ccHObject*> ancestors;
 	for (const ccHObject* parent = entity->getParent(); parent && parent != root; parent = parent->getParent())
 	{
-		folders.prepend(GetSubFolderName(parent));
+		ancestors.push_back(parent);
 	}
-	return folders.join('/');
+
+	// from the top-most ancestor down to the entity's parent
+	QString folder;
+	for (auto it = ancestors.rbegin(); it != ancestors.rend(); ++it)
+	{
+		folder = subFolder(*it, folder);
+	}
+	return folder;
 }
 
 ccHObject::Container ccIndividualFilesCollector::RemoveDescendants(const ccHObject::Container& entities)

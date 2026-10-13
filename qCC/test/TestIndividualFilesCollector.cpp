@@ -4,6 +4,7 @@
 #include <ccGBLSensor.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
+#include <ccSubMesh.h>
 
 // qCC_io
 #include <BinFilter.h>
@@ -176,7 +177,7 @@ class TestIndividualFilesCollector : public QObject
 		ccIndividualFilesCollector collector = createCollector(m_plyFilter);
 		for (ccHObject* entity : {m_stable, m_fileGroup})
 		{
-			collector.collect(entity, ccIndividualFilesCollector::GetParentRelativeFolder(entity, &m_root));
+			collector.collect(entity, collector.getParentRelativeFolder(entity, &m_root));
 		}
 
 		const QStringList expected{"boulder/stable/b201",
@@ -204,6 +205,75 @@ class TestIndividualFilesCollector : public QObject
 		ccIndividualFilesCollector collector = createCollector(BinFilter::GetFileFilter());
 		collector.collect(m_mesh);
 		QCOMPARE(RelativePaths(collector), QStringList{"mesh"});
+	}
+
+	void subMeshes()
+	{
+		ccHObject     root("root");
+		ccPointCloud* vertices = CreateCloud("vertices");
+		ccMesh*       mesh     = new ccMesh(vertices);
+		mesh->setName("mesh");
+		mesh->reserve(1);
+		mesh->addTriangle(0, 1, 2);
+		mesh->addChild(vertices);
+		ccSubMesh* subMesh = new ccSubMesh(mesh);
+		subMesh->setName("subMesh");
+		subMesh->addTriangleIndex(0);
+		mesh->addChild(subMesh);
+		root.addChild(mesh);
+
+		// a sub-mesh is a part of its parent mesh
+		ccIndividualFilesCollector parentCollector = createCollector(m_plyFilter);
+		parentCollector.collect(mesh);
+		QCOMPARE(RelativePaths(parentCollector), QStringList{"mesh"});
+
+		// but it is saved if explicitly selected
+		ccIndividualFilesCollector subMeshCollector = createCollector(m_plyFilter);
+		subMeshCollector.collect(subMesh);
+		QCOMPARE(RelativePaths(subMeshCollector), QStringList{"subMesh"});
+		QCOMPARE(subMeshCollector.meshCount(), 1u);
+	}
+
+	void siblingFoldersWithSameName()
+	{
+		// root
+		//  +- group (A)
+		//  |   +- cloud
+		//  +- GROUP (B)
+		//  |   +- cloud
+		//  |   +- sub
+		//  |       +- cloud
+		//  +- a:b (C)
+		//  |   +- cloud
+		//  +- a?b (D)
+		//      +- cloud
+		ccHObject  root("root");
+		ccHObject* groupA = new ccHObject("group");
+		ccHObject* groupB = new ccHObject("GROUP");
+		ccHObject* groupC = new ccHObject("a:b");
+		ccHObject* groupD = new ccHObject("a?b");
+		ccHObject* sub    = new ccHObject("sub");
+		for (ccHObject* group : {groupA, groupB, groupC, groupD})
+		{
+			root.addChild(group);
+			group->addChild(CreateCloud("cloud"));
+		}
+		groupB->addChild(sub);
+		ccPointCloud* subCloud = CreateCloud("cloud");
+		sub->addChild(subCloud);
+
+		ccIndividualFilesCollector collector = createCollector(m_plyFilter);
+		collector.collect(&root);
+		const QStringList expected{"root/group/cloud", "root/GROUP_1/cloud", "root/GROUP_1/sub/cloud", "root/a_b/cloud", "root/a_b_1/cloud"};
+		QCOMPARE(RelativePaths(collector), expected);
+
+		// full tree mode: the ancestors get the same (unique) folders
+		ccIndividualFilesCollector fullTreeCollector = createCollector(m_plyFilter);
+		for (ccHObject* entity : {groupA, static_cast<ccHObject*>(subCloud)})
+		{
+			fullTreeCollector.collect(entity, fullTreeCollector.getParentRelativeFolder(entity, &root));
+		}
+		QCOMPARE(RelativePaths(fullTreeCollector), (QStringList{"group/cloud", "GROUP_1/sub/cloud"}));
 	}
 
 	void saveAndReload()

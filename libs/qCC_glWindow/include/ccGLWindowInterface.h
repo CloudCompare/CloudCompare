@@ -1491,6 +1491,8 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	float m_modifierWheelRotation_deg;
 	//! Keyboard modifiers of the current modifier + wheel action
 	Qt::KeyboardModifiers m_modifierWheelModifiers;
+	//! Timestamp of the last event of the current modifier + wheel action (in ms)
+	quint64 m_modifierWheelTimestamp;
 
 	//! Scheduler timer
 	QTimer m_scheduleTimer;

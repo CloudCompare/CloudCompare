@@ -29,7 +29,7 @@
 	<key>CFBundleVersion</key>
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.12</string>
+	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© EDF R&amp;D / TELECOM ParisTech (ENST-TSI)</string>
 	<key>CFBundleDocumentTypes</key>

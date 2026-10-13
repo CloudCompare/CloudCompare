@@ -71,11 +71,7 @@ private:
     /**
      * DXF file to be created.
      */
-//#ifdef _WIN32
-//	mutable std::wofstream m_ofile;
-//#else
-	mutable std::ofstream m_ofile;
-//#endif
+    mutable std::ofstream m_ofile;
 
 };
 

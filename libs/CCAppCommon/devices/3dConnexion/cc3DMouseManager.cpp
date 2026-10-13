@@ -333,6 +333,10 @@ void cc3DMouseManager::on3DMouseReleased()
 		win->showPivotSymbol(false);
 		win->redraw();
 	}
+	else if (win->isLODEnabled())
+	{
+		win->redraw(); // we must redraw in case of LoD in progress to finish the LoD iterations!
+	}
 }
 
 void cc3DMouseManager::setupMenu()

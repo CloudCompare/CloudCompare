@@ -32,7 +32,11 @@
 #include <stdlib.h>
 #include <string>
 #include <sstream>
+#if __cplusplus >= 201103L
+#include <unordered_map>
+#else
 #include <map>
+#endif
 
 #include "dl_attributes.h"
 #include "dl_codes.h"
@@ -57,11 +61,11 @@ class DL_CreationInterface;
 class DL_WriterA;
 
 
-#define DL_VERSION "3.17.0.0"
+#define DL_VERSION "3.26.4.0"
 
 #define DL_VERSION_MAJOR    3
-#define DL_VERSION_MINOR    17
-#define DL_VERSION_REV      0
+#define DL_VERSION_MINOR    26
+#define DL_VERSION_REV      4
 #define DL_VERSION_BUILD    0
 
 #define DL_UNKNOWN               0
@@ -125,22 +129,22 @@ public:
     ~DL_Dxf();
 
 #ifdef _MSC_VER
-	bool in(const std::wstring& file,
+    bool in(const std::wstring& file,
 #else
-	bool in(const std::string& file,
+    bool in(const std::string& file,
 #endif
             DL_CreationInterface* creationInterface);
     bool readDxfGroups(FILE* fp,
                        DL_CreationInterface* creationInterface);
-    static bool getStrippedLine(std::string& s, unsigned int size,
-                               FILE* stream, bool stripSpace = true);
+    static bool getStrippedLine(std::string& s, FILE* stream,
+                                bool stripSpace = true);
     
-    bool readDxfGroups(std::stringstream& stream,
+    bool readDxfGroups(std::istream& stream,
                        DL_CreationInterface* creationInterface);
-    bool in(std::stringstream &stream,
+    bool in(std::istream &stream,
             DL_CreationInterface* creationInterface);
     static bool getStrippedLine(std::string& s, unsigned int size,
-                               std::stringstream& stream, bool stripSpace = true);
+                               std::istream& stream, bool stripSpace = true);
 
     static bool stripWhiteSpace(char** s, bool stripSpaces = true);
 
@@ -302,9 +306,9 @@ public:
                            const DL_DimensionData& data,
                            const DL_DimDiametricData& edata,
                            const DL_Attributes& attrib);
-    void writeDimAngular(DL_WriterA& dw,
+    void writeDimAngular2L(DL_WriterA& dw,
                          const DL_DimensionData& data,
-                         const DL_DimAngularData& edata,
+                         const DL_DimAngular2LData& edata,
                          const DL_Attributes& attrib);
     void writeDimAngular3P(DL_WriterA& dw,
                            const DL_DimensionData& data,
@@ -319,6 +323,8 @@ public:
                      const DL_Attributes& attrib);
     void writeLeaderVertex(DL_WriterA& dw,
                            const DL_LeaderVertexData& data);
+    void writeLeaderEnd(DL_WriterA& dw,
+                     const DL_LeaderData& data);
     void writeHatch1(DL_WriterA& dw,
                      const DL_HatchData& data,
                      const DL_Attributes& attrib);
@@ -332,7 +338,7 @@ public:
     void writeHatchEdge(DL_WriterA& dw,
                         const DL_HatchEdgeData& data);
 
-    int writeImage(DL_WriterA& dw,
+    unsigned long writeImage(DL_WriterA& dw,
                    const DL_ImageData& data,
                    const DL_Attributes& attrib);
 
@@ -356,14 +362,15 @@ public:
     void writeStyle(DL_WriterA& dw, const DL_StyleData& style);
     void writeView(DL_WriterA& dw);
     void writeUcs(DL_WriterA& dw);
-    void writeDimStyle(DL_WriterA& dw, 
+    void writeDimStyle(DL_WriterA& dw,
                        double dimasz, double dimexe, double dimexo,
-                       double dimgap, double dimtxt);
+                       double dimgap, double dimtxt,
+                       int dimtad = 1, bool dimtih = false);
     void writeBlockRecord(DL_WriterA& dw);
     void writeBlockRecord(DL_WriterA& dw, const std::string& name);
     void writeObjects(DL_WriterA& dw, const std::string& appDictionaryName = "");
     void writeAppDictionary(DL_WriterA& dw);
-    int writeDictionaryEntry(DL_WriterA& dw, const std::string& name);
+    unsigned long writeDictionaryEntry(DL_WriterA& dw, const std::string& name);
     void writeXRecord(DL_WriterA& dw, int handle, int value);
     void writeXRecord(DL_WriterA& dw, int handle, double value);
     void writeXRecord(DL_WriterA& dw, int handle, bool value);
@@ -460,15 +467,10 @@ public:
     }
 
     double toReal(const std::string& str) {
-        double ret;
         // make sure the real value uses '.' not ',':
         std::string str2 = str;
         std::replace(str2.begin(), str2.end(), ',', '.');
-        // make sure c++ expects '.' not ',':
-        std::istringstream istr(str2);
-        //istr.imbue(std::locale("C"));
-        istr >> ret;
-        return ret;
+        return ::atof(str2.c_str());
     }
 
 private:
@@ -518,7 +520,13 @@ private:
     // Key of the current setting (e.g. "$ACADVER")
     std::string settingKey;
     // Stores the group codes
+    // Inserting entries into an unordered_map is faster, but lookup of entries is slower.
+    // Since we are inserting entries more often than accessing them, using unordered_map increases performance.
+#if __cplusplus >= 201103L
+    std::unordered_map<int, std::string> values;
+#else
     std::map<int, std::string> values;
+#endif
     // First call of this method. We initialize all group values in
     //  the first call.
     bool firstCall;

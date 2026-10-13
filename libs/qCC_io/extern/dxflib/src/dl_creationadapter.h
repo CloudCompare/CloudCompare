@@ -82,7 +82,7 @@ public:
     virtual void addDimDiametric(const DL_DimensionData&,
                               const DL_DimDiametricData&) {}
     virtual void addDimAngular(const DL_DimensionData&,
-                              const DL_DimAngularData&) {}
+                              const DL_DimAngular2LData&) {}
     virtual void addDimAngular3P(const DL_DimensionData&,
                               const DL_DimAngular3PData&) {}
     virtual void addDimOrdinate(const DL_DimensionData&,

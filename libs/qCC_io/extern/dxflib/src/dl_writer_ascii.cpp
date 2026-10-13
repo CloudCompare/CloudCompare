@@ -64,7 +64,7 @@ void DL_WriterA::dxfReal(int gc, double value) const {
         snprintf(str, 256, "%.6lf", value);
     }
     else {
-		snprintf(str, 256, "%.16lf", value);
+        snprintf(str, 256, "%.16lf", value);
     }
     
     // fix for german locale:

@@ -273,7 +273,7 @@ void ccConsole::refresh()
 
 	for (const auto& message : previousQueue)
 	{
-		QString formatedMessage = QStringLiteral("[") + m_startTime.addMSecs(message.time_ns / 1000.0).toString() + QStringLiteral("] ") + message.text;
+		QString formatedMessage = QStringLiteral("[") + m_startTime.addMSecs(static_cast<int>(message.time_ns / 1000000)).toString() + QStringLiteral("] ") + message.text;
 
 		if (s_redirectToStdOut)
 		{

@@ -405,7 +405,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 					{
 						ccCloud.setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[DRACO] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[DRACO] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 

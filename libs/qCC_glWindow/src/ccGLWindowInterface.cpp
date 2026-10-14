@@ -78,6 +78,9 @@ static constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
  **/
 static constexpr float CC_ONE_WHEEL_NOTCH_DEG = 15.0f;
 
+//! Pause after which a modifier + wheel action starts over (in ms)
+static constexpr quint64 CC_MODIFIER_WHEEL_PAUSE_MS = 500;
+
 //! Converts the value of a native zoom gesture (a relative scale factor) to an equivalent wheel rotation (in degrees)
 static constexpr double CC_ZOOM_GESTURE_TO_DEG = 100.0;
 
@@ -315,6 +318,9 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent /*=nullptr*/, bool sile
     , m_LODPendingRefresh(false)
     , m_touchInProgress(false)
     , m_touchBaseDist(0.0)
+    , m_modifierWheelRotation_deg(0.0f)
+    , m_modifierWheelModifiers(Qt::NoModifier)
+    , m_modifierWheelTimestamp(0)
     , m_scheduledFullRedrawTime(0)
     , m_stereoModeEnabled(false)
     , m_formerParent(nullptr)
@@ -6995,6 +7001,28 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent* event)
 	refresh(false);
 }
 
+int ccGLWindowInterface::modifierWheelSteps(const QWheelEvent* event, Qt::KeyboardModifiers modifiers)
+{
+	// start over when another modifier + wheel action begins, or after a pause
+	if (modifiers != m_modifierWheelModifiers || event->timestamp() - m_modifierWheelTimestamp > CC_MODIFIER_WHEEL_PAUSE_MS)
+	{
+		m_modifierWheelModifiers    = modifiers;
+		m_modifierWheelRotation_deg = 0.0f;
+	}
+	m_modifierWheelTimestamp = event->timestamp();
+
+	// use the axis that actually moved: Qt turns Alt + wheel into horizontal scrolling on Windows and Linux,
+	// while macOS turns Shift + wheel into horizontal scrolling
+	const QPoint delta = event->angleDelta();
+	m_modifierWheelRotation_deg += (std::abs(delta.x()) > std::abs(delta.y()) ? delta.x() : delta.y()) / 8.0f;
+
+	// one step per wheel notch, so that a trackpad doesn't take a step at each of its many small events
+	int steps = static_cast<int>(m_modifierWheelRotation_deg / CC_ONE_WHEEL_NOTCH_DEG);
+	m_modifierWheelRotation_deg -= steps * CC_ONE_WHEEL_NOTCH_DEG;
+
+	return steps;
+}
+
 void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 {
 	bool doRedraw = false;
@@ -7005,17 +7033,24 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->angleDelta().x() < 0 ? -1.0f : 1.0f);
-		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
-
-		doRedraw = true;
+		int steps = modifierWheelSteps(event, keyboardModifiers);
+		if (steps != 0)
+		{
+			setPointSize(m_viewportParams.defaultPointSize + steps);
+			doRedraw = true;
+		}
 	}
 	else if (keyboardModifiers & Qt::ControlModifier)
 	{
 		event->accept();
 
 		// same shortcut as Meshlab: change the zNear or zFar clipping planes
-		double increment    = (event->angleDelta().y() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		int steps = modifierWheelSteps(event, keyboardModifiers);
+		if (steps == 0)
+		{
+			return;
+		}
+		double increment    = steps * computeDefaultIncrement();
 		bool   shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
 		if (shiftPressed)
 		{
@@ -7045,7 +7080,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the fov value
-		float newFOV = (getFov() + (event->angleDelta().y() < 0 ? -1.0f : 1.0f));
+		float newFOV = getFov() + modifierWheelSteps(event, keyboardModifiers);
 		newFOV       = std::min(std::max(1.0f, newFOV), 180.0f);
 		if (newFOV != getFov())
 		{

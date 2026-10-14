@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "SalomeHydroFilter.h"
+#include "../include/SalomeHydroFilter.h"
 
 // qCC_db
 #include <ccLog.h>

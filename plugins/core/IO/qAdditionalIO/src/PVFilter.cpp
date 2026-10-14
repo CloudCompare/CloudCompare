@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PVFilter.h"
+#include "../include/PVFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -26,6 +26,7 @@
 
 // Qt
 #include <QFile>
+#include <memory>
 
 PVFilter::PVFilter()
     : FileIOFilter({"_Point+Value Filter",
@@ -94,7 +95,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Save PV file"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
@@ -160,7 +161,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Open PV file"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SOI_FILTER_HEADER
-#define CC_SOI_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Mensi Soisic point cloud file I/O filter
 class SoiFilter : public FileIOFilter
@@ -29,5 +29,3 @@ class SoiFilter : public FileIOFilter
 	// inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 };
-
-#endif // CC_SOI_FILTER_HEADER

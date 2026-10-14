@@ -1,5 +1,4 @@
-#ifndef BUNDLERCOMMAND_H
-#define BUNDLERCOMMAND_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,17 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
 class BundlerCommand : public ccCommandLineInterface::Command
 {
   public:
 	BundlerCommand();
-	virtual ~BundlerCommand()
-	{
-	}
+	~BundlerCommand() override = default;
 
-	virtual bool process(ccCommandLineInterface& cmd) override;
+	bool process(ccCommandLineInterface& cmd) override;
 };
-
-#endif

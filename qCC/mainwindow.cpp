@@ -642,6 +642,8 @@ void MainWindow::connectActions()
 	connect(m_ui->actionEditGlobalShiftAndScale, &QAction::triggered, this, &MainWindow::doActionEditGlobalShiftAndScale);
 	connect(m_ui->actionSubsample, &QAction::triggered, this, &MainWindow::doActionSubsample);
 	connect(m_ui->actionDelete, &QAction::triggered, m_ccRoot, &ccDBRoot::deleteSelectedEntities);
+	// a dialog opening or closing changes whether the Delete action can be used (see enableUIItems)
+	connect(qApp, &QGuiApplication::focusWindowChanged, this, &MainWindow::updateUIWithSelection);
 
 	//"Tools > Clean" menu
 	connect(m_ui->actionSORFilter, &QAction::triggered, this, &MainWindow::doActionSORFilter);
@@ -11752,7 +11754,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_ui->actionSave->setEnabled(atLeastOneEntity);
 	m_ui->actionSaveProject->setEnabled(!dbIsEmpty);
 	m_ui->actionClone->setEnabled(atLeastOneEntity);
-	m_ui->actionDelete->setEnabled(atLeastOneEntity);
+	// disabled while a dialog is open: on macOS, menu shortcuts get the keys before native dialogs do,
+	// so the delete key typed in a file dialog would delete the selected entities
+	m_ui->actionDelete->setEnabled(atLeastOneEntity && QApplication::activeModalWidget() == nullptr);
 	m_ui->actionExportCoordToSF->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_ui->actionExportNormalToSF->setEnabled(atLeastOneNormal);
 	m_ui->actionSegment->setEnabled(atLeastOneEntity && activeWindow);

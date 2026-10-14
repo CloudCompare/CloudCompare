@@ -352,6 +352,7 @@ MainWindow::~MainWindow()
 	assert(m_ccRoot && m_mdiArea);
 	m_ccRoot->disconnect();
 	m_mdiArea->disconnect();
+	disconnect(qApp, &QGuiApplication::focusWindowChanged, this, nullptr);
 
 	// we don't want any other dialog/function to use the following structures
 	ccDBRoot* ccRoot = m_ccRoot;

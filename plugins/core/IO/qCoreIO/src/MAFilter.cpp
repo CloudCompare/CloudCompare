@@ -15,9 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "MAFilter.h"
-
-#include "FileIO.h"
+#include "../include/MAFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -25,6 +23,9 @@
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+
+// qCC_io
+#include <FileIO.h>
 
 // Qt
 #include <QDateTime>

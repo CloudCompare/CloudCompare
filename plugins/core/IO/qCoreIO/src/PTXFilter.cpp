@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PTXFilter.h"
+#include "../include/PTXFilter.h"
 
 // qCC_db
 #include <ccColorScalesManager.h>

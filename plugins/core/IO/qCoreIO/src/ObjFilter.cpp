@@ -15,17 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ObjFilter.h"
+#include "../include/ObjFilter.h"
 
-#include "FileIO.h"
-
-// Qt
-#include <QApplication>
-#include <QFile>
-#include <QFileInfo>
-#include <QString>
-#include <QStringList>
-#include <QTextStream>
+// CCCoreLib
+#include <Delaunay2dMesh.h>
 
 // qCC_db
 #include <ccChunk.h>
@@ -40,8 +33,16 @@
 #include <ccProgressDialog.h>
 #include <ccSubMesh.h>
 
-// CCCoreLib
-#include <Delaunay2dMesh.h>
+// qCC_io
+#include <FileIO.h>
+
+// Qt
+#include <QApplication>
+#include <QFile>
+#include <QFileInfo>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 // System
 #include <cstring>

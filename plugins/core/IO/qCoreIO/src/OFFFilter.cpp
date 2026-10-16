@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "OFFFilter.h"
+#include "../include/OFFFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>

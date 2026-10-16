@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "VTKFilter.h"
+#include "../include/VTKFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>

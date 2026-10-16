@@ -15,11 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "SimpleBinFilter.h"
-
-// Qt
-#include <QFileInfo>
-#include <QSettings>
+#include "../include/SimpleBinFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -27,7 +23,11 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// system
+// Qt
+#include <QFileInfo>
+#include <QSettings>
+
+// System
 #include <cassert>
 
 // header: 32 first bytes

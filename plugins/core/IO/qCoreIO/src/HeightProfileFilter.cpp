@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "HeightProfileFilter.h"
+#include "../include/HeightProfileFilter.h"
 
 // qCC_db
 #include <ccPolyline.h>

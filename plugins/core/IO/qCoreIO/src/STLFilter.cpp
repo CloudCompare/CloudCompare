@@ -15,7 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "STLFilter.h"
+#include "../include/STLFilter.h"
+
+// qCC_db
+#include <ccHObjectCaster.h>
+#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccNormalVectors.h>
+#include <ccOctree.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 
 // Qt
 #include <QApplication>
@@ -26,15 +35,6 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
-
-// qCC_db
-#include <ccHObjectCaster.h>
-#include <ccLog.h>
-#include <ccMesh.h>
-#include <ccNormalVectors.h>
-#include <ccOctree.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
 
 // System
 #include <cstring>

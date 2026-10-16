@@ -15,13 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PdmsTools.h"
+#include "../../include/PDMS/PdmsTools.h"
 
+// CCCoreLib
+#include <CCMath.h>
+
+// Qt
 #include <QSet>
 
 // System
-#include "CCMath.h"
-
 #include <cassert>
 #include <cstdlib>
 #include <cstring>

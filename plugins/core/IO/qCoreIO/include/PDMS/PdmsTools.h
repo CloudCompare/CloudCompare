@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef PDMS_TOOLS_HEADER
-#define PDMS_TOOLS_HEADER
 
 // CCCoreLib
 #include <CCConst.h>
@@ -863,5 +862,3 @@ namespace PdmsTools
 		};
 	}; // namespace PdmsCommands
 }; // namespace PdmsTools
-
-#endif // PDMS_TOOLS_HEADER

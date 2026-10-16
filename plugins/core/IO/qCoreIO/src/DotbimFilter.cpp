@@ -15,7 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "DotbimFilter.h"
+#include "../include/DotbimFilter.h"
+
+// qCC_db
+#include <ccGLMatrix.h>
+#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
 
 // Qt
 #include <QFile>
@@ -26,14 +32,7 @@
 #include <QJsonValue>
 #include <QMap>
 
-// qCC_db
-#include <ccGLMatrix.h>
-#include <ccLog.h>
-#include <ccMesh.h>
-#include <ccPointCloud.h>
-
 // System
-#include <memory>
 #include <new>
 
 DotbimFilter::DotbimFilter()

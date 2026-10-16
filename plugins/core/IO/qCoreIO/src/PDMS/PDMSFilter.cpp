@@ -15,12 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PDMSFilter.h"
+#include "../../include/PDMS/PDMSFilter.h"
 
-#include "PdmsParser.h"
+// Local
+#include "../../include/PDMS/PdmsParser.h"
 
 // qCC_db
-#include <cassert>
 #include <ccBox.h>
 #include <ccCone.h>
 #include <ccCylinder.h>
@@ -30,6 +30,9 @@
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccTorus.h>
+
+// System
+#include <cassert>
 
 using namespace CCCoreLib;
 

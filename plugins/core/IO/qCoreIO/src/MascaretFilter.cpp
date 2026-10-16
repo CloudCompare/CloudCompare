@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "MascaretFilter.h"
+#include "../include/MascaretFilter.h"
 
-// local
-#include "ui_saveMascaretFileDlg.h"
+// Ui
+#include <ui_saveMascaretFileDlg.h>
 
 // qCC_db
 #include <ccLog.h>

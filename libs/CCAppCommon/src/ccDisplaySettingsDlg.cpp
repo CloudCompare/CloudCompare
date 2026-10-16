@@ -33,6 +33,7 @@
 // Qt
 #include <QColorDialog>
 #include <QSettings>
+#include <QStyle>
 #include <QStyleFactory>
 
 // System
@@ -122,8 +123,14 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 		// then, the style was not changed.
 		QSettings settings;
 		settings.beginGroup(ccPS::AppStyle());
-		const QString defaultStyleName = settings.value("style").toString();
+		QString defaultStyleName = settings.value("style").toString();
 		settings.endGroup();
+
+		// no style is saved until the user picks one: use the active style then
+		if (defaultStyleName.isEmpty())
+		{
+			defaultStyleName = ccApp->style()->name();
+		}
 
 		// fill the combo-box
 		QStringList appStyles = QStyleFactory::keys();
@@ -545,7 +552,10 @@ void ccDisplaySettingsDlg::apply()
 	// application style
 	{
 		QString style = m_ui->appStyleComboBox->currentText();
-		ccApp->setAppStyle(style);
+		if (!style.isEmpty())
+		{
+			ccApp->setAppStyle(style);
+		}
 	}
 
 	// log verbosity

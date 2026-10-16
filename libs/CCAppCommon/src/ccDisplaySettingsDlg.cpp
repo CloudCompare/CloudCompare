@@ -552,7 +552,10 @@ void ccDisplaySettingsDlg::apply()
 	// application style
 	{
 		QString style = m_ui->appStyleComboBox->currentText();
-		ccApp->setAppStyle(style);
+		if (!style.isEmpty())
+		{
+			ccApp->setAppStyle(style);
+		}
 	}
 
 	// log verbosity

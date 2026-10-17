@@ -25,6 +25,8 @@
 #define POLYGONZ_FILE ":/TestFiles/Data/shp/polygon_z.shp"
 #define POINTZ_FILE ":/TestFiles/Data/shp/point_z.shp"
 
+#define COMPARE_LARGE_COORDINATE(testedValue, trueValue, Precision) QVERIFY(std::abs(testedValue - trueValue) < Precision)
+
 static void SetDefaultLoadParameters(FileIOFilter::LoadParameters& params, CCVector3d& shift, bool& shiftEnabled)
 {
 	params.alwaysDisplayLoadDialog  = false;
@@ -63,8 +65,8 @@ class TestShpFilter : public QObject
 		QVERIFY(!vertices->isScalarFieldEnabled());
 		QVERIFY(vertices->size() == 5);
 
-		ScalarType expectedXs[5] = {1.0, 5.0, 5.0, 3.0, 1.0};
-		ScalarType expectedYs[5] = {5.0, 5.0, 1.0, 3.0, 1.0};
+		PointCoordinateType expectedXs[5]{1.0, 5.0, 5.0, 3.0, 1.0};
+		PointCoordinateType expectedYs[5]{5.0, 5.0, 1.0, 3.0, 1.0};
 		for (unsigned i = 0; i < 5; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -80,8 +82,8 @@ class TestShpFilter : public QObject
 		QVERIFY(!vertices->isScalarFieldEnabled());
 		QVERIFY(vertices->size() == 2);
 
-		ScalarType expectedXs2[2] = {3.0, 2.0};
-		ScalarType expectedYs2[2] = {2.0, 6.0};
+		PointCoordinateType expectedXs2[2]{3.0, 2.0};
+		PointCoordinateType expectedYs2[2]{2.0, 6.0};
 		for (unsigned i = 0; i < 2; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -113,8 +115,8 @@ class TestShpFilter : public QObject
 		auto* vertices = firstPolyline->getAssociatedCloud();
 		QVERIFY(vertices->size() == 5);
 
-		ScalarType expectedXs[5] = {1.0, 5.0, 5.0, 3.0, 1.0};
-		ScalarType expectedYs[5] = {5.0, 5.0, 1.0, 3.0, 1.0};
+		PointCoordinateType expectedXs[5]{1.0, 5.0, 5.0, 3.0, 1.0};
+		PointCoordinateType expectedYs[5]{5.0, 5.0, 1.0, 3.0, 1.0};
 		for (unsigned i = 0; i < 5; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -139,8 +141,8 @@ class TestShpFilter : public QObject
 		QVERIFY(vertices->size() == 2);
 		QVERIFY(!vertices->isScalarFieldEnabled()); // All values are nan, so no scalarfield created
 
-		ScalarType expectedXs2[2] = {3.0, 2.0};
-		ScalarType expectedYs2[2] = {2.0, 6.0};
+		PointCoordinateType expectedXs2[2]{3.0, 2.0};
+		PointCoordinateType expectedYs2[2]{2.0, 6.0};
 		for (unsigned i = 0; i < 2; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -246,32 +248,35 @@ class TestShpFilter : public QObject
 		QVERIFY(pointCloud->size() == 4);
 		QVERIFY(!pointCloud->isScalarFieldEnabled());
 
+		static const double LargeCoorTestPrecision = 1.0e-4; // numerical accuracy can't be much better than 10^-4 due to the
+		                                                     // Global Shift mechanism. It leaves X and Y coordinates around 10^3
+
 		const CCVector3* point;
 		CCVector3d       pg;
 
 		point = pointCloud->getPoint(0);
 		pg    = pointCloud->toGlobal3d(*point);
-		QCOMPARE(pg.x, 1422671.7232666016);
-		QCOMPARE(pg.y, 4188903.4295959473);
-		QCOMPARE(pg.z, 72.00995635986328);
+		COMPARE_LARGE_COORDINATE(pg.x, 1422671.7232666016, LargeCoorTestPrecision);
+		COMPARE_LARGE_COORDINATE(pg.y, 4188903.4295959473, LargeCoorTestPrecision);
+		QVERIFY(qFuzzyCompare(pg.z, 72.00995635986328));
 
 		point = pointCloud->getPoint(1);
 		pg    = pointCloud->toGlobal3d(*point);
-		QCOMPARE(pg.x, 1422672.1022949219);
-		QCOMPARE(pg.y, 4188903.4295959473);
-		QCOMPARE(pg.z, 72.0060806274414);
+		COMPARE_LARGE_COORDINATE(pg.x, 1422672.1022949219, LargeCoorTestPrecision);
+		COMPARE_LARGE_COORDINATE(pg.y, 4188903.4295959473, LargeCoorTestPrecision);
+		QVERIFY(qFuzzyCompare(pg.z, 72.0060806274414));
 
 		point = pointCloud->getPoint(2);
 		pg    = pointCloud->toGlobal3d(*point);
-		QCOMPARE(pg.x, 1422671.9127807617);
-		QCOMPARE(pg.y, 4188903.7578430176);
-		QCOMPARE(pg.z, 72.00220489501953);
+		COMPARE_LARGE_COORDINATE(pg.x, 1422671.9127807617, LargeCoorTestPrecision);
+		COMPARE_LARGE_COORDINATE(pg.y, 4188903.7578430176, LargeCoorTestPrecision);
+		QVERIFY(qFuzzyCompare(pg.z, 72.00220489501953));
 
 		point = pointCloud->getPoint(3);
 		pg    = pointCloud->toGlobal3d(*point);
-		QCOMPARE(pg.x, 1422671.9127807617);
-		QCOMPARE(pg.y, 4188903.539001465);
-		QCOMPARE(pg.z, 71.99445343017578);
+		COMPARE_LARGE_COORDINATE(pg.x, 1422671.9127807617, LargeCoorTestPrecision);
+		COMPARE_LARGE_COORDINATE(pg.y, 4188903.539001465, LargeCoorTestPrecision);
+		QVERIFY(qFuzzyCompare(pg.z, 71.99445343017578));
 	}
 
 	void readMultipatchFile(const QString& filePath) const
@@ -295,9 +300,9 @@ class TestShpFilter : public QObject
 		auto*              firstMesh         = static_cast<ccMesh*>(container.getChild(0));
 		auto*              vertices          = firstMesh->getAssociatedCloud();
 		QVERIFY(vertices->size() == expectedNumPoints);
-		ScalarType expectedXs[expectedNumPoints] = {0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0, 0.0, 0.0};
-		ScalarType expectedYs[expectedNumPoints] = {0.0, 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0};
-		ScalarType expectedZs[expectedNumPoints] = {0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0};
+		PointCoordinateType expectedXs[expectedNumPoints]{0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0, 0.0, 0.0};
+		PointCoordinateType expectedYs[expectedNumPoints]{0.0, 0.0, 0.0, 0.0, 5.0, 5.0, 5.0, 5.0, 0.0, 0.0};
+		PointCoordinateType expectedZs[expectedNumPoints]{0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0};
 		for (unsigned i = 0; i < expectedNumPoints; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -310,9 +315,9 @@ class TestShpFilter : public QObject
 		auto*              secondMesh         = static_cast<ccMesh*>(container.getChild(1));
 		vertices                              = secondMesh->getAssociatedCloud();
 		QVERIFY(vertices->size() == 6);
-		ScalarType expectedXs2[expectedNumPoints2] = {2.5, 0.0, 5.0, 5.0, 0.0, 0.0};
-		ScalarType expectedYs2[expectedNumPoints2] = {2.5, 0.0, 0.0, 5.0, 5.0, 0.0};
-		ScalarType expectedZs2[expectedNumPoints2] = {5.0, 3.0, 3.0, 3.0, 3.0, 3.0};
+		PointCoordinateType expectedXs2[expectedNumPoints2]{2.5, 0.0, 5.0, 5.0, 0.0, 0.0};
+		PointCoordinateType expectedYs2[expectedNumPoints2]{2.5, 0.0, 0.0, 5.0, 5.0, 0.0};
+		PointCoordinateType expectedZs2[expectedNumPoints2]{5.0, 3.0, 3.0, 3.0, 3.0, 3.0};
 		for (unsigned i = 0; i < expectedNumPoints2; ++i)
 		{
 			const CCVector3* point = vertices->getPoint(i);
@@ -348,17 +353,22 @@ class TestShpFilter : public QObject
 		QVERIFY(poly->isClosed());
 
 		CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
-		QVERIFY(vertices->size() == expectedNumPoints);
+		auto                                   cloud    = dynamic_cast<ccPointCloud*>(vertices);
+		QVERIFY(nullptr != cloud);
+		QVERIFY(cloud->size() == expectedNumPoints);
 
 		std::array<double, 14> expectedXs{-626146.0444521683, -187004.53123683017, -59884.61951660062, 169316.43343351, 180872.78904444003, 300288.4636907161, 914701.3703384919, 752912.3917854726, 880032.303505702, 749060.273248496, 473633.79785466543, 375404.77516176086, -212043.3017271784, -187004.53123683017};
 		std::array<double, 14> expectedYs{6182705.280398346, 6409980.274079968, 6383015.444321131, 6488948.704087989, 6606438.319465778, 6650737.682641009, 6236634.939916019, 5878387.91597719, 5391094.921049644, 5271679.246403368, 5352573.735679878, 5219675.646154184, 5348721.617142901, 5789789.189626727};
 
+		static const double LargeCoorTestPrecision = 1.0e-1; // numerical accuracy can't be much better than 10^-1 due to the
+		                                                     // Global Shift mechanism. It leaves X and Y coordinates slightly below 10^6
+
 		for (unsigned i = 0; i < expectedNumPoints; ++i)
 		{
-			const CCVector3* p = vertices->getPoint(i);
-			QCOMPARE(p->x, static_cast<ScalarType>(expectedXs[i] + shift.x));
-			QCOMPARE(p->y, static_cast<ScalarType>(expectedYs[i] + shift.y));
-			QCOMPARE(p->z, 0.0);
+			const CCVector3d pg = cloud->toGlobal3d(*cloud->getPoint(i));
+			COMPARE_LARGE_COORDINATE(pg.x, expectedXs[i], LargeCoorTestPrecision);
+			COMPARE_LARGE_COORDINATE(pg.y, expectedYs[i], LargeCoorTestPrecision);
+			QCOMPARE(pg.z, 0.0);
 		}
 	}
 
@@ -587,9 +597,9 @@ class TestShpFilter : public QObject
 		for (unsigned i = 0; i < expectedNumPoints; ++i)
 		{
 			const CCVector3* p = cloud->getPoint(i);
-			QCOMPARE(p->x, static_cast<ScalarType>(expectedXs[i] + shift.x));
-			QCOMPARE(p->y, static_cast<ScalarType>(expectedYs[i] + shift.y));
-			QCOMPARE(p->z, static_cast<ScalarType>(expectedZs[i] + shift.z));
+			QCOMPARE(p->x, static_cast<PointCoordinateType>(expectedXs[i] + shift.x));
+			QCOMPARE(p->y, static_cast<PointCoordinateType>(expectedYs[i] + shift.y));
+			QCOMPARE(p->z, static_cast<PointCoordinateType>(expectedZs[i] + shift.z));
 		}
 	}
 };

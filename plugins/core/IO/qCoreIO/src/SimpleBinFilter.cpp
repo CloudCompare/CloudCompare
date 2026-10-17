@@ -317,17 +317,14 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				ccLog::Error("[SBF] Invalid global shift");
 				return CC_FERR_MALFORMED_FILE;
 			}
-			else
+			bool ok[3]               = {false, false, false};
+			descriptor.globalShift.x = strGlobalShift[0].toDouble(ok);
+			descriptor.globalShift.y = strGlobalShift[1].toDouble(ok + 1);
+			descriptor.globalShift.z = strGlobalShift[2].toDouble(ok + 2);
+			if (!ok[0] || !ok[1] || !ok[2])
 			{
-				bool ok[3]               = {false, false, false};
-				descriptor.globalShift.x = strGlobalShift[0].toDouble(ok);
-				descriptor.globalShift.y = strGlobalShift[1].toDouble(ok + 1);
-				descriptor.globalShift.z = strGlobalShift[2].toDouble(ok + 2);
-				if (!ok[0] || !ok[1] || !ok[2])
-				{
-					ccLog::Error("[SBF] Invalid global shift");
-					return CC_FERR_MALFORMED_FILE;
-				}
+				ccLog::Error("[SBF] Invalid global shift");
+				return CC_FERR_MALFORMED_FILE;
 			}
 		}
 
@@ -619,7 +616,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	{
 		return CC_FERR_CANCELED_BY_USER;
 	}
-	else if (cloud->size() < descriptor.pointCount)
+	if (cloud->size() < descriptor.pointCount)
 	{
 		cloud->shrinkToFit();
 	}

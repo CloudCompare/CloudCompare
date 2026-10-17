@@ -128,10 +128,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 				ccLog::Warning(QString("[Mascaret] Polyline '%1' is not a valid profile (missing meta-data)").arg(poly->getName()));
 				break;
 			}
-			else
-			{
-				profiles.push_back(poly);
-			}
+			profiles.push_back(poly);
 		}
 	}
 	catch (const std::bad_alloc&)

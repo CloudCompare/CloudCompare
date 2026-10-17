@@ -259,7 +259,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Error("VTK binary format not supported yet!");
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
-	else if (fileType.startsWith("ASCII"))
+	if (fileType.startsWith("ASCII"))
 	{
 		// allow blank lines
 		QString dataType;
@@ -435,7 +435,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					error = CC_FERR_MALFORMED_FILE;
 					break;
 				}
-				else if (vertCount < 3)
+				if (vertCount < 3)
 				{
 					ccLog::Warning(QString("[VTK] Element #%1 of %2 data is corrupted! (not enough indexes)").arg(i).arg(typeName));
 				}

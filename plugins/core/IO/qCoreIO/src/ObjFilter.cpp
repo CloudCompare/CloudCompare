@@ -833,19 +833,16 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                     = true;
 							break;
 						}
-						else
-						{
-							// new vertex
-							facetElement fe; //(0,0,0) by default
+						// new vertex
+						facetElement fe; //(0,0,0) by default
 
-							fe.vIndex = vertexTokens[0].toInt();
-							if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
-								fe.tcIndex = vertexTokens[1].toInt();
-							if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
-								fe.nIndex = vertexTokens[2].toInt();
+						fe.vIndex = vertexTokens[0].toInt();
+						if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
+							fe.tcIndex = vertexTokens[1].toInt();
+						if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
+							fe.nIndex = vertexTokens[2].toInt();
 
-							currentFace.push_back(fe);
-						}
+						currentFace.push_back(fe);
 					}
 				}
 
@@ -1132,18 +1129,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						error                     = true;
 						break;
 					}
-					else
+					int index = vertexTokens[0].toInt(); // we ignore normal index (if any!)
+					if (!UpdatePointIndex(index, pointsRead))
 					{
-						int index = vertexTokens[0].toInt(); // we ignore normal index (if any!)
-						if (!UpdatePointIndex(index, pointsRead))
-						{
-							objWarnings[INVALID_INDEX] = true;
-							error                      = true;
-							break;
-						}
-
-						polyline->addPointIndex(index);
+						objWarnings[INVALID_INDEX] = true;
+						error                      = true;
+						break;
 					}
+
+					polyline->addPointIndex(index);
 				}
 
 				if (error)
@@ -1462,13 +1456,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		if (objWarnings[NOT_ENOUGH_MEMORY])
 			return CC_FERR_NOT_ENOUGH_MEMORY;
-		else if (objWarnings[CANCELLED_BY_USER])
+		if (objWarnings[CANCELLED_BY_USER])
 			return CC_FERR_CANCELED_BY_USER;
-		else
-			return CC_FERR_MALFORMED_FILE;
+		return CC_FERR_MALFORMED_FILE;
 	}
-	else
-	{
-		return CC_FERR_NO_ERROR;
-	}
+	return CC_FERR_NO_ERROR;
 }

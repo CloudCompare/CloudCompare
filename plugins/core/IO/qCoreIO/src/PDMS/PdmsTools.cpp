@@ -1767,11 +1767,9 @@ PointCoordinateType Dish::surface() const
 			PointCoordinateType a = acos(r / height);
 			return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + (a * r * height / sin(a))));
 		}
-		else
-		{
-			PointCoordinateType a = acos(height / r);
-			return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a)) * log((1 + sin(a)) / cos(a)))));
-		}
+
+		PointCoordinateType a = acos(height / r);
+		return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a)) * log((1 + sin(a)) / cos(a)))));
 	}
 	return static_cast<PointCoordinateType>(M_PI * diameter * height);
 }

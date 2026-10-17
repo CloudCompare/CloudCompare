@@ -466,7 +466,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 			{
 				break;
 			}
-			else if (fp.error() != QFile::NoError)
+			if (fp.error() != QFile::NoError)
 			{
 				result = CC_FERR_READING;
 				break;

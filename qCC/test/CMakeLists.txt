@@ -1,5 +1,6 @@
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
+# Command-line argument parser tests
 add_executable(TestArgumentParser
     TestArgumentParser.cpp
 )

@@ -1,5 +1,3 @@
-#include "TestDepthMapFilter.h"
-
 // qCC_db
 #include <ccGBLSensor.h>
 #include <ccPointCloud.h>
@@ -11,57 +9,68 @@
 // Qt
 #include <QDir>
 #include <QFileInfo>
+#include <QObject>
 #include <QTemporaryDir>
+#include <QTest>
 
 // System
 #include <memory>
 
-void TestDepthMapFilter::initTestCase()
+// Saves the depth maps of several sensors with DepthMapFileFilter
+class TestDepthMapFilter : public QObject
 {
-	FileIO::setWriterInfo("TestDepthMapFilter", "1.0"); // done by ccApplication in the real application
-}
+	Q_OBJECT
 
-void TestDepthMapFilter::multipleSensorsAreSavedNextToTheRequestedFile()
-{
-	auto cloud = std::make_unique<ccPointCloud>("cloud");
-	cloud->reserve(4);
-	cloud->addPoint(CCVector3(10, 0, 0));
-	cloud->addPoint(CCVector3(10, 1, 0));
-	cloud->addPoint(CCVector3(10, 0, 1));
-	cloud->addPoint(CCVector3(10, 1, 1));
+  private slots:
 
-	// the sensors are children of the cloud, as in the application
-	for (int i = 0; i < 2; ++i)
+	void initTestCase()
 	{
-		auto* sensor = new ccGBLSensor;
-		sensor->setPitchRange(-0.5f, 0.5f);
-		sensor->setYawRange(-0.5f, 0.5f);
-		sensor->setPitchStep(0.1f);
-		sensor->setYawStep(0.1f);
-		cloud->addChild(sensor);
-		int errorCode = 0;
-		QVERIFY(sensor->computeDepthBuffer(cloud.get(), errorCode));
+		FileIO::setWriterInfo("TestDepthMapFilter", "1.0"); // done by ccApplication in the real application
 	}
 
-	QTemporaryDir outputDir;
-	QTemporaryDir workingDir;
-	QVERIFY(outputDir.isValid() && workingDir.isValid());
+	void multipleSensorsAreSavedNextToTheRequestedFile()
+	{
+		auto cloud = std::make_unique<ccPointCloud>("cloud");
+		cloud->reserve(4);
+		cloud->addPoint(CCVector3(10, 0, 0));
+		cloud->addPoint(CCVector3(10, 1, 0));
+		cloud->addPoint(CCVector3(10, 0, 1));
+		cloud->addPoint(CCVector3(10, 1, 1));
 
-	// a stray file is written in the current directory, so we move to an empty one
-	const QString previousDir = QDir::currentPath();
-	QVERIFY(QDir::setCurrent(workingDir.path()));
+		// the sensors are children of the cloud, as in the application
+		for (int i = 0; i < 2; ++i)
+		{
+			auto* sensor = new ccGBLSensor;
+			sensor->setPitchRange(-0.5f, 0.5f);
+			sensor->setYawRange(-0.5f, 0.5f);
+			sensor->setPitchStep(0.1f);
+			sensor->setYawStep(0.1f);
+			cloud->addChild(sensor);
+			int errorCode = 0;
+			QVERIFY(sensor->computeDepthBuffer(cloud.get(), errorCode));
+		}
 
-	DepthMapFileFilter           filter;
-	FileIOFilter::SaveParameters saveParams;
-	saveParams.alwaysDisplaySaveDialog = false;
-	const CC_FILE_ERROR result         = filter.saveToFile(cloud.get(), outputDir.filePath("depth.txt"), saveParams);
+		QTemporaryDir outputDir;
+		QTemporaryDir workingDir;
+		QVERIFY(outputDir.isValid() && workingDir.isValid());
 
-	QVERIFY(QDir::setCurrent(previousDir));
+		// a stray file is written in the current directory, so we move to an empty one
+		const QString previousDir = QDir::currentPath();
+		QVERIFY(QDir::setCurrent(workingDir.path()));
 
-	QCOMPARE(result, CC_FERR_NO_ERROR);
-	QVERIFY(QFileInfo::exists(outputDir.filePath("depth_0.txt")));
-	QVERIFY(QFileInfo::exists(outputDir.filePath("depth_1.txt")));
-	QVERIFY(QDir(workingDir.path()).isEmpty());
-}
+		DepthMapFileFilter           filter;
+		FileIOFilter::SaveParameters saveParams;
+		saveParams.alwaysDisplaySaveDialog = false;
+		const CC_FILE_ERROR result         = filter.saveToFile(cloud.get(), outputDir.filePath("depth.txt"), saveParams);
 
-QTEST_MAIN(TestDepthMapFilter)
+		QVERIFY(QDir::setCurrent(previousDir));
+
+		QCOMPARE(result, CC_FERR_NO_ERROR);
+		QVERIFY(QFileInfo::exists(outputDir.filePath("depth_0.txt")));
+		QVERIFY(QFileInfo::exists(outputDir.filePath("depth_1.txt")));
+		QVERIFY(QDir(workingDir.path()).isEmpty());
+	}
+};
+
+QTEST_GUILESS_MAIN(TestDepthMapFilter)
+#include "TestDepthMapFilter.moc"

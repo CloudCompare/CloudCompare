@@ -119,7 +119,15 @@ void ccLog::LogMessage(const QString& message, int level, qint64 time_ns /*=-1*/
 		}
 		else
 		{
-			assert(false);
+			// Auto-start the timer if it hasn't been started yet (e.g. if the user didn't call ccLog::Start() before)
+			if (Start())
+			{
+				LogMessage("Log timer was auto-started! Call ccLog::Start() to control when this should happen if required", LOG_VERBOSE);
+			}
+			else
+			{
+				assert(false);
+			}
 			time_ns = 0;
 		}
 	}

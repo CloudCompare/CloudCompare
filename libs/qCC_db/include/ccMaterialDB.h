@@ -24,7 +24,6 @@
 #include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QImage>
-#include <QOpenGLContext>
 #include <QOpenGLTexture>
 
 //! Smart texture database
@@ -145,8 +144,6 @@ class ccMaterialDB : public QObject
 	{
 		m_textures.remove(filename);
 		m_watcher.removePath(filename);
-
-		assert(QOpenGLContext::currentContext());
 		openGLTextures.remove(filename);
 	}
 

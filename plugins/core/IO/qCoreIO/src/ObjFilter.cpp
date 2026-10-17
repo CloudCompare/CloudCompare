@@ -1127,6 +1127,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						error                     = true;
 						break;
 					}
+
 					int index = vertexTokens[0].toInt(); // we ignore normal index (if any!)
 					if (!UpdatePointIndex(index, pointsRead))
 					{

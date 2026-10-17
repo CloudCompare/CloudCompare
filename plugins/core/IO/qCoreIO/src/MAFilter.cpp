@@ -46,7 +46,7 @@ namespace
 		edge*    nextEdge;
 	};
 
-	static void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCCoreLib::NormalizedProgress* nprogress = nullptr)
+	void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCCoreLib::NormalizedProgress* nprogress = nullptr)
 	{
 		for (unsigned i = 0; i < numberOfVertexes; ++i)
 		{

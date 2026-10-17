@@ -34,7 +34,7 @@
 #include <cassert>
 #include <memory>
 
-const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
+constexpr char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
 PTXFilter::PTXFilter()
     : FileIOFilter({"_PTX Filter",
@@ -248,7 +248,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 		// intensities
 		auto intensitySF = std::make_shared<ccScalarField>(CC_PTX_INTENSITY_FIELD_NAME);
-		if (!intensitySF->reserveSafe(static_cast<unsigned>(gridSize)))
+		if (!intensitySF->reserveSafe(gridSize))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
 			intensitySF.reset();
@@ -518,7 +518,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			// scan grid
 			if (hasIndexGrid)
 			{
-				grid->validCount     = static_cast<unsigned>(cloud->size());
+				grid->validCount     = cloud->size();
 				grid->minValidIndex  = 0;
 				grid->maxValidIndex  = grid->validCount - 1;
 				grid->sensorPosition = sensorTransD;

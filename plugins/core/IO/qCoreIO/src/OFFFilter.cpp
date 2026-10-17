@@ -25,9 +25,6 @@
 #include <ccOctree.h>
 #include <ccPointCloud.h>
 
-// System
-#include <string>
-
 OFFFilter::OFFFilter()
     : FileIOFilter({"_OFF Filter",
                     11.0f, // priority
@@ -124,7 +121,7 @@ static QString GetNextLine(QTextStream& stream)
 		currentLine = stream.readLine();
 		// end of file?
 		if (currentLine.isNull())
-			return QString();
+			return {};
 	} while (currentLine.startsWith("#") || currentLine.isEmpty());
 
 	return currentLine;

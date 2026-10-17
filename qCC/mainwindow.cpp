@@ -32,6 +32,7 @@
 #include "ccComparisonDlg.h"
 #include "ccConsole.h"
 #include "ccCropTool.h"
+#include "ccCutPursuitDlg.h"
 #include "ccEntityAction.h"
 #include "ccEntitySelectionDlg.h"
 #include "ccExtrudePolylineDlg.h"
@@ -112,6 +113,9 @@
 #include <ccPickingHub.h>
 #include <ccQtHelpers.h>
 #include <ccRenderToFileDlg.h>
+
+// PCP
+#include <Partition.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -673,6 +677,7 @@ void MainWindow::connectActions()
 	connect(m_ui->actionComputeStatParams2, &QAction::triggered, this, &MainWindow::doActionComputeStatParams); // duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
 	connect(m_ui->actionStatisticalTest, &QAction::triggered, this, &MainWindow::doActionStatisticalTest);
 	//"Tools > Segmentation" menu
+	connect(m_ui->actionCutPursuit, &QAction::triggered, this, &MainWindow::doActionCutPursuit);
 	connect(m_ui->actionLabelConnectedComponents, &QAction::triggered, this, &MainWindow::doActionLabelConnectedComponents);
 	connect(m_ui->actionKMeans, &QAction::triggered, this, &MainWindow::doActionKMeans);
 	connect(m_ui->actionFrontPropagation, &QAction::triggered, this, &MainWindow::doActionFrontPropagation);
@@ -4598,6 +4603,251 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud*                clou
 			ccConsole::Warning(tr("[CreateComponentsClouds] Original cloud has been automatically hidden"));
 		}
 	}
+}
+
+void MainWindow::doActionCutPursuit()
+{
+	// keep only the point clouds!
+	std::vector<ccPointCloud*> clouds;
+	{
+		for (ccHObject* entity : getSelectedEntities())
+		{
+			if (entity->isA(CC_TYPES::POINT_CLOUD))
+				clouds.push_back(ccHObjectCaster::ToPointCloud(entity));
+		}
+	}
+
+	size_t count = clouds.size();
+	if (count == 0)
+		return;
+
+	// gather the available scalar field names that are shared by all selected clouds,
+	// excluding the Cut Pursuit label field if it already exists
+	QStringList availableSFNames;
+	bool        allCloudsHaveColors = true;
+	{
+		for (ccPointCloud* pc : clouds)
+		{
+			if (!pc->hasColors())
+				allCloudsHaveColors = false;
+
+			for (unsigned j = 0; j < pc->getNumberOfScalarFields(); ++j)
+			{
+				QString sfName = QString::fromStdString(pc->getScalarFieldName(j));
+				if (sfName == CC_CUT_PURSUIT_LABEL_NAME)
+					continue;
+				if (!availableSFNames.contains(sfName))
+					availableSFNames.push_back(sfName);
+			}
+		}
+	}
+
+	ccCutPursuitDlg dlg(this);
+	dlg.setScalarFields(availableSFNames, allCloudsHaveColors);
+	if (!dlg.exec())
+		return;
+
+	// some parallel cut pursuit params
+	PCP::Parameters params;
+	params.knn            = dlg.getKNN();
+	params.knnRadius      = dlg.getKNNRadius();
+	params.regularization = dlg.getRegularization();
+	params.spatialWeight  = dlg.getSpatialWeight();
+	params.cutoff         = dlg.getCutoff();
+
+	const bool        averageColors   = dlg.averageColors();
+	const bool        useRGB          = dlg.useRGB();
+	const QStringList selectedSFNames = dlg.getSelectedScalarFields();
+
+	ccProgressDialog pDlg(false, this);
+	pDlg.setAutoClose(false);
+
+	ccBackgroundTask::Run([&]()
+	                      {
+		for (ccPointCloud* pc : clouds)
+		{
+			// Remove the existing Cut Pursuit scalar field before processing,
+			// so it is not counted in D and does not contaminate Y data
+			{
+				int prevSfIdx = pc->getScalarFieldIndexByName(CC_CUT_PURSUIT_LABEL_NAME);
+				if (prevSfIdx >= 0)
+				{
+					pc->deleteScalarField(prevSfIdx);
+				}
+			}
+
+			ccOctree::Shared theOctree = pc->getOctree();
+			if (!theOctree)
+			{
+				theOctree = pc->computeOctree(&pDlg);
+				if (!theOctree)
+				{
+					ccConsole::Error(tr("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+					return;
+				}
+			}
+
+			// we create/activate Cut Pursuit's label scalar field
+			int sfIdx = pc->getScalarFieldIndexByName(CC_CUT_PURSUIT_LABEL_NAME);
+			if (sfIdx < 0)
+			{
+				sfIdx = pc->addScalarField(CC_CUT_PURSUIT_LABEL_NAME);
+			}
+			if (sfIdx < 0)
+			{
+				ccConsole::Error(tr("Couldn't allocate a new scalar field for computing Cut Pursuit labels! Try to free some memory ..."));
+				return;
+			}
+			pc->setCurrentScalarField(sfIdx);
+
+			std::vector<int32_t> componentLabels;
+			int componentCount = 0;
+
+			try
+			{
+				// determine which scalar fields to include in Y, based on the user's selection
+				// (always excluding the Cut Pursuit label field itself)
+				std::vector<int> sfIndices;
+				for (int j = 0; j < static_cast<int>(pc->getNumberOfScalarFields()); ++j)
+				{
+					if (j == sfIdx)
+					{
+						continue;
+					}
+
+					QString sfName = QString::fromStdString(pc->getScalarFieldName(j));
+					if (sfName == CC_CUT_PURSUIT_LABEL_NAME)
+					{
+						continue;
+					}
+
+					if (selectedSFNames.contains(sfName))
+					{
+						sfIndices.push_back(j);
+					}
+				}
+
+				// more parallel cut pursuit params
+				size_t rgbDim = (useRGB && pc->hasColors()) ? 3 : 0;
+				size_t D      = 3 + sfIndices.size() + rgbDim;
+
+				params.D = static_cast<uint32_t>(D);
+				params.Y.assign(pc->size() * D, 0.0f);
+
+				CCVector3d posOffset(0, 0, 0);
+				for (unsigned i = 0; i < pc->size(); ++i)
+				{
+					posOffset += pc->getPoint(i)->toDouble();
+				}
+				posOffset /= static_cast<double>(pc->size());
+
+				for (unsigned i = 0; i < pc->size(); ++i)
+				{
+					const CCVector3d P = pc->getPoint(i)->toDouble();
+
+					auto Yi = params.Y.data() + i * D;
+					Yi[0]   = static_cast<float>(P.x - posOffset.x);
+					Yi[1]   = static_cast<float>(P.y - posOffset.y);
+					Yi[2]   = static_cast<float>(P.z - posOffset.z);
+
+					if (useRGB && pc->hasColors())
+					{
+						const ccColor::Rgba& C = pc->getPointColor(i);
+						Yi[3]                  = C.r / 255.0f;
+						Yi[4]                  = C.g / 255.0f;
+						Yi[5]                  = C.b / 255.0f;
+					}
+
+					for (size_t k = 0; k < sfIndices.size(); ++k)
+					{
+						ccScalarField::Shared sf    = pc->getCCScalarField(sfIndices[k]);
+						float                 value = static_cast<float>(sf->getValue(i));
+
+						// Sanitize NaN/Inf, force it to 0.0
+						if (!std::isfinite(value))
+						{
+							value = 0.0f;
+						}
+						// Scalar fields start at feature index 3, if RGB is used, they start at feature index 6
+						Yi[3 + rgbDim + k] = value;
+					}
+				}
+
+				// we try to label all CCs
+				componentCount = PCP::Partition::LabelCutPursuitComponents(pc,
+				                                                           params,
+				                                                           componentLabels,
+				                                                           &pDlg,
+				                                                           theOctree.data());
+
+				// error handling
+				if (componentCount < 0 || componentLabels.size() != static_cast<size_t>(pc->size()))
+				{
+					ccConsole::Error(tr("[Cut Pursuit] Failed to compute component labels!"));
+					pc->deleteScalarField(sfIdx);
+					return;
+				}
+
+				// Assign component index to each point
+				ccScalarField::Shared sf = pc->getCCScalarField(sfIdx);
+				for (unsigned i = 0; i < pc->size(); ++i)
+				{
+					sf->setValue(i, static_cast<ScalarType>(componentLabels[i]));
+				}
+				sf->computeMinAndMax();
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				pc->showSF(true);
+
+				ccLog::Print(tr("[Cut Pursuit] Partitioned cloud '%1' into %2 components").arg(pc->getName()).arg(componentCount));
+			}
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Error(tr("[Cut Pursuit] Not enough memory to compute compontents on cloud '%1'").arg(pc->getName()));
+				pc->deleteScalarField(sfIdx);
+				return;
+			}
+
+			if (averageColors && pc->hasColors())
+			{
+				try
+				{
+					// Average colors for each component
+					std::vector<CCVector3d> compColorSum(componentCount, CCVector3d(0, 0, 0));
+					std::vector<unsigned>   compCount(componentCount, 0);
+
+					for (unsigned i = 0; i < pc->size(); ++i)
+					{
+						int32_t              compIdx = componentLabels[i];
+						const ccColor::Rgba& C       = pc->getPointColor(i);
+						compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
+						compCount[compIdx]++;
+					}
+
+					for (unsigned i = 0; i < pc->size(); ++i)
+					{
+						int32_t compIdx = componentLabels[i];
+						if (compCount[compIdx] > 0)
+						{
+							CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);
+							pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x), static_cast<ColorCompType>(avgColor.y), static_cast<ColorCompType>(avgColor.z)));
+						}
+					}
+					// Update display to show the computed colors
+					pc->showSF(false);
+					pc->showColors(true);
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning(tr("[Cut Pursuit] Not enough memory to average colors of cloud '%1'").arg(pc->getName()));
+				}
+			}
+
+			pc->prepareDisplayForRefresh();
+
+		} });
+
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionLabelConnectedComponents()
@@ -11879,6 +12129,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_ui->actionSetSFsAsNormal->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_ui->actionShowWaveDialog->setEnabled(exactlyOneCloud);
 	m_ui->actionCompressFWFData->setEnabled(atLeastOneCloud);
+	m_ui->actionCutPursuit->setEnabled(atLeastOneCloud);
 
 	m_ui->actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/ false);
 	m_ui->actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/ false);
@@ -12453,6 +12704,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_ui->actionStatisticalTest);
 	m_actions.push_back(m_ui->actionSamplePointsOnMesh);
 	m_actions.push_back(m_ui->actionLabelConnectedComponents);
+	m_actions.push_back(m_ui->actionCutPursuit);
 	m_actions.push_back(m_ui->actionSegment);
 	m_actions.push_back(m_ui->actionTranslateRotate);
 	m_actions.push_back(m_ui->actionOpenSFManager);

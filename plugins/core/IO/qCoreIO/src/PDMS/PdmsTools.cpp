@@ -35,7 +35,7 @@ using namespace PdmsObjects;
 
 /////////// MACROS ////////////
 
-#define memalert(e, s) std::cerr << "Memory alert [" << __FILE__ << ", line " << __LINE__ << "] with size " << s << " : " << e.what() << std::endl;
+#define memalert(e, s) std::cerr << "Memory alert [" << __FILE__ << ", line " << __LINE__ << "] with size " << (s) << " : " << (e).what() << "\n";
 #define memfail(e, s) \
 	memalert(e, s); \
 	abort();
@@ -1476,13 +1476,13 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 		output << "SUBSTRUCTURE";
 		break;
 	default:
-		std::cout << "Error : cannot write group " << level << std::endl;
-		return std::pair<int, int>(0, 0);
+		std::cerr << "Error : cannot write group " << level << "\n";
+		return {0, 0};
 	}
 
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	std::pair<int, int> nb(1, 0);
 
@@ -1504,7 +1504,7 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 		for (int i = 0; i < nbtabs; i++)
 			output << "\t";
 	}
-	output << "END" << std::endl;
+	output << "END\n";
 	return nb;
 }
 
@@ -1557,41 +1557,41 @@ std::pair<int, int> SCylinder::write(std::ostream& output, int nbtabs) const
 	output << "NEW SLCYLINDER";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DIAMETER " << diameter << std::endl;
+	output << "DIAMETER " << diameter << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees(xtshear) << std::endl;
+	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees(xtshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees(xbshear) << std::endl;
+	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees(xbshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees(ytshear) << std::endl;
+	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees(ytshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees(ybshear) << std::endl;
+	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees(ybshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool CTorus::setValue(Token t, PointCoordinateType value)
@@ -1631,31 +1631,31 @@ std::pair<int, int> CTorus::write(std::ostream& output, int nbtabs) const
 	output << "NEW CTORUS";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RINSIDE " << inside_radius << std::endl;
+	output << "RINSIDE " << inside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ROUTSIDE " << outside_radius << std::endl;
+	output << "ROUTSIDE " << outside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool RTorus::setValue(Token t, PointCoordinateType value)
@@ -1699,34 +1699,34 @@ std::pair<int, int> RTorus::write(std::ostream& output, int nbtabs) const
 	output << "NEW RTORUS";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RINSIDE " << inside_radius << std::endl;
+	output << "RINSIDE " << inside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ROUTSIDE " << outside_radius << std::endl;
+	output << "ROUTSIDE " << outside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 Dish::Dish()
@@ -1783,31 +1783,31 @@ std::pair<int, int> Dish::write(std::ostream& output, int nbtabs) const
 	output << "NEW DISH";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RADIUS " << radius << std::endl;
+	output << "RADIUS " << radius << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DIAMETER " << diameter << std::endl;
+	output << "DIAMETER " << diameter << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool Cone::setValue(Token t, PointCoordinateType value)
@@ -1858,31 +1858,31 @@ std::pair<int, int> Cone::write(std::ostream& output, int nbtabs) const
 	output << "NEW CONE";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DBOTTOM " << dbottom << std::endl;
+	output << "DBOTTOM " << dbottom << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DTOP " << dtop << std::endl;
+	output << "DTOP " << dtop << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 Box::Box()
@@ -1924,36 +1924,36 @@ std::pair<int, int> Box::write(std::ostream& output, int nbtabs) const
 		output << "NEW BOX";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XLENGTH " << lengths[0] << std::endl;
+	output << "XLENGTH " << lengths[0] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YLENGTH " << lengths[1] << std::endl;
+	output << "YLENGTH " << lengths[1] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ZLENGTH " << lengths[2] << std::endl;
+	output << "ZLENGTH " << lengths[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 std::pair<int, int> Vertex::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Loop::push(GenericItem* i)
@@ -1982,7 +1982,7 @@ void Loop::remove(GenericItem* i)
 
 std::pair<int, int> Loop::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Extrusion::push(GenericItem* l)
@@ -2025,7 +2025,7 @@ PointCoordinateType Extrusion::surface() const
 
 std::pair<int, int> Extrusion::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Pyramid::setValue(Token t, PointCoordinateType value)
@@ -2067,7 +2067,7 @@ PointCoordinateType Pyramid::surface() const
 
 std::pair<int, int> Pyramid::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Snout::setValue(Token t, PointCoordinateType value)
@@ -2103,5 +2103,5 @@ PointCoordinateType Snout::surface() const
 
 std::pair<int, int> Snout::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }

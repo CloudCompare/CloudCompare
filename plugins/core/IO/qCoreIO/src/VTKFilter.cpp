@@ -632,8 +632,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			bool expected = (lastDataSize != 0);
 			assert(!acceptLookupTables || expected); // i.e. lastDataSize shouldn't be 0 for 'accepted' lookup tables
 
-			QStringList parts    = nextline.split(" ", Qt::SkipEmptyParts);
-			QString     itemName = parts[0];
+			QStringList    parts    = nextline.split(" ", Qt::SkipEmptyParts);
+			const QString& itemName = parts[0];
 			if (parts.size() > 2)
 			{
 				bool ok       = false;

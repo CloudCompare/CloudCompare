@@ -68,8 +68,8 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
-	QString headerFilename = filename;
-	QString dataFilename   = filename + ".data";
+	const QString& headerFilename = filename;
+	QString        dataFilename   = filename + ".data";
 
 	ccLog::Print(QString("[SBF] Saving file '%1'...").arg(headerFilename));
 

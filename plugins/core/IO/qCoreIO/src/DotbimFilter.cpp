@@ -110,7 +110,7 @@ try
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
 			continue;
 		}
-		QJsonObject meshObj     = *meshIt;
+		const QJsonObject& meshObj     = *meshIt;
 		QJsonArray  coordinates = meshObj.value("coordinates").toArray();
 		QJsonArray  indices     = meshObj.value("indices").toArray();
 		if (coordinates.size() < 3 || indices.size() < 3)

@@ -265,4 +265,3 @@ class TestFileRoundTrip : public QObject
 
 QTEST_GUILESS_MAIN(TestFileRoundTrip)
 #include "TestFileRoundTrip.moc"
-

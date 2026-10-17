@@ -48,6 +48,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSaveIndividualFiles"/>
     <addaction name="actionSaveProject"/>
     <addaction name="actionGlobalShiftSettings"/>
     <addaction name="actionShortcutSettings"/>
@@ -3280,6 +3281,21 @@ The active scalar field should have integer values.</string>
   <action name="actionOpen_project">
    <property name="text">
     <string>Open project</string>
+   </property>
+  </action>
+  <action name="actionSaveIndividualFiles">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save as individual files</string>
+   </property>
+   <property name="toolTip">
+    <string>Save each selected entity in its own file (groups become sub-folders)</string>
+   </property>
+   <property name="statusTip">
+    <string>Save each selected entity in its own file (groups become sub-folders)</string>
    </property>
   </action>
   <action name="actionSaveProject">

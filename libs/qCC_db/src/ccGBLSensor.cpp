@@ -691,7 +691,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 	return true;
 }
 
-bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud /*=nullptr*/)
+bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud /*=nullptr*/, ccProgressDialog* progressDlg /*=nullptr*/)
 {
 	assert(theCloud);
 	if (!theCloud)
@@ -769,12 +769,14 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 		theCloud->placeIteratorAtBeginning();
 		{
 			// progress bar
-			ccProgressDialog              pdlg(true);
-			CCCoreLib::NormalizedProgress nprogress(&pdlg, pointCount);
-			pdlg.setMethodTitle(QObject::tr("Depth buffer"));
-			pdlg.setInfo(QObject::tr("Points: %L1").arg(pointCount));
-			pdlg.start();
-			QCoreApplication::processEvents();
+			CCCoreLib::NormalizedProgress nprogress(progressDlg, pointCount);
+			if (progressDlg)
+			{
+				progressDlg->setMethodTitle(QObject::tr("Depth buffer"));
+				progressDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+				progressDlg->start();
+				QCoreApplication::processEvents();
+			}
 
 			for (unsigned i = 0; i < pointCount; ++i)
 			{
@@ -798,7 +800,7 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 					projectedCloud->setPointScalarValue(i, depth);
 				}
 
-				if (!nprogress.oneStep())
+				if (progressDlg && !nprogress.oneStep())
 				{
 					// cancelled by user
 					errorCode = ERROR_PROC_CANCELLED;

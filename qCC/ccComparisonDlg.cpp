@@ -735,6 +735,7 @@ bool ccComparisonDlg::computeDistances()
 	if (parentWidget())
 	{
 		progressDlg = std::make_unique<ccProgressDialog>(true, this);
+		progressDlg->setAutoClose(false);
 	}
 
 	std::array<ccScalarField::Shared, 3> splitDistances;
@@ -792,7 +793,7 @@ bool ccComparisonDlg::computeDistances()
 						if (sensor->getDepthBuffer().zBuff.empty())
 						{
 							int errorCode;
-							if (!sensor->computeDepthBuffer(pc, errorCode))
+							if (!sensor->computeDepthBuffer(pc, errorCode, nullptr, progressDlg.get()))
 							{
 								ccLog::Warning(QString("[ComputeDistances] ") + ccGBLSensor::GetErrorString(errorCode));
 							}

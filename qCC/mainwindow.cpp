@@ -2097,8 +2097,13 @@ void MainWindow::doActionCreateGBLSensor()
 	ccGBLSensorProjectionDlg spDlg(this);
 	spDlg.initWithPrevious();
 	if (!spDlg.exec())
+	{
 		return;
+	}
 	spDlg.saveForNextTime();
+
+	ccProgressDialog progressDlg(true, this);
+	progressDlg.setAutoClose(false);
 
 	// We create the corresponding sensor for each input cloud (in a perfect world, there should be only one ;)
 	for (ccHObject* entity : getSelectedEntities())
@@ -2126,9 +2131,9 @@ void MainWindow::doActionCreateGBLSensor()
 				else if (diag > 10000.0)
 					sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
 
-				// we display depth buffer
+				// we display the depth buffer
 				int errorCode;
-				if (sensor->computeDepthBuffer(cloud, errorCode))
+				if (sensor->computeDepthBuffer(cloud, errorCode, nullptr, &progressDlg))
 				{
 					ccRenderingTools::ShowDepthBuffer(sensor, this);
 				}
@@ -2282,7 +2287,8 @@ void MainWindow::doActionModifySensor()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
 
 			int errorCode;
-			if (gbl->computeDepthBuffer(cloud, errorCode))
+			ccProgressDialog progressDlg;
+			if (gbl->computeDepthBuffer(cloud, errorCode, nullptr, &progressDlg))
 			{
 				// we display depth buffer
 				ccRenderingTools::ShowDepthBuffer(gbl, this);
@@ -2531,6 +2537,9 @@ void MainWindow::doActionShowDepthBuffer()
 	if (!haveSelection())
 		return;
 
+	ccProgressDialog progressDlg(true, this);
+	progressDlg.setAutoClose(false);
+
 	for (ccHObject* entity : getSelectedEntities())
 	{
 		if (entity->isKindOf(CC_TYPES::GBL_SENSOR))
@@ -2548,7 +2557,7 @@ void MainWindow::doActionShowDepthBuffer()
 
 				// force depth buffer computation
 				int errorCode;
-				if (!sensor->computeDepthBuffer(cloud, errorCode))
+				if (!sensor->computeDepthBuffer(cloud, errorCode, nullptr, &progressDlg))
 				{
 					ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 				}
@@ -2662,7 +2671,8 @@ void MainWindow::doActionComputePointsVisibility()
 			}
 
 			int errorCode;
-			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud), errorCode))
+			ccProgressDialog progressDlg(true, this);
+			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud), errorCode, nullptr, &progressDlg))
 			{
 				ccRenderingTools::ShowDepthBuffer(sensor, this);
 			}

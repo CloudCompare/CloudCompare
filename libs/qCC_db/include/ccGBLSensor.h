@@ -25,6 +25,7 @@
 #include <GenericCloud.h>
 
 class ccPointCloud;
+class ccProgressDialog;
 
 //! Ground-based Laser sensor
 /** An implementation of the ccSensor interface that can be used to represent a depth sensor
@@ -263,9 +264,10 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	    \param cloud a point cloud
 	    \param errorCode error code in case the returned cloud is 0
 	    \param projectedCloud optional (empty) cloud to store the projected points
+		\param progressDlg progress dialog (optional)
 	    \return whether the depth buffer was successfully created or not
 	**/
-	bool computeDepthBuffer(CCCoreLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = nullptr);
+	bool computeDepthBuffer(CCCoreLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = nullptr, ccProgressDialog* progressDlg = nullptr);
 
 	//! Returns the associated depth buffer
 	/** Call ccGBLSensor::computeDepthBuffer first otherwise the returned buffer will be 0.

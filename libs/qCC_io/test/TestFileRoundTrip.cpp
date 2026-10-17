@@ -154,35 +154,35 @@ class TestFileRoundTrip : public QObject
 		ccHObject::Container clouds;
 		container.filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
 		QCOMPARE(clouds.size(), static_cast<size_t>(1));
-		ccPointCloud* loaded = static_cast<ccPointCloud*>(clouds.front());
+		ccPointCloud* loadedCloud = static_cast<ccPointCloud*>(clouds.front());
 
-		QCOMPARE(loaded->size(), PointCount);
-		QVERIFY(loaded->hasColors());
-		QVERIFY(loaded->hasNormals());
-		QCOMPARE(loaded->getNumberOfScalarFields(), 1u);
-		auto loadedSF = loaded->getScalarField(0);
+		QCOMPARE(loadedCloud->size(), PointCount);
+		QVERIFY(loadedCloud->hasColors());
+		QVERIFY(loadedCloud->hasNormals());
+		QCOMPARE(loadedCloud->getNumberOfScalarFields(), 1u);
+		auto loadedSF = loadedCloud->getScalarField(0);
 		QCOMPARE(QString::fromStdString(loadedSF->getName()), QString("Scalar field"));
 		auto originalSF = original->getScalarField(0);
 
 		for (unsigned i = 0; i < PointCount; ++i)
 		{
 			const CCVector3* P  = original->getPoint(i);
-			const CCVector3* Q  = loaded->getPoint(i);
+			const CCVector3* Q  = loadedCloud->getPoint(i);
 			CCVector3d       Pg = original->toGlobal3d<PointCoordinateType>(*P);
-			CCVector3d       Qg = loaded->toGlobal3d<PointCoordinateType>(*Q);
+			CCVector3d       Qg = loadedCloud->toGlobal3d<PointCoordinateType>(*Q);
 			for (unsigned d = 0; d < 3; ++d)
 			{
 				QVERIFY(std::abs(Qg.u[d] - Pg.u[d]) <= Tolerance(coordDecimals, Pg.u[d]));
 			}
 
 			const ccColor::Rgba& c  = original->getPointColor(i);
-			const ccColor::Rgba& lc = loaded->getPointColor(i);
+			const ccColor::Rgba& lc = loadedCloud->getPointColor(i);
 			QCOMPARE(lc.r, c.r);
 			QCOMPARE(lc.g, c.g);
 			QCOMPARE(lc.b, c.b);
 
 			const CCVector3& N  = original->getPointNormal(i);
-			const CCVector3& LN = loaded->getPointNormal(i);
+			const CCVector3& LN = loadedCloud->getPointNormal(i);
 			for (unsigned d = 0; d < 3; ++d)
 			{
 				QVERIFY(std::abs(LN.u[d] - N.u[d]) <= Tolerance(normalDecimals, N.u[d]));
@@ -196,26 +196,50 @@ class TestFileRoundTrip : public QObject
 	void meshRoundTrip_data()
 	{
 		QTest::addColumn<QString>("extension");
+		QTest::addColumn<QString>("normalType");
 
-		QTest::newRow("BIN") << "bin";
-		QTest::newRow("PLY") << "ply";
+		QTest::newRow("BIN with per-vertex normals") << "bin" << "vertex_norm";
+		QTest::newRow("BIN with per-triangle normals") << "bin" << "tri_norm";
+		QTest::newRow("PLY with per-vertex normals") << "ply" << "vertex_norm";
+		QTest::newRow("PLY with per-triangle normals") << "ply" << "tri_norm";
 	}
 
 	void meshRoundTrip()
 	{
 		QFETCH(QString, extension);
+		QFETCH(QString, normalType);
 
 		std::unique_ptr<FileIOFilter> filter;
 		if (extension == "bin")
+		{
 			filter.reset(new BinFilter);
-		else
+		}
+		else if (extension == "ply")
+		{
 			filter.reset(new PlyFilter);
+		}
+		else
+		{
+			QFAIL("Unknown extension");
+		}
 
 		QTemporaryDir dir;
 		QVERIFY(dir.isValid());
 		const QString filename = dir.filePath("mesh." + extension);
 
 		std::unique_ptr<ccMesh> original(CreateMesh());
+		if (normalType == "tri_norm")
+		{
+			original->computePerTriangleNormals();
+		}
+		else if (normalType == "vertex_norm")
+		{
+			original->computePerVertexNormals();
+		}
+		else
+		{
+			QFAIL("Unknown normal computation type");
+		}
 
 		FileIOFilter::SaveParameters saveParams;
 		saveParams.alwaysDisplaySaveDialog = false;
@@ -234,13 +258,25 @@ class TestFileRoundTrip : public QObject
 		ccHObject::Container meshes;
 		container.filterChildren(meshes, true, CC_TYPES::MESH, true);
 		QCOMPARE(meshes.size(), static_cast<size_t>(1));
-		ccMesh* loaded = static_cast<ccMesh*>(meshes.front());
+		ccMesh* loadedMesh = static_cast<ccMesh*>(meshes.front());
 
 		ccGenericPointCloud* vertices       = original->getAssociatedCloud();
-		ccGenericPointCloud* loadedVertices = loaded->getAssociatedCloud();
+		ccGenericPointCloud* loadedVertices = loadedMesh->getAssociatedCloud();
 		QVERIFY(loadedVertices != nullptr);
 		QCOMPARE(loadedVertices->size(), vertices->size());
-		QCOMPARE(loaded->size(), original->size());
+		QCOMPARE(loadedMesh->size(), original->size());
+
+		QVERIFY(loadedMesh->hasNormals());
+		if (normalType == "tri_norm")
+		{
+			QVERIFY(loadedMesh->hasTriNormals());
+			QVERIFY(!loadedVertices->hasNormals());
+		}
+		else if (normalType == "vertex_norm")
+		{
+			QVERIFY(!loadedMesh->hasTriNormals());
+			QVERIFY(loadedVertices->hasNormals());
+		}
 
 		for (unsigned i = 0; i < vertices->size(); ++i)
 		{
@@ -255,7 +291,7 @@ class TestFileRoundTrip : public QObject
 		for (unsigned t = 0; t < original->size(); ++t)
 		{
 			const CCCoreLib::VerticesIndexes* tri       = original->getTriangleVertIndexes(t);
-			const CCCoreLib::VerticesIndexes* loadedTri = loaded->getTriangleVertIndexes(t);
+			const CCCoreLib::VerticesIndexes* loadedTri = loadedMesh->getTriangleVertIndexes(t);
 			QCOMPARE(loadedTri->i1, tri->i1);
 			QCOMPARE(loadedTri->i2, tri->i2);
 			QCOMPARE(loadedTri->i3, tri->i3);
@@ -265,4 +301,3 @@ class TestFileRoundTrip : public QObject
 
 QTEST_GUILESS_MAIN(TestFileRoundTrip)
 #include "TestFileRoundTrip.moc"
-

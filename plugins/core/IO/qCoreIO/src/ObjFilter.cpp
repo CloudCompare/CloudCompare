@@ -46,6 +46,7 @@
 
 // System
 #include <cstring>
+#include <memory>
 
 ObjFilter::ObjFilter()
     : FileIOFilter({"_OBJ Filter",
@@ -121,10 +122,10 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	// progress (start with vertices)
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		if (mesh)
 		{
 			pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
@@ -596,10 +597,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	int                           maxTriNormIndex = -1;
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("OBJ file"));
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setRange(0, static_cast<int>(file.size()));
@@ -717,7 +718,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for tex. coords container if necessary
 				if (!texCoords)
 				{
-					texCoords.reset(new TextureCoordsContainer());
+					texCoords = std::make_shared<TextureCoordsContainer>();
 				}
 				if (texCoords->currentSize() == texCoords->capacity())
 				{
@@ -753,7 +754,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for normals container if necessary
 				if (!normals)
 				{
-					normals.reset(new NormsIndexesTableType);
+					normals = std::make_shared<NormsIndexesTableType>();
 				}
 				if (normals->currentSize() == normals->capacity())
 				{
@@ -1197,7 +1198,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					// we try to load it
 					if (!materials)
 					{
-						materials.reset(new ccMaterialSet("materials"));
+						materials = std::make_shared<ccMaterialSet>("materials");
 					}
 					size_t oldSize = materials->size();
 

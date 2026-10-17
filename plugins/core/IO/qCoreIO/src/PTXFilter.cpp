@@ -32,7 +32,7 @@
 
 // System
 #include <cassert>
-#include <string>
+#include <memory>
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
@@ -109,19 +109,19 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	ScalarType    maxIntensity = 0;
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Loading PTX file"));
 		pDlg->setAutoClose(false);
 	}
 
 	// progress dialog (for normals computation)
-	std::unique_ptr<ccProgressDialog> normalsProgressDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> normalsProgressDlg;
 	if (parameters.parentWidget && parameters.autoComputeNormals)
 	{
-		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		normalsProgressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		normalsProgressDlg->setAutoClose(false);
 		normalsProgressDlg->hide();
 	}

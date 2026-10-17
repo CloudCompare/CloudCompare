@@ -99,6 +99,7 @@ CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& 
 		outFile << s << "; " << Pg.z << Qt::endl;
 	}
 
+	// Flush and close
 	file.close();
 
 	return CC_FERR_NO_ERROR;

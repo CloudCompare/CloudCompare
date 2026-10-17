@@ -34,6 +34,7 @@
 // System
 #include <cassert>
 #include <cstring>
+#include <memory>
 
 namespace
 {
@@ -152,7 +153,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	const int                         coloursAdjustment = (hasColors ? 1 : 0);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Save MA file"));
 		pDlg->setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
 		pDlg->start();

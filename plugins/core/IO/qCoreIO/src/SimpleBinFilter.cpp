@@ -29,6 +29,7 @@
 
 // System
 #include <cassert>
+#include <memory>
 
 // header: 32 first bytes
 constexpr size_t c_headerSize = 64;
@@ -197,10 +198,10 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 	unsigned sfCount    = cloud->getNumberOfScalarFields();
 	unsigned pointCount = cloud->size();
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Simple BIN file"));
 		pDlg->setInfo(QObject::tr("Saving %1 points / %2 scalar field(s)").arg(pointCount).arg(sfCount));
 		pDlg->setModal(true);
@@ -507,10 +508,10 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Simple BIN file"));
 		pDlg->setInfo(QObject::tr("Loading %1 points / %2 scalar field(s)").arg(descriptor.pointCount).arg(descriptor.SFs.size()));
 		pDlg->setModal(true);

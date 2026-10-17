@@ -38,6 +38,7 @@
 
 // System
 #include <cstring>
+#include <memory>
 
 STLFilter::STLFilter()
     : FileIOFilter({"_STL Filter",
@@ -114,10 +115,10 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	unsigned faceCount = mesh->size();
 
 	// progress
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
 		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 		pDlg->start();
@@ -206,10 +207,10 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 	unsigned faceCount = mesh->size();
 
 	// progress
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
 		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 		pDlg->start();
@@ -430,10 +431,10 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 	mesh->setName(name);
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("(ASCII) STL file"));
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setRange(0, 0);
@@ -738,10 +739,10 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 	}
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Loading binary STL file"));
 		pDlg->setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
 		pDlg->start();

@@ -18,7 +18,7 @@ class TestPlyFilter : public QObject
 {
 	Q_OBJECT
 
-private slots:
+  private slots:
 	// A face's "texnumber" property is an index into the file's declared textures.
 	// A malformed/corrupted PLY (or one produced by third-party software) can carry
 	// a texnumber that is out of range for the textures actually declared: this must

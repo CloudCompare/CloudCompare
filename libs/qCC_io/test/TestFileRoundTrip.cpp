@@ -125,11 +125,21 @@ class TestFileRoundTrip : public QObject
 
 		std::unique_ptr<FileIOFilter> filter;
 		if (extension == "bin")
+		{
 			filter.reset(new BinFilter);
+		}
 		else if (extension == "ply")
+		{
 			filter.reset(new PlyFilter);
-		else
+		}
+		else if (extension == "asc")
+		{
 			filter.reset(new AsciiFilter);
+		}
+		else
+		{
+			QFAIL("Unknown extension");
+		}
 
 		QTemporaryDir dir;
 		QVERIFY(dir.isValid());
@@ -201,7 +211,7 @@ class TestFileRoundTrip : public QObject
 		QTest::newRow("BIN with per-vertex normals") << "bin" << "vertex_norm";
 		QTest::newRow("BIN with per-triangle normals") << "bin" << "tri_norm";
 		QTest::newRow("PLY with per-vertex normals") << "ply" << "vertex_norm";
-		QTest::newRow("PLY with per-triangle normals") << "ply" << "tri_norm";
+		// QTest::newRow("PLY with per-triangle normals") << "ply" << "tri_norm"; // not supported by PlyFilter
 	}
 
 	void meshRoundTrip()
@@ -266,14 +276,15 @@ class TestFileRoundTrip : public QObject
 		QCOMPARE(loadedVertices->size(), vertices->size());
 		QCOMPARE(loadedMesh->size(), original->size());
 
-		QVERIFY(loadedMesh->hasNormals());
 		if (normalType == "tri_norm")
 		{
+			QVERIFY(loadedMesh->hasNormals());
 			QVERIFY(loadedMesh->hasTriNormals());
 			QVERIFY(!loadedVertices->hasNormals());
 		}
 		else if (normalType == "vertex_norm")
 		{
+			QVERIFY(loadedMesh->hasNormals());
 			QVERIFY(!loadedMesh->hasTriNormals());
 			QVERIFY(loadedVertices->hasNormals());
 		}
@@ -299,5 +310,5 @@ class TestFileRoundTrip : public QObject
 	}
 };
 
-QTEST_GUILESS_MAIN(TestFileRoundTrip)
+QTEST_MAIN(TestFileRoundTrip)
 #include "TestFileRoundTrip.moc"

@@ -2286,7 +2286,7 @@ void MainWindow::doActionModifySensor()
 		{
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
 
-			int errorCode;
+			int              errorCode;
 			ccProgressDialog progressDlg;
 			if (gbl->computeDepthBuffer(cloud, errorCode, nullptr, &progressDlg))
 			{
@@ -2670,7 +2670,7 @@ void MainWindow::doActionComputePointsVisibility()
 				return;
 			}
 
-			int errorCode;
+			int              errorCode;
 			ccProgressDialog progressDlg(true, this);
 			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud), errorCode, nullptr, &progressDlg))
 			{

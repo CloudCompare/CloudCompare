@@ -45,6 +45,7 @@
 #include <QTextStream>
 
 // System
+#include <algorithm>
 #include <cstring>
 #include <memory>
 
@@ -904,8 +905,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.vIndex > maxVertexIndex)
-							maxVertexIndex = vertex.vIndex;
+						maxVertexIndex = std::max(vertex.vIndex, maxVertexIndex);
 					}
 					// should we have a tex. coord index as second vertex element?
 					if (hasTexCoords && currentMaterialDefined)
@@ -916,8 +916,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.tcIndex > maxTexCoordIndex)
-							maxTexCoordIndex = vertex.tcIndex;
+						maxTexCoordIndex = std::max(vertex.tcIndex, maxTexCoordIndex);
 					}
 
 					// should we have a normal index as third vertex element?
@@ -929,8 +928,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.nIndex > maxTriNormIndex)
-							maxTriNormIndex = vertex.nIndex;
+						maxTriNormIndex = std::max(vertex.nIndex, maxTriNormIndex);
 					}
 				}
 

@@ -6,7 +6,6 @@ add_executable( TestLasExtraBytesEvlr )
 target_sources( TestLasExtraBytesEvlr
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/TestLasExtraBytesEvlr.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/TestLasExtraBytesEvlr.h
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasDetails.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasExtraScalarField.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasScalarField.cpp
@@ -30,11 +29,5 @@ target_link_libraries( TestLasExtraBytesEvlr
         LASzip::LASzip
         Qt6::Test
 )
-
-if ( WIN32 )
-    set_target_properties( TestLasExtraBytesEvlr PROPERTIES
-        WIN32_EXECUTABLE False
-    )
-endif()
 
 add_test( NAME TestLasExtraBytesEvlr COMMAND TestLasExtraBytesEvlr )

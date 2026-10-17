@@ -28,12 +28,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
-	<key>CSResourcesFileMapped</key>
-	<true/>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.12</string>
-	<key>LSRequiresCarbon</key>
-	<true/>
+	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© EDF R&amp;D / TELECOM ParisTech (ENST-TSI)</string>
 	<key>CFBundleDocumentTypes</key>
@@ -194,6 +190,132 @@
 			<string>E57 data file</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>las</string>
+				<string>laz</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>LAS point cloud</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>pcd</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>PCL point cloud</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ptx</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>PTX scan</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>sbf</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Simple binary point cloud</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>off</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>OFF mesh file</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>asc</string>
+				<string>txt</string>
+				<string>csv</string>
+				<string>neu</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>ASCII point cloud</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>shp</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Shapefile</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>dxf</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>DXF drawing</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>step</string>
+				<string>stp</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>STEP CAD file</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gltf</string>
+				<string>dae</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>glTF or COLLADA mesh file</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
 		</dict>
 	</array>
 </dict>

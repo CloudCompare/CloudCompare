@@ -103,6 +103,7 @@ class CCBundler:
 
         libs_found, libs_ex_found, libs_in_plugins = self._collect_dependencies()
         self._embed_libraries(libs_found, libs_ex_found, libs_in_plugins)
+        self._remove_external_rpaths()
 
         # output debug files if needed
         if self.config.output_dependencies:
@@ -120,6 +121,29 @@ class CCBundler:
                 encoding="utf-8",
             ) as f:
                 json.dump(self.warnings, f, sort_keys=True, indent=4)
+
+    def _remove_external_rpaths(self) -> None:
+        """Remove the rpaths that point outside the bundle (e.g. to the build machine).
+
+        The embedded libraries are found through the @loader_path and @executable_path rpaths.
+        The other ones make dyld look on the build machine first, which hides a library
+        missing from the bundle when it is tested there.
+        """
+        binaries = [self.config.cc_bin_path]
+        for folder in (self.config.frameworks_path, self.config.plugin_path):
+            binaries += [
+                path
+                for path in folder.rglob("*")
+                if path.suffix in (".dylib", ".so") and path.is_file() and not path.is_symlink()
+            ]
+
+        removed_count = 0
+        for binary in binaries:
+            for rpath in CCBundler._get_rpath(binary):
+                if not rpath.startswith("@"):
+                    subprocess.run(["install_name_tool", "-delete_rpath", rpath, str(binary)], check=True)
+                    removed_count += 1
+        logger.info("rpaths pointing outside the bundle removed: %i", removed_count)
 
     def _get_lib_dependencies(self, mainlib: Path) -> tuple[list[str], list[str]]:
         """List dependencies of mainlib (using otool -L).

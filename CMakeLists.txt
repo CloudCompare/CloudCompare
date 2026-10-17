@@ -1,5 +1,11 @@
 cmake_minimum_required( VERSION 3.10 )
 
+# Oldest macOS the Mac builds run on (the conda-forge libraries they bundle are built for macOS 11).
+# It must be set before project(), otherwise the build machine's version is used.
+if( APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET )
+	set( CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version" FORCE )
+endif()
+
 project( CloudCompareProjects )
 
 # One shouldn't generate the BUILD project directly in the SOURCES folder!

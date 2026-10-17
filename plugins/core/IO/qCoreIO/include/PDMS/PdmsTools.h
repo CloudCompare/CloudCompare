@@ -300,7 +300,7 @@ namespace PdmsTools
 			}
 			bool         convertCoordinateSystem() override;
 			GenericItem* scan(const char* str) override;
-			bool         scan(Token t, std::vector<GenericItem*>& array) override;
+			bool         scan(Token t, std::vector<GenericItem*>& items) override;
 			Token        getType() const override
 			{
 				return level;

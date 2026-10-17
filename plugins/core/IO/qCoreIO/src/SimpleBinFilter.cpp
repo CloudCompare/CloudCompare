@@ -54,15 +54,15 @@ bool SimpleBinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusiv
 	return (type == CC_TYPES::POINT_CLOUD);
 }
 
-CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
-	if (!root || filename.isNull() || !root->isA(CC_TYPES::POINT_CLOUD))
+	if (!entity || filename.isNull() || !entity->isA(CC_TYPES::POINT_CLOUD))
 	{
 		assert(false);
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(root);
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!cloud)
 	{
 		return CC_FERR_BAD_ARGUMENT;

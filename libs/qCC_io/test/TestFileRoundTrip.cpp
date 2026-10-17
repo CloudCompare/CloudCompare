@@ -37,7 +37,7 @@ static ccPointCloud* CreateCloud()
 		N.normalize();
 		cloud->addNorm(N);
 	}
-	int  sfIndex = cloud->addScalarField("Scalar field");
+	int  sfIndex = cloud->addScalarField("ScalarField");
 	auto sf      = cloud->getScalarField(sfIndex);
 	for (unsigned i = 0; i < PointCount; ++i)
 	{
@@ -123,7 +123,7 @@ void TestFileRoundTrip::roundTrip()
 	QVERIFY(loaded->hasNormals());
 	QCOMPARE(loaded->getNumberOfScalarFields(), 1u);
 	auto loadedSF = loaded->getScalarField(0);
-	QCOMPARE(QString::fromStdString(loadedSF->getName()), QString("Scalar field"));
+	QCOMPARE(QString::fromStdString(loadedSF->getName()), QString("ScalarField"));
 	auto originalSF = original->getScalarField(0);
 
 	for (unsigned i = 0; i < PointCount; ++i)

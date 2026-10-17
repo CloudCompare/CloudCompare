@@ -271,9 +271,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 
 			// display potential 'errors'
-			for (int i = 0; i < errors.size(); ++i)
+			for (const auto& err : errors)
 			{
-				ccLog::Warning(QString("[OBJ][Material file writer] ") + errors[i]);
+				ccLog::Warning(QString("[OBJ][Material file writer] ") + err);
 			}
 
 			// increment progress bar
@@ -323,9 +323,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		// check that the number of facets is the same as the full mesh!
 		{
 			unsigned faceCount = 0;
-			for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+			for (auto* subMesh : subMeshes)
 			{
-				faceCount += static_cast<ccSubMesh*>(*it)->size();
+				faceCount += static_cast<ccSubMesh*>(subMesh)->size();
 			}
 
 			// if there's no face (i.e. no sub-mesh) or less face than the total mesh, we save the full mesh!
@@ -348,9 +348,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		// mesh or sub-meshes
 		unsigned indexShift = 0;
-		for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+		for (auto* subMesh : subMeshes)
 		{
-			ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
+			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
 
 			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << Qt::endl;
 			if (file.error() != QFile::NoError)
@@ -1217,8 +1217,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 					if (!errors.empty())
 					{
-						for (int i = 0; i < errors.size(); ++i)
-							ccLog::Warning(QString("[OBJ::Load::MTL parser] ") + errors[i]);
+						for (const auto& err : errors)
+							ccLog::Warning(QString("[OBJ::Load::MTL parser] ") + err);
 					}
 					if (materials->empty())
 					{

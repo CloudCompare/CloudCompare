@@ -389,9 +389,9 @@ bool Coordinates::getVector(CCVector3& u) const
 int Coordinates::getNbComponents(bool onlyset) const
 {
 	int nb = 0;
-	for (int i = 0; i < 3; i++)
+	for (const auto& coord : coords)
 	{
-		if (PdmsToken::isCoordinate(coords[i].command))
+		if (PdmsToken::isCoordinate(coord.command))
 		{
 			if (!onlyset || coords[nb].valueChanges >= 1)
 				nb++;
@@ -1169,9 +1169,9 @@ bool GenericItem::convertCoordinateSystem()
 		positionReference = owner;
 	// init orientationReferences
 	{
-		for (unsigned k = 0; k < 3; k++)
-			if (!orientationReferences[k])
-				orientationReferences[k] = owner;
+		for (auto& orientation : orientationReferences)
+			if (!orientation)
+				orientation = owner;
 	}
 	// Update position coordinates
 	if (positionReference)
@@ -1241,9 +1241,9 @@ bool GenericItem::scan(Token t, std::vector<GenericItem*>& array)
 
 DesignElement::~DesignElement()
 {
-	for (std::list<DesignElement*>::iterator it = nelements.begin(); it != nelements.end(); ++it)
+	for (auto* element : nelements)
 	{
-		GenericItem* item = *it;
+		GenericItem* item = element;
 		if (item)
 		{
 			Stack::Destroy(item);
@@ -1310,16 +1310,16 @@ void GroupElement::clear(bool del)
 {
 	if (del)
 	{
-		for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
+		for (auto* element : elements)
 		{
-			GenericItem* item = *eit;
-			if (*eit)
+			GenericItem* item = element;
+			if (element)
 				Stack::Destroy(item);
 		}
-		for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
+		for (auto* hit : subhierarchy)
 		{
-			GenericItem* item = *hit;
-			if (*hit)
+			GenericItem* item = hit;
+			if (hit)
 				Stack::Destroy(item);
 		}
 	}
@@ -1411,11 +1411,11 @@ bool GroupElement::convertCoordinateSystem()
 
 	if (!GenericItem::convertCoordinateSystem())
 		return false;
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
-		if (!(*eit)->convertCoordinateSystem())
+	for (auto* element : elements)
+		if (!element->convertCoordinateSystem())
 			return false;
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
-		if (!(*hit)->convertCoordinateSystem())
+	for (auto* hit : subhierarchy)
+		if (!hit->convertCoordinateSystem())
 			return false;
 	return true;
 }
@@ -1435,10 +1435,10 @@ bool GroupElement::scan(Token t, std::vector<GenericItem*>& items)
 {
 	GenericItem::scan(t, items);
 	size_t size = items.size();
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
-		(*eit)->scan(t, items);
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
-		(*hit)->scan(t, items);
+	for (auto* element : elements)
+		element->scan(t, items);
+	for (auto* hit : subhierarchy)
+		hit->scan(t, items);
 	return (items.size() > size);
 }
 
@@ -1484,16 +1484,16 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 
 	std::pair<int, int> nb(1, 0);
 
-	for (std::list<GroupElement*>::const_iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
+	for (auto* hit : subhierarchy)
 	{
-		std::pair<int, int> n = (*hit)->write(output, nbtabs + 1);
+		std::pair<int, int> n = hit->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
 
-	for (std::list<DesignElement*>::const_iterator eit = elements.begin(); eit != elements.end(); ++eit)
+	for (auto* element : elements)
 	{
-		std::pair<int, int> n = (*eit)->write(output, nbtabs + 1);
+		std::pair<int, int> n = element->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}

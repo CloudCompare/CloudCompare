@@ -343,9 +343,9 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline = inFile.readLine();
 				parts    = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
-					Pd.u[coordIndex] = parts[i].toDouble(&ok);
+					Pd.u[coordIndex] = part.toDouble(&ok);
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
@@ -534,10 +534,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
 					bool ok;
-					N.u[coordIndex] = static_cast<PointCoordinateType>(parts[i].toDouble(&ok));
+					N.u[coordIndex] = static_cast<PointCoordinateType>(part.toDouble(&ok));
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
@@ -586,10 +586,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
 					bool ok;
-					rgb.rgb[coordIndex] = static_cast<ColorCompType>(parts[i].toDouble(&ok) * ccColor::MAX);
+					rgb.rgb[coordIndex] = static_cast<ColorCompType>(part.toDouble(&ok) * ccColor::MAX);
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
@@ -687,10 +687,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 				if (expected)
 				{
-					for (int i = 0; i < parts.size(); ++i)
+					for (const auto& part : parts)
 					{
 						bool       ok;
-						ScalarType d = static_cast<ScalarType>(parts[i].toDouble(&ok));
+						ScalarType d = static_cast<ScalarType>(part.toDouble(&ok));
 						if (!ok)
 						{
 							ccLog::Warningf("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);

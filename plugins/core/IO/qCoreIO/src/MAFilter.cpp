@@ -573,18 +573,18 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 				ind[1]                          = tsi->i2;
 				ind[2]                          = tsi->i3;
 
-				for (unsigned char j = 0; j < 3; ++j)
+				for (unsigned int faceId : ind)
 				{
-					if (!theFacesIndexes[ind[j]])
+					if (!theFacesIndexes[faceId])
 					{
 						faceIndexes* f          = new faceIndexes;
 						f->faceIndex            = i;
 						f->nextFace             = nullptr;
-						theFacesIndexes[ind[j]] = f;
+						theFacesIndexes[faceId] = f;
 					}
 					else
 					{
-						faceIndexes* f = theFacesIndexes[ind[j]];
+						faceIndexes* f = theFacesIndexes[faceId];
 						while (f->nextFace)
 							f = f->nextFace;
 						f->nextFace            = new faceIndexes;

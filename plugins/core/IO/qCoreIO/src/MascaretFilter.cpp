@@ -114,9 +114,8 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 		}
 
 		// then keep the valid profiles only
-		for (size_t i = 0; i < candidates.size(); ++i)
+		for (auto* poly : candidates)
 		{
-			ccPolyline* poly = candidates[i];
 			if (!poly->hasMetaData(ccPolyline::MetaKeyUpDir())
 			    || !poly->hasMetaData(ccPolyline::MetaKeyAbscissa())
 			    || !poly->hasMetaData(ccPolyline::MetaKeyPrefixCenter() + ".x")

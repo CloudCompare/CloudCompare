@@ -534,7 +534,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 		// 3rd to 5th lines: 'vertex vix viy viz'
 		unsigned vertIndexes[3]{0, 0, 0};
 		// unsigned pointCountBefore = pointCount;
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned int& vertIndex : vertIndexes)
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
@@ -597,7 +597,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 			}
 
 			// insert new point
-			vertIndexes[i] = pointCount++;
+			vertIndex = pointCount++;
 			vertices->addPoint(P);
 		}
 
@@ -763,7 +763,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 
 		// 3 vertices
 		unsigned vertIndexes[3];
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned int& vertIndex : vertIndexes)
 		{
 			// REAL32[3] Vertex 1,2 & 3
 			float Pf[3];
@@ -788,7 +788,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 			CCVector3 P = (Pd + Pshift).toPC();
 
 			// insert new point
-			vertIndexes[i] = pointCount++;
+			vertIndex = pointCount++;
 			vertices->addPoint(P);
 		}
 

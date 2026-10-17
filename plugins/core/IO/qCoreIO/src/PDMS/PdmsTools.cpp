@@ -68,11 +68,8 @@ void PdmsObjects::Stack::Clear()
 
 		s_elementsStack.remove(item);
 
-		if (item)
-		{
-			// ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
-			delete item;
-		}
+		// ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
+		delete item;
 	}
 
 	s_elementsStack.clear();
@@ -151,6 +148,11 @@ bool DistanceValue::execute(PdmsObjects::GenericItem*& item) const
 
 Reference& Reference::operator=(const Reference& ref)
 {
+	if (this == &ref)
+	{
+		return *this;
+	}
+
 	command = ref.command;
 	token   = ref.token;
 	strcpy(refname, ref.refname);

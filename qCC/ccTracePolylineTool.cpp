@@ -40,8 +40,7 @@ ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* displa
 	if (display)
 	{
 		display->getGLCameraParameters(params);
-		QPointF pos2D = display->toCornerGLCoordinates(x, y);
-		clickPos      = CCVector2d(pos2D.x(), pos2D.y());
+		clickPos = CCVector2d(x, params.viewport[3] - 1 - y);
 	}
 }
 
@@ -508,7 +507,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 
 	// we replace the first point of the tip by this new point
 	{
-		QPointF   pos2D = m_associatedWin->toCenteredGLCoordinates(pi.clickPoint.x(), pi.clickPoint.y());
+		QPointF   pos2D(pi.clickPoint.x() - m_associatedWin->glWidth() / 2, m_associatedWin->glHeight() / 2 - pi.clickPoint.y());
 		CCVector3 P2D(static_cast<PointCoordinateType>(pos2D.x()),
 		              static_cast<PointCoordinateType>(pos2D.y()),
 		              0);

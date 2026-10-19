@@ -282,7 +282,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 			outFile << Cdg.u[xDir] << " " << Cdg.u[yDir];
 		}
 #endif
-		outFile << Qt::endl;
+		outFile << "\n";
 
 		// check the abscissa values order (must be increasing!)
 		bool inverted = false;
@@ -318,7 +318,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 				outFile << Pg.u[xDir] << " " << Pg.u[yDir];
 			}
 #endif
-			outFile << Qt::endl;
+			outFile << "\n";
 		}
 
 		result = CC_FERR_NO_ERROR;

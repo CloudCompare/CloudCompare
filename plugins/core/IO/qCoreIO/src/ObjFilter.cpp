@@ -146,8 +146,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
 
-	stream << "# " << FileIO::createdBy() << Qt::endl;
-	stream << "# " << FileIO::createdDateTime() << Qt::endl;
+	stream << "# " << FileIO::createdBy() << "\n";
+	stream << "# " << FileIO::createdDateTime() << "\n";
 
 	if (file.error() != QFile::NoError)
 	{
@@ -158,7 +158,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		const CCVector3* P       = vertices->getPoint(i);
 		CCVector3d       Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
-		stream << "v " << Pglobal.x << " " << Pglobal.y << " " << Pglobal.z << Qt::endl;
+		stream << "v " << Pglobal.x << " " << Pglobal.y << " " << Pglobal.z << "\n";
 		if (file.error() != QFile::NoError)
 			return CC_FERR_WRITING;
 		if (pDlg && !nprogress.oneStep()) // update progress bar, check cancel requested
@@ -190,7 +190,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				for (unsigned i = 0; i < numTriangleNormals; ++i)
 				{
 					const CCVector3& normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
-					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << Qt::endl;
+					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << "\n";
 					if (file.error() != QFile::NoError)
 					{
 						return CC_FERR_WRITING;
@@ -224,7 +224,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			for (unsigned i = 0; i < nbPoints; ++i)
 			{
 				const CCVector3& normalVec = vertices->getPointNormal(i);
-				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << Qt::endl;
+				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << "\n";
 				if (file.error() != QFile::NoError)
 				{
 					return CC_FERR_WRITING;
@@ -259,7 +259,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			QString     baseName = QFileInfo(filename).baseName();
 			if (materials->saveAsMTL(QFileInfo(filename).absolutePath(), baseName, errors))
 			{
-				stream << "mtllib " << baseName << ".mtl" << Qt::endl;
+				stream << "mtllib " << baseName << ".mtl" << "\n";
 				if (file.error() != QFile::NoError)
 				{
 					return CC_FERR_WRITING;
@@ -301,7 +301,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				for (unsigned i = 0; i < texCoords->currentSize(); ++i)
 				{
 					const TexCoords2D& tc = texCoords->getValue(i);
-					stream << "vt " << tc.tx << " " << tc.ty << Qt::endl;
+					stream << "vt " << tc.tx << " " << tc.ty << "\n";
 					if (file.error() != QFile::NoError)
 						return CC_FERR_WRITING;
 
@@ -353,7 +353,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
 
-			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << Qt::endl;
+			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << "\n";
 			if (file.error() != QFile::NoError)
 			{
 				return CC_FERR_WRITING;
@@ -377,11 +377,11 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
 						{
 							ccMaterial::CShared mat = materials->at(mtlIndex);
-							stream << "usemtl " << mat->getName() << Qt::endl;
+							stream << "usemtl " << mat->getName() << "\n";
 						}
 						else
 						{
-							stream << "usemtl " << Qt::endl;
+							stream << "usemtl " << "\n";
 						}
 						if (file.error() != QFile::NoError)
 						{
@@ -453,7 +453,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 						stream << " " << i3;
 					}
 				}
-				stream << Qt::endl;
+				stream << "\n";
 
 				if (file.error() != QFile::NoError)
 				{
@@ -466,7 +466,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 			}
 
-			stream << "#" << triNum << " faces" << Qt::endl;
+			stream << "#" << triNum << " faces" << "\n";
 			if (file.error() != QFile::NoError)
 			{
 				return CC_FERR_WRITING;

@@ -133,13 +133,13 @@ try
 		unsigned vertexCount = static_cast<unsigned>(coordinates.size() / 3);
 
 		ccPointCloud* vertices = new ccPointCloud("vertices");
-		ccMesh*       mesh     = new ccMesh(vertices);
+		// Mesh takes ownership of vertices
+		auto mesh = std::make_unique<ccMesh>(vertices);
 		mesh->addChild(vertices);
 		vertices->setEnabled(false);
 
 		if (!vertices->reserve(vertexCount) || !mesh->reserve(triCount))
 		{
-			delete mesh;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
@@ -196,7 +196,6 @@ try
 		if (mesh->size() == 0)
 		{
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
-			delete mesh;
 			continue;
 		}
 
@@ -219,7 +218,7 @@ try
 			}
 		}
 
-		container.addChild(mesh);
+		container.addChild(mesh.release());
 		++loadedCount;
 	}
 

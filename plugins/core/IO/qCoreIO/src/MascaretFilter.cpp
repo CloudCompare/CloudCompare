@@ -197,10 +197,9 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 	CC_FILE_ERROR result = CC_FERR_NO_SAVE;
 
 	// for each profile
-	for (size_t i = 0; i < profiles.size(); ++i)
+	for (const auto* poly : profiles)
 	{
-		ccPolyline* poly      = profiles[i];
-		unsigned    vertCount = poly ? poly->size() : 0;
+		unsigned vertCount = poly ? poly->size() : 0;
 		if (vertCount < 2)
 		{
 			// invalid size

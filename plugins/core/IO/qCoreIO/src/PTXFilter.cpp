@@ -217,7 +217,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		}
 
 		// now we can read the grid cells
-		ccPointCloud* cloud = new ccPointCloud();
+		auto cloud = std::make_unique<ccPointCloud>();
 		if (container.getChildrenNumber() == 0)
 		{
 			cloud->setName("unnamed - Cloud");
@@ -235,8 +235,6 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		if (!cloud->reserve(gridSize))
 		{
 			result = CC_FERR_NOT_ENOUGH_MEMORY;
-			delete cloud;
-			cloud = nullptr;
 			break;
 		}
 
@@ -457,8 +455,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		// is there at least one valid point in this grid?
 		if (cloud->size() == 0)
 		{
-			delete cloud;
-			cloud = nullptr;
+			cloud.reset();
 			intensitySF.reset();
 
 			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex + 1));
@@ -499,7 +496,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			{
 				// determine best sensor parameters (mainly yaw and pitch steps)
 				ccGLMatrix cloudToSensorTrans((sensorTransD.inverse() * cloudTransD).data());
-				sensor = ccGriddedTools::ComputeBestSensor(cloud, grid, &cloudToSensorTrans);
+				sensor = ccGriddedTools::ComputeBestSensor(cloud.get(), grid, &cloudToSensorTrans);
 			}
 
 			// we apply the transformation
@@ -535,7 +532,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			cloud->showColors(cloud->hasColors());
 			cloud->showNormals(cloud->hasNormals());
 
-			container.addChild(cloud);
+			container.addChild(cloud.release());
 
 #ifdef QT_DEBUG
 			// break;

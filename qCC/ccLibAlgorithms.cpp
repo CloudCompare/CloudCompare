@@ -120,68 +120,10 @@ namespace ccLibAlgorithms
 		return sigma;
 	}
 
-	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
-	                                PointCoordinateType          radius,
-	                                ccHObject::Container&        entities,
-	                                const CCVector3*             roughnessUpDir /*=nullptr*/,
-	                                QWidget*                     parent /*=nullptr*/)
+	static QString GetCharacteristicSFName(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
+	                                       int                                                     subOption,
+	                                       PointCoordinateType                                     radius)
 	{
-		// no feature case
-		if (characteristics.empty())
-		{
-			// nothing to do
-			assert(false);
-			return true;
-		}
-
-		// single features case
-		if (characteristics.size() == 1)
-		{
-			return ComputeGeomCharacteristic(characteristics.front().charac,
-			                                 characteristics.front().subOption,
-			                                 radius,
-			                                 entities,
-			                                 roughnessUpDir,
-			                                 parent);
-		}
-
-		// multiple features case
-		std::unique_ptr<ccProgressDialog> pDlg;
-		if (parent)
-		{
-			pDlg = std::make_unique<ccProgressDialog>(true, parent);
-			pDlg->setAutoClose(false);
-		}
-
-		for (const GeomCharacteristic& g : characteristics)
-		{
-			if (!ComputeGeomCharacteristic(g.charac,
-			                               g.subOption,
-			                               radius,
-			                               entities,
-			                               roughnessUpDir,
-			                               parent,
-			                               pDlg.get()))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
-	                               int                                                     subOption,
-	                               PointCoordinateType                                     radius,
-	                               ccHObject::Container&                                   entities,
-	                               const CCVector3*                                        roughnessUpDir /*=nullptr*/,
-	                               QWidget*                                                parent /*= nullptr*/,
-	                               ccProgressDialog*                                       progressDialog /*=nullptr*/)
-	{
-		size_t selNum = entities.size();
-		if (selNum < 1)
-			return false;
-
 		// generate the right SF name
 		QString sfName;
 
@@ -242,9 +184,8 @@ namespace ccLibAlgorithms
 			default:
 				assert(false);
 				ccLog::Error("Internal error: invalid sub option for Feature computation");
-				return false;
+				return QString();
 			}
-
 			sfName += QString(" (%1)").arg(radius);
 		}
 		break;
@@ -265,7 +206,7 @@ namespace ccLibAlgorithms
 			default:
 				assert(false);
 				ccLog::Error("Internal error: invalid sub option for Curvature computation");
-				return false;
+				return QString();
 			}
 			sfName += QString(" (%1)").arg(radius);
 		}
@@ -289,6 +230,255 @@ namespace ccLibAlgorithms
 
 		default:
 			assert(false);
+			return QString();
+		}
+		return sfName;
+	}
+
+	static QString GetErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode result)
+	{
+		QString errorMessage;
+		switch (result)
+		{
+		case CCCoreLib::GeometricalAnalysisTools::InvalidInput:
+			errorMessage = "Internal error (invalid input)";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::NotEnoughPoints:
+			errorMessage = "Not enough points";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::OctreeComputationFailed:
+			errorMessage = "Failed to compute octree (not enough memory?)";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::ProcessFailed:
+			errorMessage = "Process failed";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::UnhandledCharacteristic:
+			errorMessage = "Internal error (unhandled characteristic)";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::NotEnoughMemory:
+			errorMessage = "Not enough memory";
+			break;
+		case CCCoreLib::GeometricalAnalysisTools::ProcessCancelledByUser:
+			errorMessage = "Process cancelled by user";
+			break;
+		default:
+			assert(false);
+			errorMessage = "Unknown error";
+			break;
+		}
+		return errorMessage;
+	}
+
+	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
+	                                PointCoordinateType          radius,
+	                                ccHObject::Container&        entities,
+	                                const CCVector3*             roughnessUpDir /*=nullptr*/,
+	                                QWidget*                     parent /*=nullptr*/,
+	                                ccProgressDialog*            progressDialog /*=nullptr*/)
+	{
+		size_t selNum = entities.size();
+		if (selNum < 1)
+			return false;
+
+		// no feature case
+		if (characteristics.empty())
+		{
+			// nothing to do
+			assert(false);
+			return true;
+		}
+
+		ccProgressDialog* pDlg = progressDialog;
+		if (!pDlg && parent)
+		{
+			pDlg = new ccProgressDialog(true, parent);
+			pDlg->setAutoClose(false);
+		}
+
+		for (size_t i = 0; i < selNum; ++i)
+		{
+			// is the ith selected data is eligible for processing?
+			if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
+				assert(nullptr != cloud);
+
+				ccPointCloud* pc    = nullptr;
+				int           sfIdx = -1;
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				{
+					ccOctree::Shared octree = cloud->getOctree();
+					if (!octree)
+					{
+						if (pDlg)
+						{
+							pDlg->show();
+						}
+						octree = cloud->computeOctree(pDlg);
+						if (!octree)
+						{
+							ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+							break;
+						}
+					}
+
+					pc = static_cast<ccPointCloud*>(cloud);
+					CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequestSet requests;
+					for (const GeomCharacteristic& g : characteristics)
+					{
+						QString sfName = GetCharacteristicSFName(g.charac, g.subOption, radius);
+						if (sfName.isEmpty())
+						{
+							return false;
+						}
+
+						sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
+						if (sfIdx < 0)
+							sfIdx = pc->addScalarField(sfName.toStdString());
+						if (sfIdx < 0)
+						{
+							ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
+							return false;
+						}
+
+						// ApproxLocalDensity is not supported in multi geometric feature requests computation.
+						// It's a special case that should be treated separately (see GeometricalAnalysisTools::ComputeCharacteristics)
+						if (g.charac == CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity)
+						{
+							// ComputeCharactersitic writes in the Current Out SF.
+							// we must set the corresponding before calling it.
+							pc->setCurrentScalarField(sfIdx);
+
+							// only the computation itself runs in a worker thread
+							CCCoreLib::GeometricalAnalysisTools::ErrorCode appoxDensResult = ccBackgroundTask::Run(
+							    [&]()
+							    {
+								    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(g.charac,
+								                                                                      g.subOption,
+								                                                                      cloud,
+								                                                                      radius,
+								                                                                      roughnessUpDir,
+								                                                                      pDlg,
+								                                                                      octree.data());
+							    });
+							if (appoxDensResult != CCCoreLib::GeometricalAnalysisTools::NoError)
+							{
+								QString errorMessage = GetErrorMessage(appoxDensResult);
+
+								ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
+								ccConsole::Warning(errorMessage);
+
+								if (pc && sfIdx >= 0)
+								{
+									pc->deleteScalarField(sfIdx);
+								}
+
+								return false;
+							}
+
+							// the SF is not part of the requests and must be finalized here
+							if (auto approxSF = pc->getCCScalarField(sfIdx))
+							{
+								approxSF->computeMinAndMax();
+							}
+							pc->setCurrentDisplayedScalarField(sfIdx);
+							pc->showSF(true);
+							continue;
+						}
+
+						// populate the request structure (except for ApproxLocalDensity which was handled separately)
+						CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequest request;
+						request.c         = g.charac;
+						request.subOption = g.subOption;
+						request.sf        = (pc && sfIdx >= 0 ? pc->getCCScalarField(sfIdx).get() : nullptr);
+						request.sfIdx     = sfIdx;
+
+						requests.push_back(request);
+					}
+
+					// only the computation itself runs in a worker thread
+					CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
+					    [&]()
+					    {
+						    return CCCoreLib::GeometricalAnalysisTools::ComputeCharacteristics(requests,
+						                                                                       cloud,
+						                                                                       radius,
+						                                                                       roughnessUpDir,
+						                                                                       pDlg,
+						                                                                       octree.data());
+					    });
+
+					if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
+					{
+						for (auto request : requests)
+						{
+							if (pc && request.sfIdx >= 0)
+							{
+								// the SF was written directly (not through the 'in/out' SF of the cloud),
+								// so we address it by its index
+								auto sf = pc->getCCScalarField(request.sfIdx);
+								if (sf)
+								{
+									sf->computeMinAndMax();
+									if (request.c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+									{
+										// signed roughness should be displayed with a symmetrical color scale
+										sf->setSymmetricalScale(true);
+									}
+								}
+								else
+								{
+									assert(false);
+								}
+							}
+						}
+						// display the last computed scalar field
+						if (!requests.empty() && requests.back().sfIdx >= 0)
+						{
+							pc->setCurrentDisplayedScalarField(requests.back().sfIdx);
+							pc->showSF(true);
+						}
+						cloud->prepareDisplayForRefresh();
+					}
+					else
+					{
+						QString errorMessage = GetErrorMessage(result);
+
+						ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
+						ccConsole::Warning(errorMessage);
+
+						for (auto request : requests)
+						{
+							if (pc && request.sfIdx >= 0)
+							{
+								pc->deleteScalarField(request.sfIdx);
+							}
+						}
+
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
+	                               int                                                     subOption,
+	                               PointCoordinateType                                     radius,
+	                               ccHObject::Container&                                   entities,
+	                               const CCVector3*                                        roughnessUpDir /*=nullptr*/,
+	                               QWidget*                                                parent /*= nullptr*/,
+	                               ccProgressDialog*                                       progressDialog /*=nullptr*/)
+	{
+		size_t selNum = entities.size();
+		if (selNum < 1)
+			return false;
+
+		QString sfName = GetCharacteristicSFName(algo, subOption, radius);
+		if (sfName.isEmpty())
+		{
 			return false;
 		}
 
@@ -378,35 +568,7 @@ namespace ccLibAlgorithms
 				}
 				else
 				{
-					QString errorMessage;
-					switch (result)
-					{
-					case CCCoreLib::GeometricalAnalysisTools::InvalidInput:
-						errorMessage = "Internal error (invalid input)";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::NotEnoughPoints:
-						errorMessage = "Not enough points";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::OctreeComputationFailed:
-						errorMessage = "Failed to compute octree (not enough memory?)";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::ProcessFailed:
-						errorMessage = "Process failed";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::UnhandledCharacteristic:
-						errorMessage = "Internal error (unhandled characteristic)";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::NotEnoughMemory:
-						errorMessage = "Not enough memory";
-						break;
-					case CCCoreLib::GeometricalAnalysisTools::ProcessCancelledByUser:
-						errorMessage = "Process cancelled by user";
-						break;
-					default:
-						assert(false);
-						errorMessage = "Unknown error";
-						break;
-					}
+					QString errorMessage = GetErrorMessage(result);
 
 					ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
 					ccConsole::Warning(errorMessage);

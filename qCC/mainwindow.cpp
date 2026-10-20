@@ -8947,7 +8947,20 @@ void MainWindow::doComputeGeometricFeature()
 		s_upDir = *upDir;
 	}
 
-	ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, upDir, this);
+	// single features case
+	if (s_selectedCharacteristics.size() == 1)
+	{
+		ccLibAlgorithms::ComputeGeomCharacteristic(s_selectedCharacteristics.front().charac,
+		                                           s_selectedCharacteristics.front().subOption,
+		                                           static_cast<PointCoordinateType>(radius),
+		                                           m_selectedEntities,
+		                                           upDir,
+		                                           this);
+	}
+	else // multiple features case
+	{
+		ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, upDir, this);
+	}
 
 	refreshAll();
 	updateUI();

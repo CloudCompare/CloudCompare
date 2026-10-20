@@ -36,6 +36,13 @@ namespace ccLibAlgorithms
 	//! Returns a default first guess for algorithms kernel size (several clouds)
 	double GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 
+	//! Returns the name of the scalar field that will be created by a given geometric characteristic computation
+	static QString GetCharacteristicSFName(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
+	                                       int                                                     subOption,
+	                                       PointCoordinateType                                     radius);
+
+	static QString GetErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode errorCode);
+
 	/*** CCCoreLib "standalone" algorithms ***/
 
 	//! Geometric characteristic (with sub option)
@@ -59,7 +66,8 @@ namespace ccLibAlgorithms
 	                                PointCoordinateType          radius,
 	                                ccHObject::Container&        entities,
 	                                const CCVector3*             roughnessUpDir = nullptr,
-	                                QWidget*                     parent         = nullptr);
+	                                QWidget*                     parent         = nullptr,
+	                                ccProgressDialog*            progressDialog = nullptr);
 
 	//! Computes a geometrical characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
 	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,

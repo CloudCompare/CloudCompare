@@ -43,6 +43,7 @@
 #include <QWidget>
 
 // System
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #ifdef CC_WINDOWS
@@ -399,6 +400,35 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& 
 #endif
 }
 
+//! Applies a rotation (in camera space) to the view of a 3D window
+static void RotateView(const ccGLMatrixd& rotMat, ccGLWindowInterface* win)
+{
+	if (!win->isRotationAxisLocked())
+	{
+		win->rotateBaseViewMat(rotMat);
+		return;
+	}
+
+	// The rotation axis is locked: like the mouse, only turn about the locked axis and tilt the view,
+	// and update the angles from which the mouse rebuilds the view (otherwise the view would jump back
+	// at the next mouse drag)
+	double     angle_rad = 0.0;
+	CCVector3d axis;
+	CCVector3d translation;
+	rotMat.getParameters(angle_rad, axis, translation);
+
+	double vertAngle_rad  = 0.0;
+	double orthoAngle_rad = 0.0;
+	win->getLockedRotationAngles(vertAngle_rad, orthoAngle_rad);
+
+	// the rotation about the screen vertical axis turns the view about the locked axis
+	vertAngle_rad = std::remainder(vertAngle_rad + angle_rad * axis.y, 2 * M_PI);
+	// the rotation about the screen horizontal axis tilts the view (in the same range as with the mouse)
+	orthoAngle_rad = std::clamp(orthoAngle_rad + angle_rad * axis.x, -M_PI_2, M_PI_2);
+
+	win->setLockedRotationAngles(vertAngle_rad, orthoAngle_rad);
+}
+
 void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterface* win)
 {
 	assert(motionData.size() >= 6);
@@ -468,7 +498,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 		if (!bubbleViewMode)
 		{
 			Mouse3DInput::GetMatrix(vec, rotMat);
-			win->rotateBaseViewMat(viewParams.objectCenteredView ? rotMat : rotMat.inverse());
+			RotateView(viewParams.objectCenteredView ? rotMat : rotMat.inverse(), win);
 		}
 		else
 		{

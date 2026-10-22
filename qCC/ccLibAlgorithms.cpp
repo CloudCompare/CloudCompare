@@ -329,6 +329,12 @@ namespace ccLibAlgorithms
 						QString sfName = GetCharacteristicSFName(g.charac, g.subOption, radius);
 						if (sfName.isEmpty())
 						{
+							if (pDlg != progressDialog)
+							{
+								delete pDlg;
+								pDlg = nullptr;
+							}
+
 							return false;
 						}
 
@@ -338,6 +344,13 @@ namespace ccLibAlgorithms
 						if (sfIdx < 0)
 						{
 							ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
+
+							if (pDlg != progressDialog)
+							{
+								delete pDlg;
+								pDlg = nullptr;
+							}
+
 							return false;
 						}
 
@@ -371,6 +384,12 @@ namespace ccLibAlgorithms
 								if (pc && sfIdx >= 0)
 								{
 									pc->deleteScalarField(sfIdx);
+								}
+
+								if (pDlg != progressDialog)
+								{
+									delete pDlg;
+									pDlg = nullptr;
 								}
 
 								return false;
@@ -455,10 +474,22 @@ namespace ccLibAlgorithms
 							}
 						}
 
+						if (pDlg != progressDialog)
+						{
+							delete pDlg;
+							pDlg = nullptr;
+						}
+
 						return false;
 					}
 				}
 			}
+		}
+
+		if (pDlg != progressDialog)
+		{
+			delete pDlg;
+			pDlg = nullptr;
 		}
 
 		return true;

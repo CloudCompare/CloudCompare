@@ -242,6 +242,9 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 	//! Returns number of lines to skip
 	unsigned getSkippedLinesCount() const;
 
+	//! Sets the number of lines to skip
+	void setSkippedLines(int lineCount, bool blockSignal = true);
+
 	//! Returns user selected separator
 	unsigned char getSeparator() const
 	{
@@ -314,9 +317,6 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 
 	//! Sets the current separator
 	void setSeparator(QChar);
-
-	//! Sets the number of lines to skip
-	void setSkippedLines(int lineCount, bool blockSignal = true);
 
 	//! Resest all column roles
 	void resetColumnRoles();

@@ -41,6 +41,7 @@ namespace ccLibAlgorithms
 	                                       int                                                     subOption,
 	                                       PointCoordinateType                                     radius);
 
+	//! Returns the error message associated to a given GeometricalAnalysisTools::ErrorCode
 	static QString GetErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode errorCode);
 
 	/*** CCCoreLib "standalone" algorithms ***/

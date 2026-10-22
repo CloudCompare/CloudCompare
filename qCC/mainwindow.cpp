@@ -229,6 +229,9 @@ MainWindow::MainWindow()
 
 	m_ui->actionFullScreen->setText(tr("Enter Full Screen"));
 	m_ui->actionFullScreen->setShortcut(QKeySequence(Qt::CTRL | Qt::META | Qt::Key_F));
+
+	// the 'delete' key of Mac keyboards is Backspace (Del needs Fn on most of them)
+	m_ui->actionDelete->setShortcuts({QKeySequence(Qt::Key_Backspace), QKeySequence(Qt::Key_Delete)});
 #endif
 
 	// Set up dynamic menus

@@ -410,7 +410,7 @@ namespace ccLibAlgorithms
 
 					if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 					{
-						for (auto request : requests)
+						for (const auto& request : requests)
 						{
 							if (pc && request.sfIdx >= 0)
 							{

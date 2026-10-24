@@ -17,6 +17,9 @@
 
 #include "../../include/PDMS/PdmsTools.h"
 
+// qCC
+#include <ccLog.h>
+
 // CCCoreLib
 #include <CCMath.h>
 
@@ -35,10 +38,7 @@ using namespace PdmsObjects;
 
 /////////// MACROS ////////////
 
-#define memalert(e, s) std::cerr << "Memory alert [" << __FILE__ << ", line " << __LINE__ << "] with size " << (s) << " : " << (e).what() << "\n";
-#define memfail(e, s) \
-	memalert(e, s); \
-	abort();
+#define logMemAlert(e, s) ccLog::Warning(QStringLiteral("[PDMSFilter] Memory alert [line %1] with size %2: %3").arg(__LINE__).arg(s).arg(e))
 
 /////////// FUNCTIONS ////////////
 #define PDMS_SQR(a) ((a) * (a))
@@ -818,7 +818,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem*& item) const
 	}
 	catch (std::exception& nex)
 	{
-		memalert(nex, 1);
+		logMemAlert(nex.what(), 1);
 		return false;
 	}
 
@@ -876,7 +876,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem*& item) const
 	}
 	catch (std::exception& pex)
 	{
-		memalert(pex, 1);
+		logMemAlert(pex.what(), 1);
 		PdmsObjects::Stack::Destroy(newElement);
 		// delete newElement;
 		return false;
@@ -968,7 +968,7 @@ bool HierarchyNavigation::execute(PdmsObjects::GenericItem*& item) const
 		}
 		catch (std::exception& nex)
 		{
-			memfail(nex, 1);
+			logMemAlert(nex.what(), 1);
 			return false;
 		}
 		result->push(item);
@@ -1047,7 +1047,7 @@ Command* Command::Create(Token t)
 	}
 	catch (std::exception& nex)
 	{
-		memfail(nex, 1);
+		logMemAlert(nex.what(), 1);
 		return nullptr;
 	}
 }
@@ -1233,7 +1233,8 @@ bool GenericItem::scan(Token t, std::vector<GenericItem*>& array)
 		}
 		catch (std::exception& pex)
 		{
-			memfail(pex, array.size());
+			logMemAlert(pex.what(), array.size());
+			return false;
 		}
 		return true;
 	}
@@ -1267,7 +1268,7 @@ bool DesignElement::push(GenericItem* i)
 			}
 			catch (std::exception& pex)
 			{
-				memalert(pex, nelements.size());
+				logMemAlert(pex.what(), nelements.size());
 				return false;
 			}
 			if (element->owner)
@@ -1350,7 +1351,7 @@ bool GroupElement::push(GenericItem* i)
 			}
 			catch (std::exception& pex)
 			{
-				memalert(pex, subhierarchy.size());
+				logMemAlert(pex.what(), subhierarchy.size());
 				return false;
 			}
 		}
@@ -1376,7 +1377,7 @@ bool GroupElement::push(GenericItem* i)
 		}
 		catch (std::exception& pex)
 		{
-			memalert(pex, elements.size());
+			logMemAlert(pex.what(), elements.size());
 			return false;
 		}
 		return true;
@@ -1435,12 +1436,17 @@ GenericItem* GroupElement::scan(const char* str)
 
 bool GroupElement::scan(Token t, std::vector<GenericItem*>& items)
 {
-	GenericItem::scan(t, items);
+	if (!GenericItem::scan(t, items))
+	{
+		return false;
+	}
 	size_t size = items.size();
 	for (auto* element : elements)
-		element->scan(t, items);
+		if (!element->scan(t, items))
+			return false;
 	for (auto* hit : subhierarchy)
-		hit->scan(t, items);
+		if (!hit->scan(t, items))
+			return false;
 	return (items.size() > size);
 }
 
@@ -1476,7 +1482,7 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 		output << "SUBSTRUCTURE";
 		break;
 	default:
-		std::cerr << "Error : cannot write group " << level << "\n";
+		ccLog::Error(QStringLiteral("[PDMSFilter] Error : cannot write group %1").arg(level));
 		return {0, 0};
 	}
 

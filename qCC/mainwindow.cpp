@@ -43,6 +43,7 @@
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
 #include "ccHistogramWindow.h"
+#include "ccIndividualFilesCollector.h"
 #include "ccInnerRect2DFinder.h"
 #include "ccItemSelectionDlg.h"
 #include "ccLabelingDlg.h"
@@ -61,6 +62,7 @@
 #include "ccRegistrationDlg.h"
 #include "ccRegistrationTools.h"
 #include "ccSORFilterDlg.h"
+#include "ccSaveIndividualFilesDlg.h"
 #include "ccScalarFieldsManagerDlg.h"
 #include "ccScaleDlg.h"
 #include "ccSectionExtractionTool.h"
@@ -150,6 +152,8 @@
 
 // Qt
 #include <QClipboard>
+#include <QDir>
+#include <QProgressDialog>
 
 // System
 #include <random>
@@ -511,6 +515,7 @@ void MainWindow::connectActions()
 	//"File" menu
 	connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::doActionLoadFile);
 	connect(m_ui->actionSave, &QAction::triggered, this, &MainWindow::doActionSaveFile);
+	connect(m_ui->actionSaveIndividualFiles, &QAction::triggered, this, &MainWindow::doActionSaveIndividualFiles);
 	connect(m_ui->actionSaveProject, &QAction::triggered, this, &MainWindow::doActionSaveProject);
 	connect(m_ui->actionGlobalShiftSettings, &QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
 	connect(m_ui->actionPrimitiveFactory, &QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
@@ -11612,6 +11617,181 @@ void MainWindow::doActionSaveFile()
 	settings.endGroup();
 }
 
+void MainWindow::doActionSaveIndividualFiles()
+{
+	if (m_selectedEntities.empty() || !m_ccRoot)
+	{
+		return;
+	}
+
+	ccHObject* rootEntity = m_ccRoot->getRootEntity();
+
+	// we skip the selected entities whose ancestor is also selected
+	ccHObject::Container selectedEntities = ccIndividualFilesCollector::RemoveDescendants(m_selectedEntities);
+
+	// first pass: count the entities, to setup the dialog
+	unsigned cloudCount    = 0;
+	unsigned meshCount     = 0;
+	unsigned polylineCount = 0;
+	{
+		ccIndividualFilesCollector counter;
+		for (ccHObject* entity : selectedEntities)
+		{
+			counter.collect(entity);
+		}
+		cloudCount    = counter.cloudCount();
+		meshCount     = counter.meshCount();
+		polylineCount = counter.polylineCount();
+	}
+
+	if (cloudCount + meshCount + polylineCount == 0)
+	{
+		ccConsole::Error(tr("No cloud, mesh or polyline to save in the selected entities!"));
+		return;
+	}
+
+	ccSaveIndividualFilesDlg dlg(cloudCount, meshCount, polylineCount, this);
+	if (!dlg.exec())
+	{
+		return;
+	}
+	dlg.saveSettings();
+
+	QDir outputDir(dlg.outputFolder());
+	if (!outputDir.exists() && !outputDir.mkpath("."))
+	{
+		ccConsole::Error(tr("Failed to create the output folder '%1'").arg(dlg.outputFolder()));
+		return;
+	}
+
+	ccSaveIndividualFilesDlg::FolderStructure folderStructure = dlg.folderStructure();
+
+	// second pass: collect the entities with their output path
+	ccIndividualFilesCollector collector;
+	collector.cloudFilter      = dlg.cloudFilter();
+	collector.meshFilter       = dlg.meshFilter();
+	collector.polylineFilter   = dlg.polylineFilter();
+	collector.createSubFolders = (folderStructure != ccSaveIndividualFilesDlg::FolderStructure::Flat);
+	for (ccHObject* entity : selectedEntities)
+	{
+		QString relativeFolder;
+		if (folderStructure == ccSaveIndividualFilesDlg::FolderStructure::FullTree)
+		{
+			relativeFolder = collector.getParentRelativeFolder(entity, rootEntity);
+		}
+		collector.collect(entity, relativeFolder);
+	}
+
+	if (!collector.ignored().empty())
+	{
+		ccConsole::Warning(tr("[I/O] The following entities can't be saved this way and will be ignored:"));
+		for (ccHObject* entity : collector.ignored())
+		{
+			ccConsole::Warning(QString("\t- %1").arg(entity->getName()));
+		}
+	}
+
+	FileIOFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = dlg.showFilterDialogs();
+		parameters.parentWidget            = this;
+	}
+
+	const bool overwrite = dlg.overwriteExisting();
+
+	QProgressDialog progressDialog(tr("Saving files..."), tr("Cancel"), 0, static_cast<int>(collector.files().size()), this);
+	progressDialog.setWindowTitle(tr("Save as individual files"));
+	progressDialog.setWindowModality(Qt::WindowModal);
+	progressDialog.setMinimumDuration(0);
+
+	QSet<QString>                                        usedFilenames; // to avoid name collisions between the saved entities
+	unsigned                                             savedCount   = 0;
+	unsigned                                             skippedCount = 0;
+	unsigned                                             errorCount   = 0;
+	bool                                                 canceled     = false;
+	const std::vector<ccIndividualFilesCollector::File>& files        = collector.files();
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		const ccIndividualFilesCollector::File& file = files[i];
+
+		progressDialog.setValue(static_cast<int>(i));
+		progressDialog.setLabelText(tr("Saving '%3' (%1/%2)").arg(i + 1).arg(files.size()).arg(file.entity->getName()));
+		QApplication::processEvents();
+		if (progressDialog.wasCanceled())
+		{
+			canceled = true;
+			break;
+		}
+
+		FileIOFilter::Shared filter = FileIOFilter::GetFilter(file.fileFilter, false);
+		if (!filter)
+		{
+			ccConsole::Error(tr("[I/O] Internal error: no filter corresponds to filter '%1'").arg(file.fileFilter));
+			++errorCount;
+			continue;
+		}
+
+		QString folder = file.relativeFolder.isEmpty() ? outputDir.absolutePath() : outputDir.absoluteFilePath(file.relativeFolder);
+
+		// make sure the filename is unique (Windows filenames are not case-sensitive)
+		QString extension = filter->getDefaultExtension();
+		QString filename  = ccIndividualFilesCollector::MakeUniqueFilename(usedFilenames, folder, file.baseName, extension);
+
+		if (!overwrite && QFileInfo::exists(filename))
+		{
+			ccConsole::Warning(tr("[I/O] File '%1' already exists: skipped").arg(filename));
+			++skippedCount;
+			continue;
+		}
+
+		if (!QDir().mkpath(folder))
+		{
+			ccConsole::Error(tr("[I/O] Failed to create folder '%1'").arg(folder));
+			++errorCount;
+			continue;
+		}
+
+		CC_FILE_ERROR result = FileIOFilter::SaveToFile(file.entity, filename, parameters, filter);
+		if (result == CC_FERR_NO_ERROR)
+		{
+			++savedCount;
+		}
+		else if (result == CC_FERR_CANCELED_BY_USER)
+		{
+			canceled = true;
+			break;
+		}
+		else
+		{
+			++errorCount;
+		}
+	}
+	progressDialog.setValue(progressDialog.maximum());
+
+	QString summary = tr("[I/O] %1 file(s) saved in '%2'").arg(savedCount).arg(QDir::toNativeSeparators(outputDir.absolutePath()));
+	if (skippedCount != 0)
+	{
+		summary += tr(", %1 skipped (already existing)").arg(skippedCount);
+	}
+	if (errorCount != 0)
+	{
+		summary += tr(", %1 failed").arg(errorCount);
+	}
+	if (canceled)
+	{
+		summary += tr(" (process canceled)");
+	}
+
+	if (errorCount != 0 || canceled)
+	{
+		ccConsole::Warning(summary);
+	}
+	else
+	{
+		ccConsole::Print(summary);
+	}
+}
+
 void MainWindow::doActionSaveProject()
 {
 	if (!m_ccRoot || !m_ccRoot->getRootEntity())
@@ -12016,6 +12196,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_ui->actionTracePolyline->setEnabled(!dbIsEmpty);
 	m_ui->actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
 	m_ui->actionSave->setEnabled(atLeastOneEntity);
+	m_ui->actionSaveIndividualFiles->setEnabled(atLeastOneEntity);
 	m_ui->actionSaveProject->setEnabled(!dbIsEmpty);
 	m_ui->actionClone->setEnabled(atLeastOneEntity);
 	// disabled while a dialog is open: on macOS, menu shortcuts get the keys before native dialogs do,
@@ -12695,6 +12876,7 @@ void MainWindow::populateActionList()
 {
 	m_actions.push_back(m_ui->actionOpen);
 	m_actions.push_back(m_ui->actionSave);
+	m_actions.push_back(m_ui->actionSaveIndividualFiles);
 	m_actions.push_back(m_ui->actionQuit);
 	m_actions.push_back(m_ui->actionFullScreen);
 	m_actions.push_back(m_ui->actionDisplaySettings);

@@ -317,7 +317,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				ccLog::Error("[SBF] Invalid global shift");
 				return CC_FERR_MALFORMED_FILE;
 			}
-			bool ok[3]               = {false, false, false};
+			bool ok[3]{false, false, false};
 			descriptor.globalShift.x = strGlobalShift[0].toDouble(ok);
 			descriptor.globalShift.y = strGlobalShift[1].toDouble(ok + 1);
 			descriptor.globalShift.z = strGlobalShift[2].toDouble(ok + 2);

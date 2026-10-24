@@ -49,14 +49,21 @@ namespace ccLibAlgorithms
 	//! Geometric characteristic (with sub option)
 	struct GeomCharacteristicWithSubOption
 	{
+		//! Default constructor
 		GeomCharacteristicWithSubOption(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
 		    : charac(c)
 		    , subOption(option)
 		{
 		}
 
-		CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic charac;
-		int                                                     subOption = 0;
+		//! Equality operator
+		bool operator==(const GeomCharacteristicWithSubOption& other) const
+		{
+			return charac == other.charac && subOption == other.subOption;
+		}
+
+		CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic charac;        //!< Geometric characteristic
+		int                                                     subOption = 0; //!< Sub option (if any)
 	};
 
 	//! Set of GeomCharacteristicWithSubOption instances

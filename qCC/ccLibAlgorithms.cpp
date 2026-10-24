@@ -183,8 +183,8 @@ namespace ccLibAlgorithms
 				break;
 			default:
 				assert(false);
-				ccLog::Error("Internal error: invalid sub option for Feature computation");
-				return QString();
+				ccLog::Error("Internal error: invalid sub-option for Feature computation");
+				return {};
 			}
 			sfName += QString(" (%1)").arg(radius);
 		}
@@ -205,8 +205,8 @@ namespace ccLibAlgorithms
 				break;
 			default:
 				assert(false);
-				ccLog::Error("Internal error: invalid sub option for Curvature computation");
-				return QString();
+				ccLog::Error("Internal error: invalid sub-option for Curvature computation");
+				return {};
 			}
 			sfName += QString(" (%1)").arg(radius);
 		}
@@ -230,55 +230,48 @@ namespace ccLibAlgorithms
 
 		default:
 			assert(false);
-			return QString();
+			return {};
 		}
+
 		return sfName;
 	}
 
-	static QString GetErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode result)
+	static QString ToErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode result)
 	{
-		QString errorMessage;
 		switch (result)
 		{
 		case CCCoreLib::GeometricalAnalysisTools::InvalidInput:
-			errorMessage = "Internal error (invalid input)";
-			break;
+			return "Internal error (invalid input)";
 		case CCCoreLib::GeometricalAnalysisTools::NotEnoughPoints:
-			errorMessage = "Not enough points";
-			break;
+			return "Not enough points";
 		case CCCoreLib::GeometricalAnalysisTools::OctreeComputationFailed:
-			errorMessage = "Failed to compute octree (not enough memory?)";
-			break;
+			return "Failed to compute octree (not enough memory?)";
 		case CCCoreLib::GeometricalAnalysisTools::ProcessFailed:
-			errorMessage = "Process failed";
-			break;
+			return "Process failed";
 		case CCCoreLib::GeometricalAnalysisTools::UnhandledCharacteristic:
-			errorMessage = "Internal error (unhandled characteristic)";
-			break;
+			return "Internal error (unhandled characteristic)";
 		case CCCoreLib::GeometricalAnalysisTools::NotEnoughMemory:
-			errorMessage = "Not enough memory";
-			break;
+			return "Not enough memory";
 		case CCCoreLib::GeometricalAnalysisTools::ProcessCancelledByUser:
-			errorMessage = "Process cancelled by user";
-			break;
+			return "Process cancelled by user";
 		default:
 			assert(false);
-			errorMessage = "Unknown error";
 			break;
 		}
-		return errorMessage;
+		return "Unknown error";
 	}
 
-	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
-	                                PointCoordinateType          radius,
-	                                ccHObject::Container&        entities,
-	                                const CCVector3*             roughnessUpDir /*=nullptr*/,
-	                                QWidget*                     parent /*=nullptr*/,
-	                                ccProgressDialog*            progressDialog /*=nullptr*/)
+	bool ComputeGeomCharacteristics(const GeomCharacteristicWithSubOptionSet& characteristics,
+	                                PointCoordinateType                       radius,
+	                                const ccHObject::Container&               entities,
+	                                const CCVector3*                          roughnessUpDir /*=nullptr*/,
+	                                QWidget*                                  parent /*=nullptr*/)
 	{
 		size_t selNum = entities.size();
-		if (selNum < 1)
+		if (selNum == 0)
+		{
 			return false;
+		}
 
 		// no feature case
 		if (characteristics.empty())
@@ -288,306 +281,157 @@ namespace ccLibAlgorithms
 			return true;
 		}
 
-		ccProgressDialog* pDlg = progressDialog;
+		std::unique_ptr<ccProgressDialog> pDlg;
 		if (!pDlg && parent)
 		{
-			pDlg = new ccProgressDialog(true, parent);
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 		}
 
 		for (size_t i = 0; i < selNum; ++i)
 		{
-			// is the ith selected data is eligible for processing?
-			if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			// is the ith selected entity eligible for processing?
+			if (!entities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
-				assert(nullptr != cloud);
-
-				ccPointCloud* pc    = nullptr;
-				int           sfIdx = -1;
-				if (cloud->isA(CC_TYPES::POINT_CLOUD))
-				{
-					ccOctree::Shared octree = cloud->getOctree();
-					if (!octree)
-					{
-						if (pDlg)
-						{
-							pDlg->show();
-						}
-						octree = cloud->computeOctree(pDlg);
-						if (!octree)
-						{
-							ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
-							break;
-						}
-					}
-
-					pc = static_cast<ccPointCloud*>(cloud);
-					CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequestSet requests;
-					for (const GeomCharacteristic& g : characteristics)
-					{
-						QString sfName = GetCharacteristicSFName(g.charac, g.subOption, radius);
-						if (sfName.isEmpty())
-						{
-							if (pDlg != progressDialog)
-							{
-								delete pDlg;
-								pDlg = nullptr;
-							}
-
-							return false;
-						}
-
-						sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
-						if (sfIdx < 0)
-							sfIdx = pc->addScalarField(sfName.toStdString());
-						if (sfIdx < 0)
-						{
-							ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
-
-							if (pDlg != progressDialog)
-							{
-								delete pDlg;
-								pDlg = nullptr;
-							}
-
-							return false;
-						}
-
-						// ApproxLocalDensity is not supported in multi geometric feature requests computation.
-						// It's a special case that should be treated separately (see GeometricalAnalysisTools::ComputeCharacteristics)
-						if (g.charac == CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity)
-						{
-							// ComputeCharactersitic writes in the Current Out SF.
-							// we must set the corresponding before calling it.
-							pc->setCurrentScalarField(sfIdx);
-
-							// only the computation itself runs in a worker thread
-							CCCoreLib::GeometricalAnalysisTools::ErrorCode appoxDensResult = ccBackgroundTask::Run(
-							    [&]()
-							    {
-								    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(g.charac,
-								                                                                      g.subOption,
-								                                                                      cloud,
-								                                                                      radius,
-								                                                                      roughnessUpDir,
-								                                                                      pDlg,
-								                                                                      octree.data());
-							    });
-							if (appoxDensResult != CCCoreLib::GeometricalAnalysisTools::NoError)
-							{
-								QString errorMessage = GetErrorMessage(appoxDensResult);
-
-								ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
-								ccConsole::Warning(errorMessage);
-
-								if (pc && sfIdx >= 0)
-								{
-									pc->deleteScalarField(sfIdx);
-								}
-
-								if (pDlg != progressDialog)
-								{
-									delete pDlg;
-									pDlg = nullptr;
-								}
-
-								return false;
-							}
-
-							// the SF is not part of the requests and must be finalized here
-							if (auto approxSF = pc->getCCScalarField(sfIdx))
-							{
-								approxSF->computeMinAndMax();
-							}
-							pc->setCurrentDisplayedScalarField(sfIdx);
-							pc->showSF(true);
-							continue;
-						}
-
-						// populate the request structure (except for ApproxLocalDensity which was handled separately)
-						CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequest request;
-						request.c         = g.charac;
-						request.subOption = g.subOption;
-						request.sf        = (pc && sfIdx >= 0 ? pc->getCCScalarField(sfIdx).get() : nullptr);
-						request.sfIdx     = sfIdx;
-
-						requests.push_back(request);
-					}
-
-					// only the computation itself runs in a worker thread
-					CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
-					    [&]()
-					    {
-						    return CCCoreLib::GeometricalAnalysisTools::ComputeCharacteristics(requests,
-						                                                                       cloud,
-						                                                                       radius,
-						                                                                       roughnessUpDir,
-						                                                                       pDlg,
-						                                                                       octree.data());
-					    });
-
-					if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
-					{
-						for (const auto& request : requests)
-						{
-							if (pc && request.sfIdx >= 0)
-							{
-								// the SF was written directly (not through the 'in/out' SF of the cloud),
-								// so we address it by its index
-								auto sf = pc->getCCScalarField(request.sfIdx);
-								if (sf)
-								{
-									sf->computeMinAndMax();
-									if (request.c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
-									{
-										// signed roughness should be displayed with a symmetrical color scale
-										sf->setSymmetricalScale(true);
-									}
-								}
-								else
-								{
-									assert(false);
-								}
-							}
-						}
-						// display the last computed scalar field
-						if (!requests.empty() && requests.back().sfIdx >= 0)
-						{
-							pc->setCurrentDisplayedScalarField(requests.back().sfIdx);
-							pc->showSF(true);
-						}
-						cloud->prepareDisplayForRefresh();
-					}
-					else
-					{
-						QString errorMessage = GetErrorMessage(result);
-
-						ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
-						ccConsole::Warning(errorMessage);
-
-						for (auto request : requests)
-						{
-							if (pc && request.sfIdx >= 0)
-							{
-								pc->deleteScalarField(request.sfIdx);
-							}
-						}
-
-						if (pDlg != progressDialog)
-						{
-							delete pDlg;
-							pDlg = nullptr;
-						}
-
-						return false;
-					}
-				}
+				continue;
 			}
-		}
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entities[i]);
+			assert(nullptr != pc);
 
-		if (pDlg != progressDialog)
-		{
-			delete pDlg;
-			pDlg = nullptr;
-		}
-
-		return true;
-	}
-
-	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
-	                               int                                                     subOption,
-	                               PointCoordinateType                                     radius,
-	                               ccHObject::Container&                                   entities,
-	                               const CCVector3*                                        roughnessUpDir /*=nullptr*/,
-	                               QWidget*                                                parent /*= nullptr*/,
-	                               ccProgressDialog*                                       progressDialog /*=nullptr*/)
-	{
-		size_t selNum = entities.size();
-		if (selNum < 1)
-			return false;
-
-		QString sfName = GetCharacteristicSFName(algo, subOption, radius);
-		if (sfName.isEmpty())
-		{
-			return false;
-		}
-
-		ccProgressDialog* pDlg = progressDialog;
-		if (!pDlg && parent)
-		{
-			pDlg = new ccProgressDialog(true, parent);
-			pDlg->setAutoClose(false);
-		}
-
-		for (size_t i = 0; i < selNum; ++i)
-		{
-			// is the ith selected data is eligible for processing?
-			if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			ccOctree::Shared octree = pc->getOctree();
+			if (!octree)
 			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
-				assert(nullptr != cloud);
-
-				ccPointCloud* pc    = nullptr;
-				int           sfIdx = -1;
-				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				if (pDlg)
 				{
-					pc = static_cast<ccPointCloud*>(cloud);
-
-					sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
-					if (sfIdx < 0)
-						sfIdx = pc->addScalarField(sfName.toStdString());
-					if (sfIdx >= 0)
-						pc->setCurrentScalarField(sfIdx);
-					else
-					{
-						ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
-						continue;
-					}
+					pDlg->show();
 				}
-
-				ccOctree::Shared octree = cloud->getOctree();
+				octree = pc->computeOctree(pDlg.get());
 				if (!octree)
 				{
-					if (pDlg)
-					{
-						pDlg->show();
-					}
-					octree = cloud->computeOctree(pDlg);
-					if (!octree)
-					{
-						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
-						break;
-					}
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+					return false;
+				}
+			}
+
+			// build the set of 'requests' for the multi-characteristic computation
+			CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequestSet requests;
+			bool                                                                   success = true;
+			for (const GeomCharacteristicWithSubOption& g : characteristics)
+			{
+				QString sfName = GetCharacteristicSFName(g.charac, g.subOption, radius);
+				if (sfName.isEmpty())
+				{
+					ccConsole::Warning("Internal error");
+					success = false;
+					break;
 				}
 
+				int sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
+				if (sfIdx < 0)
+				{
+					sfIdx = pc->addScalarField(sfName.toStdString());
+				}
+				if (sfIdx < 0)
+				{
+					ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
+					success = false;
+					break;
+				}
+
+				// ApproxLocalDensity is not supported in multi geometric feature requests computation.
+				// It's a special case that should be treated separately (see GeometricalAnalysisTools::ComputeCharacteristics)
+				if (g.charac == CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity)
+				{
+					// ComputeCharactersitic writes in the active/current 'out' SF.
+					// we must set it up before calling the method.
+					pc->setCurrentScalarField(sfIdx);
+
+					// only the computation itself runs in a worker thread
+					CCCoreLib::GeometricalAnalysisTools::ErrorCode appoxDensResult = ccBackgroundTask::Run(
+					    [&]()
+					    {
+						    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(g.charac,
+						                                                                      g.subOption,
+						                                                                      pc,
+						                                                                      radius,
+						                                                                      roughnessUpDir,
+						                                                                      pDlg.get(),
+						                                                                      octree.data());
+					    });
+
+					if (appoxDensResult != CCCoreLib::GeometricalAnalysisTools::NoError)
+					{
+						QString errorMessage = ToErrorMessage(appoxDensResult);
+
+						ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(pc->getName()));
+						ccConsole::Warning(errorMessage);
+
+						if (pc && sfIdx >= 0)
+						{
+							pc->deleteScalarField(sfIdx);
+						}
+
+						success = false;
+						break;
+					}
+
+					// the approx density SF is not part of the requests and must be finalized here
+					auto approxDensitySF = pc->getCCScalarField(sfIdx);
+					if (approxDensitySF)
+					{
+						approxDensitySF->computeMinAndMax();
+					}
+					pc->setCurrentDisplayedScalarField(sfIdx);
+					pc->showSF(true);
+					continue;
+				}
+
+				// populate the request structure (except for ApproxLocalDensity which was handled separately)
+				CCCoreLib::GeometricalAnalysisTools::MultiGeomCharacteristicRequest request;
+				{
+					request.c         = g.charac;
+					request.subOption = g.subOption;
+					request.sf        = (pc && sfIdx >= 0 ? pc->getCCScalarField(sfIdx).get() : nullptr);
+					request.sfIdx     = sfIdx;
+				}
+
+				requests.push_back(request);
+			}
+
+			if (success)
+			{
 				// only the computation itself runs in a worker thread
 				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
 				    [&]()
 				    {
-					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(algo,
-					                                                                      subOption,
-					                                                                      cloud,
-					                                                                      radius,
-					                                                                      roughnessUpDir,
-					                                                                      pDlg,
-					                                                                      octree.data());
+					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharacteristics(requests,
+					                                                                       pc,
+					                                                                       radius,
+					                                                                       roughnessUpDir,
+					                                                                       pDlg.get(),
+					                                                                       octree.data());
 				    });
 
 				if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 				{
-					if (pc && sfIdx >= 0)
+					// update all scalar fields
+					int lastValidSFIdnex = -1;
+					for (const auto& request : requests)
 					{
-						pc->setCurrentDisplayedScalarField(sfIdx);
-						pc->showSF(sfIdx >= 0);
-						pc->getCurrentInScalarField()->computeMinAndMax();
-						if (algo == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+						if (pc && request.sfIdx >= 0)
 						{
-							// signed roughness should be displayed with a symmetrical color scale
-							auto sf = pc->getCCScalarField(pc->getCurrentInScalarFieldIndex());
+							// the SF was written directly (not through the 'in/out' SF of the cloud)
+							// so we retrieve it by its index
+							auto sf = pc->getCCScalarField(request.sfIdx);
 							if (sf)
 							{
-								sf->setSymmetricalScale(true);
+								lastValidSFIdnex = request.sfIdx;
+								sf->computeMinAndMax();
+								if (request.c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+								{
+									// signed roughness should be displayed with a symmetrical color scale
+									sf->setSymmetricalScale(true);
+								}
 							}
 							else
 							{
@@ -595,36 +439,35 @@ namespace ccLibAlgorithms
 							}
 						}
 					}
-					cloud->prepareDisplayForRefresh();
+
+					// display the last valid SF (if any)
+					if (lastValidSFIdnex >= 0)
+					{
+						pc->setCurrentDisplayedScalarField(lastValidSFIdnex);
+						pc->showSF(true);
+					}
+					pc->prepareDisplayForRefresh();
 				}
 				else
 				{
-					QString errorMessage = GetErrorMessage(result);
-
-					ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
-					ccConsole::Warning(errorMessage);
-
-					if (pc && sfIdx >= 0)
-					{
-						pc->deleteScalarField(sfIdx);
-						sfIdx = -1;
-					}
-
-					if (pDlg != progressDialog)
-					{
-						delete pDlg;
-						pDlg = nullptr;
-					}
-
-					return false;
+					ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(pc->getName()));
+					ccConsole::Warning(ToErrorMessage(result));
+					success = false;
 				}
 			}
-		}
 
-		if (pDlg != progressDialog)
-		{
-			delete pDlg;
-			pDlg = nullptr;
+			if (!success)
+			{
+				// early stop: we remove all the SFs that were created for this cloud
+				for (const auto& request : requests)
+				{
+					if (pc && request.sfIdx >= 0)
+					{
+						pc->deleteScalarField(request.sfIdx);
+					}
+				}
+				return false;
+			}
 		}
 
 		return true;

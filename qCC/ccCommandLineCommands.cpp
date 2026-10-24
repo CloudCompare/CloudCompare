@@ -2002,7 +2002,11 @@ bool CommandCurvature::process(ccCommandLineInterface& cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Curvature, curvType, kernelSize, entities, nullptr, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::Curvature, curvType}},
+	                                                kernelSize,
+	                                                entities,
+	                                                nullptr,
+	                                                cmd.widgetParent()))
 	{
 		// save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
@@ -2054,7 +2058,11 @@ bool CommandApproxDensity::process(ccCommandLineInterface& cmd)
 		densityType = *maybeDensityType;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType, 0, entities, nullptr, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType}},
+	                                                0,
+	                                                entities,
+	                                                nullptr,
+	                                                cmd.widgetParent()))
 	{
 		// save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds("APPROX_DENSITY"))
@@ -2104,7 +2112,11 @@ bool CommandDensity::process(ccCommandLineInterface& cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::LocalDensity, densityType, kernelSize, entities, nullptr, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::LocalDensity, densityType}},
+	                                                kernelSize,
+	                                                entities,
+	                                                nullptr,
+	                                                cmd.widgetParent()))
 	{
 		// save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds("DENSITY"))
@@ -2228,7 +2240,11 @@ bool CommandRoughness::process(ccCommandLineInterface& cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Roughness, 0, kernelSize, entities, _roughnessUpDir, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::Roughness, 0}},
+	                                                kernelSize,
+	                                                entities,
+	                                                _roughnessUpDir,
+	                                                cmd.widgetParent()))
 	{
 		// save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
@@ -8008,7 +8024,11 @@ bool CommandMoment::process(ccCommandLineInterface& cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0, kernelSize, entities, nullptr, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0}},
+	                                                kernelSize,
+	                                                entities,
+	                                                nullptr,
+	                                                cmd.widgetParent()))
 	{
 		// save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("MOMENT_KERNEL_%2").arg(kernelSize)))
@@ -8149,7 +8169,11 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (!ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, nullptr, cmd.widgetParent()))
+	if (!ccLibAlgorithms::ComputeGeomCharacteristics({{CCCoreLib::GeometricalAnalysisTools::Feature, featureType}},
+	                                                 kernelSize,
+	                                                 entities,
+	                                                 nullptr,
+	                                                 cmd.widgetParent()))
 	{
 		return cmd.error(QObject::tr("The computation of some geometric features failed."));
 	}

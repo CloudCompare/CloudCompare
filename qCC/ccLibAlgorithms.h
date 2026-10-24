@@ -36,39 +36,45 @@ namespace ccLibAlgorithms
 	//! Returns a default first guess for algorithms kernel size (several clouds)
 	double GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 
+	//! Returns the name of the scalar field that will be created by a given geometric characteristic computation
+	static QString GetCharacteristicSFName(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
+	                                       int                                                     subOption,
+	                                       PointCoordinateType                                     radius);
+
+	//! Returns the error message associated to a given GeometricalAnalysisTools::ErrorCode
+	static QString GetErrorMessage(CCCoreLib::GeometricalAnalysisTools::ErrorCode errorCode);
+
 	/*** CCCoreLib "standalone" algorithms ***/
 
 	//! Geometric characteristic (with sub option)
-	struct GeomCharacteristic
+	struct GeomCharacteristicWithSubOption
 	{
-		GeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
+		//! Default constructor
+		GeomCharacteristicWithSubOption(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
 		    : charac(c)
 		    , subOption(option)
 		{
 		}
 
-		CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic charac;
-		int                                                     subOption = 0;
+		//! Equality operator
+		bool operator==(const GeomCharacteristicWithSubOption& other) const
+		{
+			return charac == other.charac && subOption == other.subOption;
+		}
+
+		CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic charac;        //!< Geometric characteristic
+		int                                                     subOption = 0; //!< Sub option (if any)
 	};
 
-	//! Set of GeomCharacteristic instances
-	using GeomCharacteristicSet = std::vector<GeomCharacteristic>;
+	//! Set of GeomCharacteristicWithSubOption instances
+	using GeomCharacteristicWithSubOptionSet = std::vector<GeomCharacteristicWithSubOption>;
 
 	//! Computes geometrical characteristics (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
-	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
-	                                PointCoordinateType          radius,
-	                                ccHObject::Container&        entities,
-	                                const CCVector3*             roughnessUpDir = nullptr,
-	                                QWidget*                     parent         = nullptr);
-
-	//! Computes a geometrical characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
-	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
-	                               int                                                     subOption,
-	                               PointCoordinateType                                     radius,
-	                               ccHObject::Container&                                   entities,
-	                               const CCVector3*                                        roughnessUpDir = nullptr,
-	                               QWidget*                                                parent         = nullptr,
-	                               ccProgressDialog*                                       progressDialog = nullptr);
+	bool ComputeGeomCharacteristics(const GeomCharacteristicWithSubOptionSet& characteristics,
+	                                PointCoordinateType                       radius,
+	                                const ccHObject::Container&               entities,
+	                                const CCVector3*                          roughnessUpDir = nullptr,
+	                                QWidget*                                  parent         = nullptr);
 
 	// CCCoreLib algorithms handled by the 'ApplyCCCoreLibAlgorithm' method
 	enum CC_LIB_ALGORITHM

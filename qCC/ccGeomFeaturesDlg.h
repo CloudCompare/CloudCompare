@@ -35,9 +35,9 @@ class ccGeomFeaturesDlg : public QDialog
 	explicit ccGeomFeaturesDlg(QWidget* parent = nullptr);
 
 	//! Sets selected features
-	void setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features);
+	void setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicWithSubOptionSet& features);
 	//! Returns selected features
-	bool getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicSet& features) const;
+	bool getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicWithSubOptionSet& features) const;
 	//! Sets the default kernel radius (for 'precise' mode only)
 	void setRadius(double r);
 	//! Returns	the kernel radius (for 'precise' mode only)
@@ -52,16 +52,29 @@ class ccGeomFeaturesDlg : public QDialog
 	void reset();
 
   protected:
-	struct Option : ccLibAlgorithms::GeomCharacteristic
+	//! Composite structure for a geometric characteristic option and its corresponding checkbox
+	struct Option
 	{
-		Option(QCheckBox* cb, CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
-		    : ccLibAlgorithms::GeomCharacteristic(c, option)
+		//! Default constructor
+		Option(QCheckBox* cb = nullptr, CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c = CCCoreLib::GeometricalAnalysisTools::Feature, int option = 0)
+		    : gc(c, option)
 		    , checkBox(cb)
 		{
 		}
 
-		QCheckBox* checkBox = nullptr;
+		//! Equality operator
+		bool operator==(const Option& other) const
+		{
+			return gc == other.gc;
+		}
+
+		ccLibAlgorithms::GeomCharacteristicWithSubOption gc;                 //!< Geometric characteristic (with sub option)
+		QCheckBox*                                       checkBox = nullptr; //!< Corresponding checkbox
 	};
 
+	//! Add option
+	void addOption(const Option& option);
+
+	//! List of all available options
 	std::vector<Option> m_options;
 };

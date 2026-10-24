@@ -31,39 +31,56 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
 
 	try
 	{
-		m_options.reserve(27);
-		m_options.push_back(Option(roughnessCheckBox, CCCoreLib::GeometricalAnalysisTools::Roughness, 0));
-		m_options.push_back(Option(firstOrderMomentCheckBox, CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0));
-		m_options.push_back(Option(curvMeanCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::MEAN_CURV));
-		m_options.push_back(Option(curvGaussCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::GAUSSIAN_CURV));
-		m_options.push_back(Option(curvNCRCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::NORMAL_CHANGE_RATE));
-		m_options.push_back(Option(densityKnnCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
-		m_options.push_back(Option(densitySurfCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
-		m_options.push_back(Option(densityVolCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
-		m_options.push_back(Option(densityKnnApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
-		m_options.push_back(Option(densitySurfApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
-		m_options.push_back(Option(densityVolApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
-		m_options.push_back(Option(eigSumCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValuesSum));
-		m_options.push_back(Option(eigOmnivarianceCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Omnivariance));
-		m_options.push_back(Option(eigenentropyCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenEntropy));
-		m_options.push_back(Option(eigAnisotropyCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Anisotropy));
-		m_options.push_back(Option(eigPlanarityBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Planarity));
-		m_options.push_back(Option(eigLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Linearity));
-		m_options.push_back(Option(eigPCA1CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::PCA1));
-		m_options.push_back(Option(eigPCA2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::PCA2));
-		m_options.push_back(Option(eigSurfaceVarCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::SurfaceVariation));
-		m_options.push_back(Option(eigSphericityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Sphericity));
-		m_options.push_back(Option(eigVerticalityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Verticality));
-		m_options.push_back(Option(eigenvalue1CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue1));
-		m_options.push_back(Option(eigenvalue2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue2));
-		m_options.push_back(Option(eigenvalue3CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue3));
-		m_options.push_back(Option(degreeOfPlanarityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfPlanarity));
-		m_options.push_back(Option(degreeOfLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfLinearity));
+		addOption(Option(roughnessCheckBox, CCCoreLib::GeometricalAnalysisTools::Roughness, 0));
+		addOption(Option(firstOrderMomentCheckBox, CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0));
+		addOption(Option(curvMeanCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::MEAN_CURV));
+		addOption(Option(curvGaussCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::GAUSSIAN_CURV));
+		addOption(Option(curvNCRCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::NORMAL_CHANGE_RATE));
+		addOption(Option(densityKnnCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
+		addOption(Option(densitySurfCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
+		addOption(Option(densityVolCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
+		addOption(Option(densityKnnApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
+		addOption(Option(densitySurfApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
+		addOption(Option(densityVolApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
+		addOption(Option(eigSumCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValuesSum));
+		addOption(Option(eigOmnivarianceCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Omnivariance));
+		addOption(Option(eigenentropyCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenEntropy));
+		addOption(Option(eigAnisotropyCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Anisotropy));
+		addOption(Option(eigPlanarityBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Planarity));
+		addOption(Option(eigLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Linearity));
+		addOption(Option(eigPCA1CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::PCA1));
+		addOption(Option(eigPCA2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::PCA2));
+		addOption(Option(eigSurfaceVarCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::SurfaceVariation));
+		addOption(Option(eigSphericityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Sphericity));
+		addOption(Option(eigVerticalityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Verticality));
+		addOption(Option(eigenvalue1CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue1));
+		addOption(Option(eigenvalue2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue2));
+		addOption(Option(eigenvalue3CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue3));
+		addOption(Option(degreeOfPlanarityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfPlanarity));
+		addOption(Option(degreeOfLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfLinearity));
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Warning("[ccGeomFeaturesDlg] Not enough memory");
+		ccLog::Warning("[ccGeomFeaturesDlg] Not enough memory!");
 	}
+}
+
+void ccGeomFeaturesDlg::addOption(const Option& option)
+{
+	auto it = std::find(m_options.begin(), m_options.end(), option);
+	if (it != m_options.end())
+	{
+		ccLog::Warning(QString("Internal error: duplicate option for characteristic '%1'").arg(static_cast<int>(option.gc.charac)));
+		assert(false);
+		return;
+	}
+	if (option.checkBox == nullptr)
+	{
+		ccLog::Warning(QString("Internal error: null checkbox for characteristic '%1'").arg(static_cast<int>(option.gc.charac)));
+		assert(false);
+		return;
+	}
+	m_options.push_back(option);
 }
 
 void ccGeomFeaturesDlg::setUpDirection(const CCVector3& upDir)
@@ -87,25 +104,22 @@ CCVector3* ccGeomFeaturesDlg::getUpDirection() const
 	return nullptr;
 }
 
-void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features)
+void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicWithSubOptionSet& features)
 {
 	reset();
 
-	for (const ccLibAlgorithms::GeomCharacteristic& f : features)
+	for (const auto& f : features)
 	{
 		// find the corresponding checkbox
-		for (const Option& opt : m_options)
+		auto it = std::find(m_options.begin(), m_options.end(), Option(nullptr, f.charac, f.subOption));
+		if (it != m_options.end())
 		{
-			if (opt.charac == f.charac && opt.subOption == f.subOption)
-			{
-				opt.checkBox->setChecked(true);
-				break;
-			}
+			it->checkBox->setChecked(true);
 		}
 	}
 }
 
-bool ccGeomFeaturesDlg::getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicSet& features) const
+bool ccGeomFeaturesDlg::getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicWithSubOptionSet& features) const
 {
 	features.clear();
 
@@ -116,11 +130,14 @@ bool ccGeomFeaturesDlg::getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicS
 		{
 			assert(opt.checkBox);
 			if (opt.checkBox && opt.checkBox->isChecked())
-				features.push_back(opt);
+			{
+				features.push_back(opt.gc);
+			}
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
+		ccLog::Warning("[ccGeomFeaturesDlg::getSelectedFeatures] Not enough memory!");
 		return false;
 	}
 	return true;
@@ -139,5 +156,8 @@ void ccGeomFeaturesDlg::setRadius(double r)
 void ccGeomFeaturesDlg::reset()
 {
 	for (const Option& opt : m_options)
+	{
+		assert(opt.checkBox);
 		opt.checkBox->setChecked(false);
+	}
 }

@@ -164,11 +164,6 @@ New plugins
 
 Improvements:
 
-	- Compute multiple geometric features at one octree traversal
-		- create the target scalar fields for all requested features and pass pointers to CCCoreLib
-		- use of a PCAResults struct for caching eigen values and vectors within CCCoreLib::Neighbourhood
-		- writes values to scalar fields using globalIndex
-
 	- Display speed of clouds and meshes has been improved a lot
 		- use of a composite GLSL 1.2 program
 		- use of a LUT texture with uncompressed normals
@@ -399,6 +394,9 @@ Improvements:
 
 	- Cross Section (clipping box) tool
 		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)
+
+	- Tools > Other > Compute geometric feature:
+		- faster computation of multiple geometric features (only one octree traversal)
 
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same

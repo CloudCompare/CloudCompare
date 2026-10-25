@@ -15,7 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "STLFilter.h"
+#include "../include/STLFilter.h"
+
+// qCC_db
+#include <ccHObjectCaster.h>
+#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccNormalVectors.h>
+#include <ccOctree.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 
 // Qt
 #include <QApplication>
@@ -27,17 +36,9 @@
 #include <QStringList>
 #include <QTextStream>
 
-// qCC_db
-#include <ccHObjectCaster.h>
-#include <ccLog.h>
-#include <ccMesh.h>
-#include <ccNormalVectors.h>
-#include <ccOctree.h>
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
-
 // System
 #include <cstring>
+#include <memory>
 
 STLFilter::STLFilter()
     : FileIOFilter({"_STL Filter",
@@ -114,10 +115,10 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	unsigned faceCount = mesh->size();
 
 	// progress
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
 		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 		pDlg->start();
@@ -206,10 +207,10 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 	unsigned faceCount = mesh->size();
 
 	// progress
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
 		pDlg->setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 		pDlg->start();
@@ -430,10 +431,10 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 	mesh->setName(name);
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("(ASCII) STL file"));
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setRange(0, 0);
@@ -465,7 +466,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 			{
 				break;
 			}
-			else if (fp.error() != QFile::NoError)
+			if (fp.error() != QFile::NoError)
 			{
 				result = CC_FERR_READING;
 				break;
@@ -533,7 +534,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 		// 3rd to 5th lines: 'vertex vix viy viz'
 		unsigned vertIndexes[3]{0, 0, 0};
 		// unsigned pointCountBefore = pointCount;
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned int& vertIndex : vertIndexes)
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
@@ -596,7 +597,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 			}
 
 			// insert new point
-			vertIndexes[i] = pointCount++;
+			vertIndex = pointCount++;
 			vertices->addPoint(P);
 		}
 
@@ -738,10 +739,10 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 	}
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Loading binary STL file"));
 		pDlg->setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
 		pDlg->start();
@@ -762,7 +763,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 
 		// 3 vertices
 		unsigned vertIndexes[3];
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned int& vertIndex : vertIndexes)
 		{
 			// REAL32[3] Vertex 1,2 & 3
 			float Pf[3];
@@ -787,7 +788,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 			CCVector3 P = (Pd + Pshift).toPC();
 
 			// insert new point
-			vertIndexes[i] = pointCount++;
+			vertIndex = pointCount++;
 			vertices->addPoint(P);
 		}
 

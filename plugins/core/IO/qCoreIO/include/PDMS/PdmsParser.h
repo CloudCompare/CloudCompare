@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef PDMS_PARSER_HEADER
-#define PDMS_PARSER_HEADER
 
 #include "PdmsTools.h"
 
@@ -143,5 +142,3 @@ class PdmsParser
 	PdmsObjects::GenericItem* currentItem;
 	PdmsObjects::GenericItem* root;
 };
-
-#endif // PDMS_PARSER_HEADER

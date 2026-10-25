@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_PDMS_FILTER_HEADER
-#define CC_PDMS_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! PDMS .mac file I/O filter
 class PDMSFilter : public FileIOFilter
@@ -29,5 +29,3 @@ class PDMSFilter : public FileIOFilter
 	// inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 };
-
-#endif // CC_PDMS_FILTER_HEADER

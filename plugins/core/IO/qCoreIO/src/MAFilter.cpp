@@ -15,9 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "MAFilter.h"
-
-#include "FileIO.h"
+#include "../include/MAFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -26,6 +24,9 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
+// qCC_io
+#include <FileIO.h>
+
 // Qt
 #include <QDateTime>
 #include <QFileInfo>
@@ -33,6 +34,7 @@
 // System
 #include <cassert>
 #include <cstring>
+#include <memory>
 
 namespace
 {
@@ -44,7 +46,7 @@ namespace
 		edge*    nextEdge;
 	};
 
-	static void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCCoreLib::NormalizedProgress* nprogress = nullptr)
+	void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCCoreLib::NormalizedProgress* nprogress = nullptr)
 	{
 		for (unsigned i = 0; i < numberOfVertexes; ++i)
 		{
@@ -151,7 +153,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	const int                         coloursAdjustment = (hasColors ? 1 : 0);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Save MA file"));
 		pDlg->setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
 		pDlg->start();
@@ -571,18 +573,18 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 				ind[1]                          = tsi->i2;
 				ind[2]                          = tsi->i3;
 
-				for (unsigned char j = 0; j < 3; ++j)
+				for (unsigned int faceId : ind)
 				{
-					if (!theFacesIndexes[ind[j]])
+					if (!theFacesIndexes[faceId])
 					{
 						faceIndexes* f          = new faceIndexes;
 						f->faceIndex            = i;
 						f->nextFace             = nullptr;
-						theFacesIndexes[ind[j]] = f;
+						theFacesIndexes[faceId] = f;
 					}
 					else
 					{
-						faceIndexes* f = theFacesIndexes[ind[j]];
+						faceIndexes* f = theFacesIndexes[faceId];
 						while (f->nextFace)
 							f = f->nextFace;
 						f->nextFace            = new faceIndexes;

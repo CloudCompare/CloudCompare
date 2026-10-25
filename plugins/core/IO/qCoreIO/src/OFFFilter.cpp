@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "OFFFilter.h"
+#include "../include/OFFFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -24,9 +24,6 @@
 #include <ccNormalVectors.h>
 #include <ccOctree.h>
 #include <ccPointCloud.h>
-
-// System
-#include <string>
 
 OFFFilter::OFFFilter()
     : FileIOFilter({"_OFF Filter",
@@ -86,12 +83,12 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	stream.setRealNumberPrecision(12); // TODO: ask the user?
 
 	// header: "OFF"
-	stream << "OFF" << Qt::endl;
+	stream << "OFF" << "\n";
 
 	// 2nd line: vertices count / faces count / edges count
 	unsigned vertCount = vertices->size();
 	unsigned triCount  = mesh->size();
-	stream << vertCount << ' ' << triCount << ' ' << 0 << Qt::endl;
+	stream << vertCount << ' ' << triCount << ' ' << 0 << "\n";
 
 	// save vertices
 	{
@@ -99,7 +96,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			const CCVector3* P       = vertices->getPoint(i);
 			CCVector3d       Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
-			stream << Pglobal.x << ' ' << Pglobal.y << ' ' << Pglobal.z << Qt::endl;
+			stream << Pglobal.x << ' ' << Pglobal.y << ' ' << Pglobal.z << "\n";
 		}
 	}
 
@@ -108,7 +105,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
-			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << Qt::endl;
+			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << "\n";
 		}
 	}
 
@@ -124,7 +121,7 @@ static QString GetNextLine(QTextStream& stream)
 		currentLine = stream.readLine();
 		// end of file?
 		if (currentLine.isNull())
-			return QString();
+			return {};
 	} while (currentLine.startsWith("#") || currentLine.isEmpty());
 
 	return currentLine;

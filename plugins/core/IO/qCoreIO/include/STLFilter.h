@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_STL_FILTER_HEADER
-#define CC_STL_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 // Qt
 #include <QFile>
@@ -58,5 +58,3 @@ class STLFilter : public FileIOFilter
 	                             ccPointCloud*   vertices,
 	                             LoadParameters& parameters);
 };
-
-#endif // CC_STL_FILTER_HEADER

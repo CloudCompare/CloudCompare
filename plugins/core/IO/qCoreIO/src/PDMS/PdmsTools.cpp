@@ -15,13 +15,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PdmsTools.h"
+#include "../../include/PDMS/PdmsTools.h"
 
+// qCC
+#include <ccLog.h>
+
+// CCCoreLib
+#include <CCMath.h>
+
+// Qt
 #include <QSet>
 
 // System
-#include "CCMath.h"
-
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -33,10 +38,7 @@ using namespace PdmsObjects;
 
 /////////// MACROS ////////////
 
-#define memalert(e, s) std::cerr << "Memory alert [" << __FILE__ << ", line " << __LINE__ << "] with size " << s << " : " << e.what() << std::endl;
-#define memfail(e, s) \
-	memalert(e, s); \
-	abort();
+#define logMemAlert(e, s) ccLog::Warning(QStringLiteral("[PDMSFilter] Memory alert [line %1] with size %2: %3").arg(__LINE__).arg(s).arg(e))
 
 /////////// FUNCTIONS ////////////
 #define PDMS_SQR(a) ((a) * (a))
@@ -66,11 +68,8 @@ void PdmsObjects::Stack::Clear()
 
 		s_elementsStack.remove(item);
 
-		if (item)
-		{
-			// ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
-			delete item;
-		}
+		// ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
+		delete item;
 	}
 
 	s_elementsStack.clear();
@@ -149,6 +148,11 @@ bool DistanceValue::execute(PdmsObjects::GenericItem*& item) const
 
 Reference& Reference::operator=(const Reference& ref)
 {
+	if (this == &ref)
+	{
+		return *this;
+	}
+
 	command = ref.command;
 	token   = ref.token;
 	strcpy(refname, ref.refname);
@@ -387,9 +391,9 @@ bool Coordinates::getVector(CCVector3& u) const
 int Coordinates::getNbComponents(bool onlyset) const
 {
 	int nb = 0;
-	for (int i = 0; i < 3; i++)
+	for (const auto& coord : coords)
 	{
-		if (PdmsToken::isCoordinate(coords[i].command))
+		if (PdmsToken::isCoordinate(coord.command))
 		{
 			if (!onlyset || coords[nb].valueChanges >= 1)
 				nb++;
@@ -814,7 +818,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem*& item) const
 	}
 	catch (std::exception& nex)
 	{
-		memalert(nex, 1);
+		logMemAlert(nex.what(), 1);
 		return false;
 	}
 
@@ -872,7 +876,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem*& item) const
 	}
 	catch (std::exception& pex)
 	{
-		memalert(pex, 1);
+		logMemAlert(pex.what(), 1);
 		PdmsObjects::Stack::Destroy(newElement);
 		// delete newElement;
 		return false;
@@ -964,7 +968,7 @@ bool HierarchyNavigation::execute(PdmsObjects::GenericItem*& item) const
 		}
 		catch (std::exception& nex)
 		{
-			memfail(nex, 1);
+			logMemAlert(nex.what(), 1);
 			return false;
 		}
 		result->push(item);
@@ -1043,7 +1047,7 @@ Command* Command::Create(Token t)
 	}
 	catch (std::exception& nex)
 	{
-		memfail(nex, 1);
+		logMemAlert(nex.what(), 1);
 		return nullptr;
 	}
 }
@@ -1167,9 +1171,9 @@ bool GenericItem::convertCoordinateSystem()
 		positionReference = owner;
 	// init orientationReferences
 	{
-		for (unsigned k = 0; k < 3; k++)
-			if (!orientationReferences[k])
-				orientationReferences[k] = owner;
+		for (auto& orientation : orientationReferences)
+			if (!orientation)
+				orientation = owner;
 	}
 	// Update position coordinates
 	if (positionReference)
@@ -1229,7 +1233,8 @@ bool GenericItem::scan(Token t, std::vector<GenericItem*>& array)
 		}
 		catch (std::exception& pex)
 		{
-			memfail(pex, array.size());
+			logMemAlert(pex.what(), array.size());
+			return false;
 		}
 		return true;
 	}
@@ -1239,9 +1244,9 @@ bool GenericItem::scan(Token t, std::vector<GenericItem*>& array)
 
 DesignElement::~DesignElement()
 {
-	for (std::list<DesignElement*>::iterator it = nelements.begin(); it != nelements.end(); ++it)
+	for (auto* element : nelements)
 	{
-		GenericItem* item = *it;
+		GenericItem* item = element;
 		if (item)
 		{
 			Stack::Destroy(item);
@@ -1263,7 +1268,7 @@ bool DesignElement::push(GenericItem* i)
 			}
 			catch (std::exception& pex)
 			{
-				memalert(pex, nelements.size());
+				logMemAlert(pex.what(), nelements.size());
 				return false;
 			}
 			if (element->owner)
@@ -1308,16 +1313,16 @@ void GroupElement::clear(bool del)
 {
 	if (del)
 	{
-		for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
+		for (auto* element : elements)
 		{
-			GenericItem* item = *eit;
-			if (*eit)
+			GenericItem* item = element;
+			if (element)
 				Stack::Destroy(item);
 		}
-		for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
+		for (auto* hit : subhierarchy)
 		{
-			GenericItem* item = *hit;
-			if (*hit)
+			GenericItem* item = hit;
+			if (hit)
 				Stack::Destroy(item);
 		}
 	}
@@ -1346,7 +1351,7 @@ bool GroupElement::push(GenericItem* i)
 			}
 			catch (std::exception& pex)
 			{
-				memalert(pex, subhierarchy.size());
+				logMemAlert(pex.what(), subhierarchy.size());
 				return false;
 			}
 		}
@@ -1372,7 +1377,7 @@ bool GroupElement::push(GenericItem* i)
 		}
 		catch (std::exception& pex)
 		{
-			memalert(pex, elements.size());
+			logMemAlert(pex.what(), elements.size());
 			return false;
 		}
 		return true;
@@ -1409,11 +1414,11 @@ bool GroupElement::convertCoordinateSystem()
 
 	if (!GenericItem::convertCoordinateSystem())
 		return false;
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
-		if (!(*eit)->convertCoordinateSystem())
+	for (auto* element : elements)
+		if (!element->convertCoordinateSystem())
 			return false;
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
-		if (!(*hit)->convertCoordinateSystem())
+	for (auto* hit : subhierarchy)
+		if (!hit->convertCoordinateSystem())
 			return false;
 	return true;
 }
@@ -1431,12 +1436,17 @@ GenericItem* GroupElement::scan(const char* str)
 
 bool GroupElement::scan(Token t, std::vector<GenericItem*>& items)
 {
-	GenericItem::scan(t, items);
+	if (!GenericItem::scan(t, items))
+	{
+		return false;
+	}
 	size_t size = items.size();
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
-		(*eit)->scan(t, items);
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
-		(*hit)->scan(t, items);
+	for (auto* element : elements)
+		if (!element->scan(t, items))
+			return false;
+	for (auto* hit : subhierarchy)
+		if (!hit->scan(t, items))
+			return false;
 	return (items.size() > size);
 }
 
@@ -1472,26 +1482,26 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 		output << "SUBSTRUCTURE";
 		break;
 	default:
-		std::cout << "Error : cannot write group " << level << std::endl;
-		return std::pair<int, int>(0, 0);
+		ccLog::Error(QStringLiteral("[PDMSFilter] Error : cannot write group %1").arg(level));
+		return {0, 0};
 	}
 
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	std::pair<int, int> nb(1, 0);
 
-	for (std::list<GroupElement*>::const_iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
+	for (auto* hit : subhierarchy)
 	{
-		std::pair<int, int> n = (*hit)->write(output, nbtabs + 1);
+		std::pair<int, int> n = hit->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
 
-	for (std::list<DesignElement*>::const_iterator eit = elements.begin(); eit != elements.end(); ++eit)
+	for (auto* element : elements)
 	{
-		std::pair<int, int> n = (*eit)->write(output, nbtabs + 1);
+		std::pair<int, int> n = element->write(output, nbtabs + 1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
@@ -1500,7 +1510,7 @@ std::pair<int, int> GroupElement::write(std::ostream& output, int nbtabs) const
 		for (int i = 0; i < nbtabs; i++)
 			output << "\t";
 	}
-	output << "END" << std::endl;
+	output << "END\n";
 	return nb;
 }
 
@@ -1553,41 +1563,41 @@ std::pair<int, int> SCylinder::write(std::ostream& output, int nbtabs) const
 	output << "NEW SLCYLINDER";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DIAMETER " << diameter << std::endl;
+	output << "DIAMETER " << diameter << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees(xtshear) << std::endl;
+	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees(xtshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees(xbshear) << std::endl;
+	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees(xbshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees(ytshear) << std::endl;
+	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees(ytshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees(ybshear) << std::endl;
+	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees(ybshear) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
 
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool CTorus::setValue(Token t, PointCoordinateType value)
@@ -1627,31 +1637,31 @@ std::pair<int, int> CTorus::write(std::ostream& output, int nbtabs) const
 	output << "NEW CTORUS";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RINSIDE " << inside_radius << std::endl;
+	output << "RINSIDE " << inside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ROUTSIDE " << outside_radius << std::endl;
+	output << "ROUTSIDE " << outside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool RTorus::setValue(Token t, PointCoordinateType value)
@@ -1695,34 +1705,34 @@ std::pair<int, int> RTorus::write(std::ostream& output, int nbtabs) const
 	output << "NEW RTORUS";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RINSIDE " << inside_radius << std::endl;
+	output << "RINSIDE " << inside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ROUTSIDE " << outside_radius << std::endl;
+	output << "ROUTSIDE " << outside_radius << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees(angle) << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 Dish::Dish()
@@ -1765,11 +1775,9 @@ PointCoordinateType Dish::surface() const
 			PointCoordinateType a = acos(r / height);
 			return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + (a * r * height / sin(a))));
 		}
-		else
-		{
-			PointCoordinateType a = acos(height / r);
-			return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a)) * log((1 + sin(a)) / cos(a)))));
-		}
+
+		PointCoordinateType a = acos(height / r);
+		return static_cast<PointCoordinateType>(M_PI * (PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a)) * log((1 + sin(a)) / cos(a)))));
 	}
 	return static_cast<PointCoordinateType>(M_PI * diameter * height);
 }
@@ -1781,31 +1789,31 @@ std::pair<int, int> Dish::write(std::ostream& output, int nbtabs) const
 	output << "NEW DISH";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "RADIUS " << radius << std::endl;
+	output << "RADIUS " << radius << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DIAMETER " << diameter << std::endl;
+	output << "DIAMETER " << diameter << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 bool Cone::setValue(Token t, PointCoordinateType value)
@@ -1856,31 +1864,31 @@ std::pair<int, int> Cone::write(std::ostream& output, int nbtabs) const
 	output << "NEW CONE";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "HEIGHT " << height << std::endl;
+	output << "HEIGHT " << height << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DBOTTOM " << dbottom << std::endl;
+	output << "DBOTTOM " << dbottom << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "DTOP " << dtop << std::endl;
+	output << "DTOP " << dtop << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 Box::Box()
@@ -1922,36 +1930,36 @@ std::pair<int, int> Box::write(std::ostream& output, int nbtabs) const
 		output << "NEW BOX";
 	if (strlen(name))
 		output << " /" << name;
-	output << std::endl;
+	output << "\n";
 
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XLENGTH " << lengths[0] << std::endl;
+	output << "XLENGTH " << lengths[0] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YLENGTH " << lengths[1] << std::endl;
+	output << "YLENGTH " << lengths[1] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ZLENGTH " << lengths[2] << std::endl;
+	output << "ZLENGTH " << lengths[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
+	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << "\n";
 	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
-	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
+	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << "\n";
 
 	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
-	output << "END" << std::endl;
+	output << "END\n";
 
-	return std::pair<int, int>(0, 1);
+	return {0, 1};
 }
 
 std::pair<int, int> Vertex::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Loop::push(GenericItem* i)
@@ -1980,7 +1988,7 @@ void Loop::remove(GenericItem* i)
 
 std::pair<int, int> Loop::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Extrusion::push(GenericItem* l)
@@ -2023,7 +2031,7 @@ PointCoordinateType Extrusion::surface() const
 
 std::pair<int, int> Extrusion::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Pyramid::setValue(Token t, PointCoordinateType value)
@@ -2065,7 +2073,7 @@ PointCoordinateType Pyramid::surface() const
 
 std::pair<int, int> Pyramid::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }
 
 bool Snout::setValue(Token t, PointCoordinateType value)
@@ -2101,5 +2109,5 @@ PointCoordinateType Snout::surface() const
 
 std::pair<int, int> Snout::write(std::ostream& output, int nbtabs) const
 {
-	return std::pair<int, int>(0, 0);
+	return {0, 0};
 }

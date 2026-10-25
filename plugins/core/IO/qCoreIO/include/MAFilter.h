@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MA_FILTER_HEADER
-#define CC_MA_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Maya ASCII meshes file I/O filter
 class MAFilter : public FileIOFilter
@@ -30,5 +30,3 @@ class MAFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_MA_FILTER_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SIMPLE_BIN_FILTER_HEADER
-#define CC_SIMPLE_BIN_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Simple binary file (with attached text meta-file)
 class SimpleBinFilter : public FileIOFilter
@@ -32,5 +32,3 @@ class SimpleBinFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_SIMPLE_BIN_FILTER_HEADER

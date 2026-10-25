@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "VTKFilter.h"
+#include "../include/VTKFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -259,7 +259,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Error("VTK binary format not supported yet!");
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
-	else if (fileType.startsWith("ASCII"))
+	if (fileType.startsWith("ASCII"))
 	{
 		// allow blank lines
 		QString dataType;
@@ -343,9 +343,9 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline = inFile.readLine();
 				parts    = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
-					Pd.u[coordIndex] = parts[i].toDouble(&ok);
+					Pd.u[coordIndex] = part.toDouble(&ok);
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
@@ -435,7 +435,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					error = CC_FERR_MALFORMED_FILE;
 					break;
 				}
-				else if (vertCount < 3)
+				if (vertCount < 3)
 				{
 					ccLog::Warning(QString("[VTK] Element #%1 of %2 data is corrupted! (not enough indexes)").arg(i).arg(typeName));
 				}
@@ -534,10 +534,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
 					bool ok;
-					N.u[coordIndex] = static_cast<PointCoordinateType>(parts[i].toDouble(&ok));
+					N.u[coordIndex] = static_cast<PointCoordinateType>(part.toDouble(&ok));
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
@@ -586,10 +586,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", Qt::SkipEmptyParts);
 
-				for (int i = 0; i < parts.size(); ++i)
+				for (const auto& part : parts)
 				{
 					bool ok;
-					rgb.rgb[coordIndex] = static_cast<ColorCompType>(parts[i].toDouble(&ok) * ccColor::MAX);
+					rgb.rgb[coordIndex] = static_cast<ColorCompType>(part.toDouble(&ok) * ccColor::MAX);
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
@@ -632,8 +632,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			bool expected = (lastDataSize != 0);
 			assert(!acceptLookupTables || expected); // i.e. lastDataSize shouldn't be 0 for 'accepted' lookup tables
 
-			QStringList parts    = nextline.split(" ", Qt::SkipEmptyParts);
-			QString     itemName = parts[0];
+			QStringList    parts    = nextline.split(" ", Qt::SkipEmptyParts);
+			const QString& itemName = parts[0];
 			if (parts.size() > 2)
 			{
 				bool ok       = false;
@@ -687,10 +687,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 				if (expected)
 				{
-					for (int i = 0; i < parts.size(); ++i)
+					for (const auto& part : parts)
 					{
 						bool       ok;
-						ScalarType d = static_cast<ScalarType>(parts[i].toDouble(&ok));
+						ScalarType d = static_cast<ScalarType>(part.toDouble(&ok));
 						if (!ok)
 						{
 							ccLog::Warningf("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);

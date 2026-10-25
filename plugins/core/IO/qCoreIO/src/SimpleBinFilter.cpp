@@ -15,11 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "SimpleBinFilter.h"
-
-// Qt
-#include <QFileInfo>
-#include <QSettings>
+#include "../include/SimpleBinFilter.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -27,8 +23,13 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// system
+// Qt
+#include <QFileInfo>
+#include <QSettings>
+
+// System
 #include <cassert>
+#include <memory>
 
 // header: 32 first bytes
 constexpr size_t c_headerSize = 64;
@@ -53,22 +54,22 @@ bool SimpleBinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusiv
 	return (type == CC_TYPES::POINT_CLOUD);
 }
 
-CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
-	if (!root || filename.isNull() || !root->isA(CC_TYPES::POINT_CLOUD))
+	if (!entity || filename.isNull() || !entity->isA(CC_TYPES::POINT_CLOUD))
 	{
 		assert(false);
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(root);
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 	if (!cloud)
 	{
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
-	QString headerFilename = filename;
-	QString dataFilename   = filename + ".data";
+	const QString& headerFilename = filename;
+	QString        dataFilename   = filename + ".data";
 
 	ccLog::Print(QString("[SBF] Saving file '%1'...").arg(headerFilename));
 
@@ -197,10 +198,10 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 	unsigned sfCount    = cloud->getNumberOfScalarFields();
 	unsigned pointCount = cloud->size();
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Simple BIN file"));
 		pDlg->setInfo(QObject::tr("Saving %1 points / %2 scalar field(s)").arg(pointCount).arg(sfCount));
 		pDlg->setModal(true);
@@ -316,17 +317,14 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				ccLog::Error("[SBF] Invalid global shift");
 				return CC_FERR_MALFORMED_FILE;
 			}
-			else
+			bool ok[3]{false, false, false};
+			descriptor.globalShift.x = strGlobalShift[0].toDouble(ok);
+			descriptor.globalShift.y = strGlobalShift[1].toDouble(ok + 1);
+			descriptor.globalShift.z = strGlobalShift[2].toDouble(ok + 2);
+			if (!ok[0] || !ok[1] || !ok[2])
 			{
-				bool ok[3]               = {false, false, false};
-				descriptor.globalShift.x = strGlobalShift[0].toDouble(ok);
-				descriptor.globalShift.y = strGlobalShift[1].toDouble(ok + 1);
-				descriptor.globalShift.z = strGlobalShift[2].toDouble(ok + 2);
-				if (!ok[0] || !ok[1] || !ok[2])
-				{
-					ccLog::Error("[SBF] Invalid global shift");
-					return CC_FERR_MALFORMED_FILE;
-				}
+				ccLog::Error("[SBF] Invalid global shift");
+				return CC_FERR_MALFORMED_FILE;
 			}
 		}
 
@@ -507,10 +505,10 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Simple BIN file"));
 		pDlg->setInfo(QObject::tr("Loading %1 points / %2 scalar field(s)").arg(descriptor.pointCount).arg(descriptor.SFs.size()));
 		pDlg->setModal(true);
@@ -618,7 +616,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	{
 		return CC_FERR_CANCELED_BY_USER;
 	}
-	else if (cloud->size() < descriptor.pointCount)
+	if (cloud->size() < descriptor.pointCount)
 	{
 		cloud->shrinkToFit();
 	}

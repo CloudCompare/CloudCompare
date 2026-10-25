@@ -29,6 +29,8 @@
 #include <QTextStream>
 
 // System
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 
 VTKFilter::VTKFilter()
@@ -588,8 +590,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 				for (int i = 0; i < parts.size(); ++i)
 				{
-					bool ok;
-					rgb.rgb[coordIndex] = static_cast<ColorCompType>(parts[i].toDouble(&ok) * ccColor::MAX);
+					bool   ok;
+					double value = parts[i].toDouble(&ok);
+					// round (instead of truncating), otherwise a color saved as 7/255 could be read back as 6
+					rgb.rgb[coordIndex] = static_cast<ColorCompType>(std::round(std::clamp(value, 0.0, 1.0) * ccColor::MAX));
 					if (!ok)
 					{
 						ccLog::Warningf("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);

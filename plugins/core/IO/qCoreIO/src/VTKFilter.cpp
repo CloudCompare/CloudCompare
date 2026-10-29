@@ -591,7 +591,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				for (const auto& part : parts)
 				{
 					bool   ok;
-					double value = parts.toDouble(&ok);
+					double value = part.toDouble(&ok);
 					// round (instead of truncating), otherwise a color saved as 7/255 could be read back as 6
 					if (!ok)
 					{
@@ -600,8 +600,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 						iCol  = lastDataSize;
 						break;
 					}
-					
-          rgb.rgb[coordIndex] = static_cast<ColorCompType>(std::round(std::clamp(value, 0.0, 1.0) * ccColor::MAX));
+
+					rgb.rgb[coordIndex] = static_cast<ColorCompType>(std::round(std::clamp(value, 0.0, 1.0) * ccColor::MAX));
 
 					if (coordIndex == 2)
 					{

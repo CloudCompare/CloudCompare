@@ -15,9 +15,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PdmsParser.h"
+#include "../../include/PDMS/PdmsParser.h"
 
-// system
+// System
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -497,7 +497,7 @@ void PdmsFileSession::skipHandleCommand()
 			return;
 	}
 	//"HANDLE(...) does not lie in tokenBuffer, then search it in the file
-	while (!(opened > 0 && state == 0))
+	while (opened <= 0 || state != 0)
 	{
 		int car = readChar();
 		if (car == '(')
@@ -514,9 +514,9 @@ void PdmsFileSession::skipHandleCommand()
 void PdmsFileSession::printWarning(const char* str)
 {
 	if (currentToken == PDMS_EOS)
-		std::cerr << "[" << qUtf8Printable(m_filename) << "]@postprocessing : " << str << std::endl;
+		std::cerr << "[" << qUtf8Printable(m_filename) << "]@postprocessing : " << str << "\n";
 	else
-		std::cerr << "[" << qUtf8Printable(m_filename) << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
+		std::cerr << "[" << qUtf8Printable(m_filename) << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << "\n";
 }
 
 ///////////////////////////

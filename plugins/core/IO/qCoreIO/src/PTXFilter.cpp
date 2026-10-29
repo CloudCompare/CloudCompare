@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PTXFilter.h"
+#include "../include/PTXFilter.h"
 
 // qCC_db
 #include <ccColorScalesManager.h>
@@ -32,9 +32,9 @@
 
 // System
 #include <cassert>
-#include <string>
+#include <memory>
 
-const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
+constexpr char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
 PTXFilter::PTXFilter()
     : FileIOFilter({"_PTX Filter",
@@ -109,19 +109,19 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	ScalarType    maxIntensity = 0;
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Loading PTX file"));
 		pDlg->setAutoClose(false);
 	}
 
 	// progress dialog (for normals computation)
-	std::unique_ptr<ccProgressDialog> normalsProgressDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> normalsProgressDlg;
 	if (parameters.parentWidget && parameters.autoComputeNormals)
 	{
-		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		normalsProgressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		normalsProgressDlg->setAutoClose(false);
 		normalsProgressDlg->hide();
 	}
@@ -217,7 +217,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		}
 
 		// now we can read the grid cells
-		ccPointCloud* cloud = new ccPointCloud();
+		auto cloud = std::make_unique<ccPointCloud>();
 		if (container.getChildrenNumber() == 0)
 		{
 			cloud->setName("unnamed - Cloud");
@@ -235,8 +235,6 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		if (!cloud->reserve(gridSize))
 		{
 			result = CC_FERR_NOT_ENOUGH_MEMORY;
-			delete cloud;
-			cloud = nullptr;
 			break;
 		}
 
@@ -248,7 +246,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 		// intensities
 		auto intensitySF = std::make_shared<ccScalarField>(CC_PTX_INTENSITY_FIELD_NAME);
-		if (!intensitySF->reserveSafe(static_cast<unsigned>(gridSize)))
+		if (!intensitySF->reserveSafe(gridSize))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
 			intensitySF.reset();
@@ -457,8 +455,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		// is there at least one valid point in this grid?
 		if (cloud->size() == 0)
 		{
-			delete cloud;
-			cloud = nullptr;
+			cloud.reset();
 			intensitySF.reset();
 
 			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex + 1));
@@ -499,7 +496,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			{
 				// determine best sensor parameters (mainly yaw and pitch steps)
 				ccGLMatrix cloudToSensorTrans((sensorTransD.inverse() * cloudTransD).data());
-				sensor = ccGriddedTools::ComputeBestSensor(cloud, grid, &cloudToSensorTrans);
+				sensor = ccGriddedTools::ComputeBestSensor(cloud.get(), grid, &cloudToSensorTrans);
 			}
 
 			// we apply the transformation
@@ -518,7 +515,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			// scan grid
 			if (hasIndexGrid)
 			{
-				grid->validCount     = static_cast<unsigned>(cloud->size());
+				grid->validCount     = cloud->size();
 				grid->minValidIndex  = 0;
 				grid->maxValidIndex  = grid->validCount - 1;
 				grid->sensorPosition = sensorTransD;
@@ -535,7 +532,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			cloud->showColors(cloud->hasColors());
 			cloud->showNormals(cloud->hasNormals());
 
-			container.addChild(cloud);
+			container.addChild(cloud.release());
 
 #ifdef QT_DEBUG
 			// break;

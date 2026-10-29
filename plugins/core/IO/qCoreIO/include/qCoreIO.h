@@ -1,5 +1,4 @@
-#ifndef QCORE_IO_HEADER
-#define QCORE_IO_HEADER
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// CCPluginStub
 #include <ccIOPluginInterface.h>
 
 class qCoreIO : public QObject
@@ -35,5 +35,3 @@ class qCoreIO : public QObject
 
 	FilterList getFilters() override;
 };
-
-#endif // QCORE_IO_HEADER

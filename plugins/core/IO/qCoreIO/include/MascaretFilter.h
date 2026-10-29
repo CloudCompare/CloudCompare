@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MASCARET_FILTER_HEADER
-#define CC_MASCARET_FILTER_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Mascaret profile I/O filter
 /** See http://www.opentelemac.org/
@@ -32,5 +32,3 @@ class MascaretFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_MASCARET_FILTER_HEADER

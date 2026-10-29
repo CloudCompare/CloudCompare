@@ -17,7 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Wavefront meshes file I/O filter
 class ObjFilter : public FileIOFilter

@@ -15,7 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "DotbimFilter.h"
+#include "../include/DotbimFilter.h"
+
+// qCC_db
+#include <ccGLMatrix.h>
+#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
 
 // Qt
 #include <QFile>
@@ -26,14 +32,7 @@
 #include <QJsonValue>
 #include <QMap>
 
-// qCC_db
-#include <ccGLMatrix.h>
-#include <ccLog.h>
-#include <ccMesh.h>
-#include <ccPointCloud.h>
-
 // System
-#include <memory>
 #include <new>
 
 DotbimFilter::DotbimFilter()
@@ -111,9 +110,9 @@ try
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
 			continue;
 		}
-		QJsonObject meshObj     = *meshIt;
-		QJsonArray  coordinates = meshObj.value("coordinates").toArray();
-		QJsonArray  indices     = meshObj.value("indices").toArray();
+		const QJsonObject& meshObj     = *meshIt;
+		QJsonArray         coordinates = meshObj.value("coordinates").toArray();
+		QJsonArray         indices     = meshObj.value("indices").toArray();
 		if (coordinates.size() < 3 || indices.size() < 3)
 		{
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
@@ -134,13 +133,13 @@ try
 		unsigned vertexCount = static_cast<unsigned>(coordinates.size() / 3);
 
 		ccPointCloud* vertices = new ccPointCloud("vertices");
-		ccMesh*       mesh     = new ccMesh(vertices);
+		// Mesh takes ownership of vertices
+		auto mesh = std::make_unique<ccMesh>(vertices);
 		mesh->addChild(vertices);
 		vertices->setEnabled(false);
 
 		if (!vertices->reserve(vertexCount) || !mesh->reserve(triCount))
 		{
-			delete mesh;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
@@ -197,7 +196,6 @@ try
 		if (mesh->size() == 0)
 		{
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
-			delete mesh;
 			continue;
 		}
 
@@ -220,7 +218,7 @@ try
 			}
 		}
 
-		container.addChild(mesh);
+		container.addChild(mesh.release());
 		++loadedCount;
 	}
 

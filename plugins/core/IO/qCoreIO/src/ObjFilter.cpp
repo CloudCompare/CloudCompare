@@ -15,17 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ObjFilter.h"
+#include "../include/ObjFilter.h"
 
-#include "FileIO.h"
-
-// Qt
-#include <QApplication>
-#include <QFile>
-#include <QFileInfo>
-#include <QString>
-#include <QStringList>
-#include <QTextStream>
+// CCCoreLib
+#include <Delaunay2dMesh.h>
 
 // qCC_db
 #include <ccChunk.h>
@@ -40,11 +33,21 @@
 #include <ccProgressDialog.h>
 #include <ccSubMesh.h>
 
-// CCCoreLib
-#include <Delaunay2dMesh.h>
+// qCC_io
+#include <FileIO.h>
+
+// Qt
+#include <QApplication>
+#include <QFile>
+#include <QFileInfo>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 // System
+#include <algorithm>
 #include <cstring>
+#include <memory>
 
 ObjFilter::ObjFilter()
     : FileIOFilter({"_OBJ Filter",
@@ -120,10 +123,10 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	// progress (start with vertices)
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		if (mesh)
 		{
 			pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
@@ -143,8 +146,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
 
-	stream << "# " << FileIO::createdBy() << Qt::endl;
-	stream << "# " << FileIO::createdDateTime() << Qt::endl;
+	stream << "# " << FileIO::createdBy() << "\n";
+	stream << "# " << FileIO::createdDateTime() << "\n";
 
 	if (file.error() != QFile::NoError)
 	{
@@ -155,7 +158,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		const CCVector3* P       = vertices->getPoint(i);
 		CCVector3d       Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
-		stream << "v " << Pglobal.x << " " << Pglobal.y << " " << Pglobal.z << Qt::endl;
+		stream << "v " << Pglobal.x << " " << Pglobal.y << " " << Pglobal.z << "\n";
 		if (file.error() != QFile::NoError)
 			return CC_FERR_WRITING;
 		if (pDlg && !nprogress.oneStep()) // update progress bar, check cancel requested
@@ -187,7 +190,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				for (unsigned i = 0; i < numTriangleNormals; ++i)
 				{
 					const CCVector3& normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
-					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << Qt::endl;
+					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << "\n";
 					if (file.error() != QFile::NoError)
 					{
 						return CC_FERR_WRITING;
@@ -221,7 +224,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			for (unsigned i = 0; i < nbPoints; ++i)
 			{
 				const CCVector3& normalVec = vertices->getPointNormal(i);
-				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << Qt::endl;
+				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << "\n";
 				if (file.error() != QFile::NoError)
 				{
 					return CC_FERR_WRITING;
@@ -256,7 +259,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			QString     baseName = QFileInfo(filename).baseName();
 			if (materials->saveAsMTL(QFileInfo(filename).absolutePath(), baseName, errors))
 			{
-				stream << "mtllib " << baseName << ".mtl" << Qt::endl;
+				stream << "mtllib " << baseName << ".mtl" << "\n";
 				if (file.error() != QFile::NoError)
 				{
 					return CC_FERR_WRITING;
@@ -269,9 +272,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 
 			// display potential 'errors'
-			for (int i = 0; i < errors.size(); ++i)
+			for (const auto& err : errors)
 			{
-				ccLog::Warning(QString("[OBJ][Material file writer] ") + errors[i]);
+				ccLog::Warning(QString("[OBJ][Material file writer] ") + err);
 			}
 
 			// increment progress bar
@@ -298,7 +301,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				for (unsigned i = 0; i < texCoords->currentSize(); ++i)
 				{
 					const TexCoords2D& tc = texCoords->getValue(i);
-					stream << "vt " << tc.tx << " " << tc.ty << Qt::endl;
+					stream << "vt " << tc.tx << " " << tc.ty << "\n";
 					if (file.error() != QFile::NoError)
 						return CC_FERR_WRITING;
 
@@ -321,9 +324,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		// check that the number of facets is the same as the full mesh!
 		{
 			unsigned faceCount = 0;
-			for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+			for (auto* subMesh : subMeshes)
 			{
-				faceCount += static_cast<ccSubMesh*>(*it)->size();
+				faceCount += static_cast<ccSubMesh*>(subMesh)->size();
 			}
 
 			// if there's no face (i.e. no sub-mesh) or less face than the total mesh, we save the full mesh!
@@ -346,11 +349,11 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		// mesh or sub-meshes
 		unsigned indexShift = 0;
-		for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+		for (auto* subMesh : subMeshes)
 		{
-			ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
+			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
 
-			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << Qt::endl;
+			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << "\n";
 			if (file.error() != QFile::NoError)
 			{
 				return CC_FERR_WRITING;
@@ -374,11 +377,11 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
 						{
 							ccMaterial::CShared mat = materials->at(mtlIndex);
-							stream << "usemtl " << mat->getName() << Qt::endl;
+							stream << "usemtl " << mat->getName() << "\n";
 						}
 						else
 						{
-							stream << "usemtl " << Qt::endl;
+							stream << "usemtl " << "\n";
 						}
 						if (file.error() != QFile::NoError)
 						{
@@ -450,7 +453,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 						stream << " " << i3;
 					}
 				}
-				stream << Qt::endl;
+				stream << "\n";
 
 				if (file.error() != QFile::NoError)
 				{
@@ -463,7 +466,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 			}
 
-			stream << "#" << triNum << " faces" << Qt::endl;
+			stream << "#" << triNum << " faces" << "\n";
 			if (file.error() != QFile::NoError)
 			{
 				return CC_FERR_WRITING;
@@ -595,10 +598,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	int                           maxTriNormIndex = -1;
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("OBJ file"));
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setRange(0, static_cast<int>(file.size()));
@@ -716,7 +719,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for tex. coords container if necessary
 				if (!texCoords)
 				{
-					texCoords.reset(new TextureCoordsContainer());
+					texCoords = std::make_shared<TextureCoordsContainer>();
 				}
 				if (texCoords->currentSize() == texCoords->capacity())
 				{
@@ -752,7 +755,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for normals container if necessary
 				if (!normals)
 				{
-					normals.reset(new NormsIndexesTableType);
+					normals = std::make_shared<NormsIndexesTableType>();
 				}
 				if (normals->currentSize() == normals->capacity())
 				{
@@ -831,19 +834,16 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                     = true;
 							break;
 						}
-						else
-						{
-							// new vertex
-							facetElement fe; //(0,0,0) by default
+						// new vertex
+						facetElement fe; //(0,0,0) by default
 
-							fe.vIndex = vertexTokens[0].toInt();
-							if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
-								fe.tcIndex = vertexTokens[1].toInt();
-							if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
-								fe.nIndex = vertexTokens[2].toInt();
+						fe.vIndex = vertexTokens[0].toInt();
+						if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
+							fe.tcIndex = vertexTokens[1].toInt();
+						if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
+							fe.nIndex = vertexTokens[2].toInt();
 
-							currentFace.push_back(fe);
-						}
+						currentFace.push_back(fe);
 					}
 				}
 
@@ -905,8 +905,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.vIndex > maxVertexIndex)
-							maxVertexIndex = vertex.vIndex;
+						maxVertexIndex = std::max(vertex.vIndex, maxVertexIndex);
 					}
 					// should we have a tex. coord index as second vertex element?
 					if (hasTexCoords && currentMaterialDefined)
@@ -917,8 +916,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.tcIndex > maxTexCoordIndex)
-							maxTexCoordIndex = vertex.tcIndex;
+						maxTexCoordIndex = std::max(vertex.tcIndex, maxTexCoordIndex);
 					}
 
 					// should we have a normal index as third vertex element?
@@ -930,8 +928,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							error                      = true;
 							break;
 						}
-						if (vertex.nIndex > maxTriNormIndex)
-							maxTriNormIndex = vertex.nIndex;
+						maxTriNormIndex = std::max(vertex.nIndex, maxTriNormIndex);
 					}
 				}
 
@@ -1130,18 +1127,16 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						error                     = true;
 						break;
 					}
-					else
-					{
-						int index = vertexTokens[0].toInt(); // we ignore normal index (if any!)
-						if (!UpdatePointIndex(index, pointsRead))
-						{
-							objWarnings[INVALID_INDEX] = true;
-							error                      = true;
-							break;
-						}
 
-						polyline->addPointIndex(index);
+					int index = vertexTokens[0].toInt(); // we ignore normal index (if any!)
+					if (!UpdatePointIndex(index, pointsRead))
+					{
+						objWarnings[INVALID_INDEX] = true;
+						error                      = true;
+						break;
 					}
+
+					polyline->addPointIndex(index);
 				}
 
 				if (error)
@@ -1196,7 +1191,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					// we try to load it
 					if (!materials)
 					{
-						materials.reset(new ccMaterialSet("materials"));
+						materials = std::make_shared<ccMaterialSet>("materials");
 					}
 					size_t oldSize = materials->size();
 
@@ -1215,8 +1210,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 					if (!errors.empty())
 					{
-						for (int i = 0; i < errors.size(); ++i)
-							ccLog::Warning(QString("[OBJ::Load::MTL parser] ") + errors[i]);
+						for (const auto& err : errors)
+							ccLog::Warning(QString("[OBJ::Load::MTL parser] ") + err);
 					}
 					if (materials->empty())
 					{
@@ -1460,13 +1455,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		if (objWarnings[NOT_ENOUGH_MEMORY])
 			return CC_FERR_NOT_ENOUGH_MEMORY;
-		else if (objWarnings[CANCELLED_BY_USER])
+		if (objWarnings[CANCELLED_BY_USER])
 			return CC_FERR_CANCELED_BY_USER;
-		else
-			return CC_FERR_MALFORMED_FILE;
+		return CC_FERR_MALFORMED_FILE;
 	}
-	else
-	{
-		return CC_FERR_NO_ERROR;
-	}
+	return CC_FERR_NO_ERROR;
 }

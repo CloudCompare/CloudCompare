@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_HEIGHT_PROFILE_HEADER
-#define CC_HEIGHT_PROFILE_HEADER
-
-#include "FileIOFilter.h"
+// qCC_io
+#include <FileIOFilter.h>
 
 //! Polyline height profile I/O filter
 /** This file format contains a 2D series: (curvilinear absisca ; height)
@@ -32,5 +32,3 @@ class HeightProfileFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_HEIGHT_PROFILE_HEADER

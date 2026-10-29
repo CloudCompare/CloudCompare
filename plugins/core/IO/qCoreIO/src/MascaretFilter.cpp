@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "MascaretFilter.h"
+#include "../include/MascaretFilter.h"
 
-// local
-#include "ui_saveMascaretFileDlg.h"
+// Ui
+#include <ui_saveMascaretFileDlg.h>
 
 // qCC_db
 #include <ccLog.h>
@@ -114,9 +114,8 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 		}
 
 		// then keep the valid profiles only
-		for (size_t i = 0; i < candidates.size(); ++i)
+		for (auto* poly : candidates)
 		{
-			ccPolyline* poly = candidates[i];
 			if (!poly->hasMetaData(ccPolyline::MetaKeyUpDir())
 			    || !poly->hasMetaData(ccPolyline::MetaKeyAbscissa())
 			    || !poly->hasMetaData(ccPolyline::MetaKeyPrefixCenter() + ".x")
@@ -129,10 +128,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 				ccLog::Warning(QString("[Mascaret] Polyline '%1' is not a valid profile (missing meta-data)").arg(poly->getName()));
 				break;
 			}
-			else
-			{
-				profiles.push_back(poly);
-			}
+			profiles.push_back(poly);
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -201,10 +197,9 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 	CC_FILE_ERROR result = CC_FERR_NO_SAVE;
 
 	// for each profile
-	for (size_t i = 0; i < profiles.size(); ++i)
+	for (const auto* poly : profiles)
 	{
-		ccPolyline* poly      = profiles[i];
-		unsigned    vertCount = poly ? poly->size() : 0;
+		unsigned vertCount = poly ? poly->size() : 0;
 		if (vertCount < 2)
 		{
 			// invalid size
@@ -286,7 +281,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 			outFile << Cdg.u[xDir] << " " << Cdg.u[yDir];
 		}
 #endif
-		outFile << Qt::endl;
+		outFile << "\n";
 
 		// check the abscissa values order (must be increasing!)
 		bool inverted = false;
@@ -322,7 +317,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 				outFile << Pg.u[xDir] << " " << Pg.u[yDir];
 			}
 #endif
-			outFile << Qt::endl;
+			outFile << "\n";
 		}
 
 		result = CC_FERR_NO_ERROR;

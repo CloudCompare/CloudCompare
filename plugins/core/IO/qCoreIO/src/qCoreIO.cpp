@@ -15,19 +15,20 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qCoreIO.h"
+#include "../include/qCoreIO.h"
 
-#include "DotbimFilter.h"
-#include "HeightProfileFilter.h"
-#include "MAFilter.h"
-#include "MascaretFilter.h"
-#include "OFFFilter.h"
-#include "ObjFilter.h"
-#include "PDMSFilter.h"
-#include "PTXFilter.h"
-#include "STLFilter.h"
-#include "SimpleBinFilter.h"
-#include "VTKFilter.h"
+// Local
+#include "../include/DotbimFilter.h"
+#include "../include/HeightProfileFilter.h"
+#include "../include/MAFilter.h"
+#include "../include/MascaretFilter.h"
+#include "../include/OFFFilter.h"
+#include "../include/ObjFilter.h"
+#include "../include/PDMS/PDMSFilter.h"
+#include "../include/PTXFilter.h"
+#include "../include/STLFilter.h"
+#include "../include/SimpleBinFilter.h"
+#include "../include/VTKFilter.h"
 
 qCoreIO::qCoreIO(QObject* parent)
     : QObject(parent)

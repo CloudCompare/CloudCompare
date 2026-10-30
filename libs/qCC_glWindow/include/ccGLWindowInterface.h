@@ -1176,7 +1176,9 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 
 	//! Inits FBO (frame buffer object)
 	bool initFBO(int w, int h);
-	//! Initializes the floating-point X-ray accumulation target and tone mapper.
+	bool isXRayRequested() const;
+	ccColor::Rgba effectiveTextColor() const;
+	//! Initializes the floating-point X-ray accumulation and scene buffers.
 	bool initXRay(int w, int h);
 	void drawXRay(CC_DRAW_CONTEXT& context);
 	void drawXRayTexture(bool composite);

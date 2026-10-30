@@ -24,7 +24,7 @@ add_executable(TestXRayDisplay
     ../../plugins/core/GL/qEDL/src/ccEDLFilter.cpp
 )
 target_include_directories(TestXRayDisplay PRIVATE ../../plugins/core/GL/qEDL/include)
-target_link_libraries(TestXRayDisplay PRIVATE QCC_GL_LIB Qt6::Test)
+target_link_libraries(TestXRayDisplay PRIVATE QCC_GL_LIB CCAppCommon Qt6::Test)
 file(COPY
     ../shaders/ColorRamp
     ../shaders/DrawNormals

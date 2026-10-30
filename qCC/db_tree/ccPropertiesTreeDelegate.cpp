@@ -479,7 +479,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	{
 		const auto* cloud = static_cast<const ccPointCloud*>(_obj);
 		auto*       item  = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
-		item->setToolTip(tr("Additive, unlit point display. Adjust exposure in Display Settings. Temporarily inactive while EDL is enabled."));
+		item->setToolTip(tr("Unlit point display. Adjust Xray settings in Display Settings. Temporarily inactive while EDL is enabled."));
 		appendRow(ITEM(tr("Xray")), item);
 	}
 

@@ -1,7 +1,14 @@
 // CloudCompare - GPL-2.0-or-later
 #include <QApplication>
+#include <QCheckBox>
+#include <QDoubleSpinBox>
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
+#include <QToolBox>
+#include <QToolButton>
 #include <QtTest>
+#include <ccDisplaySettingsDlg.h>
 #include <ccEDLFilter.h>
 #include <ccFrameBufferObject.h>
 #include <ccGLWindow.h>
@@ -20,6 +27,10 @@ class XRayTestWindow : public ccGLWindow
 	{
 		return m_xRayFbo || m_xRaySceneFbo || m_xRayShader;
 	}
+	ccColor::Rgba overlayColor() const
+	{
+		return effectiveTextColor();
+	}
 
 	// Exercise successive updates of the same framebuffer, as progressive LOD
 	// does. Export alone always starts a fresh frame and cannot catch stale depth
@@ -31,20 +42,19 @@ class XRayTestWindow : public ccGLWindow
 			return {};
 		auto* previousFbo = m_activeFbo;
 		bindFBO(m_fbo);
-		auto* gl = functions();
-		if (level == 0)
-		{
-			gl->glDepthMask(GL_TRUE);
-			gl->glClearColor(0, 0, 0, 1);
-			gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		}
-		m_currentLODState.level      = level;
-		m_currentLODState.inProgress = level != 0;
+		auto*           gl = functions();
 		CC_DRAW_CONTEXT context;
 		getContext(context);
 		RenderingParams parameters;
 		parameters.useFBO      = true;
 		parameters.draw3DCross = false;
+		if (level == 0)
+		{
+			gl->glDepthMask(GL_TRUE);
+			drawBackground(context, parameters);
+		}
+		m_currentLODState.level      = level;
+		m_currentLODState.inProgress = level != 0;
 		draw3D(context, parameters);
 		QImage result(glWidth(), glHeight(), QImage::Format_RGBA8888);
 		result.fill(Qt::magenta);
@@ -65,6 +75,68 @@ class TestXRayDisplay : public QObject
 {
 	Q_OBJECT
   private Q_SLOTS:
+	void settingsAndPreview()
+	{
+		const auto         original = ccGui::Parameters();
+		ccGui::ParamStruct defaults;
+		ccGui::Set(defaults);
+		ccDisplaySettingsDlg dialog(nullptr);
+		dialog.setAttribute(Qt::WA_DontShowOnScreen);
+		auto* reverse         = dialog.findChild<QCheckBox*>("xRayReverseCheckBox");
+		auto* screenGradient  = dialog.findChild<QCheckBox*>("xRayGradientCheckBox");
+		auto* reverseGradient = dialog.findChild<QCheckBox*>("xRayReverseGradientCheckBox");
+		auto* screenSecond    = dialog.findChild<QToolButton*>("xRaySecondColorButton");
+		auto* reverseSecond   = dialog.findChild<QToolButton*>("xRayReverseSecondColorButton");
+		auto* exposure        = dialog.findChild<QDoubleSpinBox*>("xRayExposureSpinBox");
+		auto* toolbox         = dialog.findChild<QToolBox*>("toolBox");
+		QVERIFY(reverse && screenGradient && reverseGradient && screenSecond && reverseSecond && exposure && toolbox);
+		QVERIFY(!screenSecond->isEnabled() && !reverseSecond->isEnabled());
+		screenGradient->setChecked(true);
+		QVERIFY(screenSecond->isEnabled() && !reverseSecond->isEnabled());
+		reverseGradient->setChecked(true);
+		QVERIFY(reverseSecond->isEnabled());
+		reverse->setChecked(true);
+		exposure->setValue(-2.0);
+		QVERIFY(ccGui::Parameters().xRayReverse);
+		QVERIFY(ccGui::Parameters().xRayBackground.gradient);
+		QVERIFY(ccGui::Parameters().xRayReverseBackground.gradient);
+		QCOMPARE(ccGui::Parameters().xRayExposure, -2.0);
+		QVERIFY(ccGui::Parameters().backgroundCol == defaults.backgroundCol);
+		toolbox->setCurrentIndex(toolbox->count() - 1);
+		dialog.show();
+		QTest::qWait(30);
+		QVERIFY(dialog.grab().save("xray-settings.png"));
+		dialog.reject(); // includes Escape and window-close path
+		QVERIFY(!ccGui::Parameters().xRayReverse);
+		QVERIFY(ccGui::Parameters().xRayBackground == defaults.xRayBackground);
+		QVERIFY(ccGui::Parameters().xRayReverseBackground == defaults.xRayReverseBackground);
+		QCOMPARE(ccGui::Parameters().xRayExposure, defaults.xRayExposure);
+		ccGui::Set(original);
+
+		// Write settings in an isolated directory, never into the user's profile.
+		QTemporaryDir dir;
+		QVERIFY(dir.isValid());
+		const auto organization = QCoreApplication::organizationName();
+		const auto application  = QCoreApplication::applicationName();
+		const auto format       = QSettings::defaultFormat();
+		QSettings::setDefaultFormat(QSettings::IniFormat);
+		QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, dir.path());
+		QCoreApplication::setOrganizationName("XRaySettingsTest");
+		QCoreApplication::setApplicationName("RoundTrip");
+		defaults.xRayReverse           = true;
+		defaults.xRayBackground        = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(40, 50, 60), true};
+		defaults.xRayReverseBackground = {ccColor::Rgb(210, 220, 230), ccColor::Rgb(140, 150, 160), false};
+		defaults.toPersistentSettings();
+		ccGui::ParamStruct loaded;
+		loaded.fromPersistentSettings();
+		QCoreApplication::setOrganizationName(organization);
+		QCoreApplication::setApplicationName(application);
+		QSettings::setDefaultFormat(format);
+		QVERIFY(loaded.xRayReverse);
+		QVERIFY(loaded.xRayBackground == defaults.xRayBackground);
+		QVERIFY(loaded.xRayReverseBackground == defaults.xRayReverseBackground);
+	}
+
 	void persistenceAndClone()
 	{
 		ccPointCloud cloud;
@@ -326,6 +398,78 @@ class TestXRayDisplay : public QObject
 		xray->setXRayEnabled(false);
 		QCOMPARE(capture(), baseline);
 		QVERIFY(!window.hasXRayResources());
+
+		// Reverse uses original hues with Multiply, including between clouds.
+		parameters.xRayReverse = true;
+		window.setDisplayParameters(parameters, true);
+		QCOMPARE(capture(), baseline); // no X-ray cloud: no background override
+		xray->setXRayEnabled(true);
+		opaque->setVisible(false);
+		const QImage reverseRed = capture();
+		QVERIFY(window.overlayColor() == ccColor::black);
+		const QColor redLayer = center(reverseRed);
+		QCOMPARE(reverseRed.pixelColor(2, 2), QColor(Qt::white));
+		QCOMPARE(redLayer.red(), 255);
+		QVERIFY(redLayer.green() < 255 && redLayer.blue() < 255); // red, never cyan
+		secondCloud->setEnabled(true);
+		secondCloud->setColor(ccColor::Rgb(128, 64, 192));
+		xray->setVisible(false);
+		const QColor multiplySecond = center(capture());
+		xray->setVisible(true);
+		const QImage multiplied     = capture();
+		const QColor multiplyResult = center(multiplied);
+		for (int channel = 0; channel < 3; ++channel)
+		{
+			const int a      = channel == 0 ? redLayer.red() : channel == 1 ? redLayer.green()
+			                                                                : redLayer.blue();
+			const int b      = channel == 0 ? multiplySecond.red() : channel == 1 ? multiplySecond.green()
+			                                                                      : multiplySecond.blue();
+			const int actual = channel == 0 ? multiplyResult.red() : channel == 1 ? multiplyResult.green()
+			                                                                      : multiplyResult.blue();
+			QVERIFY(std::abs(actual - a * b / 255.0) <= 2.0);
+		}
+		scene.swapChildren(1, 2);
+		QCOMPARE(capture(), multiplied);
+		scene.swapChildren(1, 2);
+		secondCloud->setColor(ccColor::white);
+		QCOMPARE(capture(), reverseRed); // white is Multiply's neutral color
+		secondCloud->setEnabled(false);
+		const QImage reverseLOD = window.renderLODFrame(0);
+		QCOMPARE(window.renderLODFrame(1), reverseLOD);
+		parameters.xRayExposure = 3;
+		window.setDisplayParameters(parameters, true);
+		QVERIFY(center(capture()).green() < redLayer.green());
+		parameters.xRayExposure          = 2;
+		parameters.xRayReverseBackground = {ccColor::Rgb(240, 220, 200), ccColor::Rgb(100, 120, 140), true};
+		window.setDisplayParameters(parameters, true);
+		const QImage reverseGradientImage = capture();
+		QVERIFY(reverseGradientImage.pixelColor(2, 2).red() > 230);
+		QVERIFY(reverseGradientImage.pixelColor(2, reverseGradientImage.height() - 3).red() < 110);
+		parameters.xRayReverseBackground.gradient = false;
+		window.setDisplayParameters(parameters, true);
+		const QImage reverseFlat = capture();
+		QCOMPARE(reverseFlat.pixelColor(2, 2), QColor(240, 220, 200));
+		QCOMPARE(reverseFlat.pixelColor(2, reverseFlat.height() - 3), QColor(240, 220, 200));
+		parameters.xRayReverse    = false;
+		parameters.xRayBackground = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(50, 60, 70), true};
+		window.setDisplayParameters(parameters, true);
+		const QImage screenGradientImage = capture();
+		QVERIFY(screenGradientImage.pixelColor(2, 2).red() < 15);
+		QVERIFY(screenGradientImage.pixelColor(2, screenGradientImage.height() - 3).red() > 45);
+		parameters.xRayReverse = true;
+		window.setDisplayParameters(parameters, true);
+		QCOMPARE(capture(), reverseFlat); // independent profiles survive mode switches
+		opaque->setVisible(true);
+		opaque->setGLTransformation(transform);
+		QCOMPARE(center(capture()), QColor(Qt::green)); // opaque foreground still occludes
+		opaque->resetGLTransformation();
+		window.setGlFilter(new ccEDLFilter());
+		const QImage reverseEDL = capture();
+		xray->setXRayEnabled(false);
+		QCOMPARE(capture(), reverseEDL);
+		window.setGlFilter(nullptr);
+		QCOMPARE(capture(), baseline);
+		QVERIFY(window.overlayColor() == parameters.textDefaultCol);
 		window.setSceneDB(nullptr);
 	}
 };

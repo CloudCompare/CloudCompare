@@ -71,7 +71,7 @@ class ccGLSL
 	    - uNormalLUT, uLUTWidth, uLUTHeight (for normals)
 	    - uLight0Enabled, uLight1Enabled (for lighting - e.g. if ATTR_NOR is set)
 	    - uPickingColor (for picking - e.g. if ATTR_PICK_FLAG is set)
-	    - uXRayStrength (for additive rendering - if ATTR_XRAY_FLAG is set)
+	    - uXRayStrength, uXRayReverse (for X-ray rendering - if ATTR_XRAY_FLAG is set)
 
 	    If normals are used (ATTR_NOR), a 2D texture containing a normal LUT (see ccGLSL::GetNormalLUTTexture) must be set as uniform
 	    (see ccGLSL::SetLUTTextureUniforms) and should be bound to unit 1 by default.

@@ -3812,7 +3812,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						color[c] = rgba.rgba[c] / 255.0f;
 				}
 				for (unsigned c = 0; c < 3; ++c)
-					color[c] = std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
+					color[c] = context.xRayReverse
+					               ? 1.0f - std::clamp((1.0f - color[c]) * xRayStrength, 0.0f, 1.0f) * color[3]
+					               : std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
 				glFunc->glColor4fv(color);
 				ccGL::Vertex3v(glFunc, m_points[j].u);
 			}
@@ -4078,6 +4080,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (xRay)
 				{
 					prog->setUniformValue("uXRayStrength", xRayStrength);
+					prog->setUniformValue("uXRayReverse", context.xRayReverse);
 				}
 
 				if (glParams.showNorms)

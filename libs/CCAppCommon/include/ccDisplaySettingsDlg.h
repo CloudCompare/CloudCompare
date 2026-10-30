@@ -71,6 +71,7 @@ class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 
 	void changeZoomSpeed(double);
 	void previewXRay();
+	void refreshXRay();
 
 	void changeAutoComputeOctreeOption(int);
 

@@ -1013,6 +1013,11 @@
       <attribute name="label"><string>Point Cloud X-ray</string></attribute>
       <layout class="QVBoxLayout" name="xRayLayout">
        <item>
+        <widget class="QCheckBox" name="xRayReverseCheckBox">
+         <property name="text"><string>Xray Reverse</string></property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="xRayExposureLayout">
          <item><widget class="QLabel" name="xRayExposureLabel"><property name="text"><string>Exposure</string></property></widget></item>
          <item>
@@ -1033,6 +1038,50 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="xRayBackgroundGroup">
+         <property name="title"><string>Xray background</string></property>
+         <layout class="QGridLayout" name="xRayBackgroundLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="xRayColorLabel"><property name="text"><string>Background color</string></property></widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="xRayColorButton"><property name="text"><string>...</string></property></widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="xRayGradientCheckBox"><property name="text"><string>Gradient background</string></property></widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="xRaySecondColorLabel"><property name="text"><string>Secondary color</string></property><property name="enabled"><bool>false</bool></property></widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QToolButton" name="xRaySecondColorButton"><property name="text"><string>...</string></property><property name="enabled"><bool>false</bool></property></widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="xRayReverseBackgroundGroup">
+         <property name="title"><string>Xray Reverse background</string></property>
+         <layout class="QGridLayout" name="xRayReverseBackgroundLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="xRayReverseColorLabel"><property name="text"><string>Background color</string></property></widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="xRayReverseColorButton"><property name="text"><string>...</string></property></widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="xRayReverseGradientCheckBox"><property name="text"><string>Gradient background</string></property></widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="xRayReverseSecondColorLabel"><property name="text"><string>Secondary color</string></property><property name="enabled"><bool>false</bool></property></widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QToolButton" name="xRayReverseSecondColorButton"><property name="text"><string>...</string></property><property name="enabled"><bool>false</bool></property></widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <spacer name="xRaySpacer">

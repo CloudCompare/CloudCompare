@@ -18,6 +18,7 @@
 #include "ccGuiParameters.h"
 
 // Qt
+#include <QColor>
 #include <QSettings>
 
 // qCC_db
@@ -72,6 +73,9 @@ void ccGui::ParamStruct::reset()
 	drawBackgroundGradient = true;
 	drawRoundedPoints      = false;
 	xRayExposure           = -3.0;
+	xRayReverse            = false;
+	xRayBackground         = {ccColor::black, ccColor::Rgb(32, 32, 32), false};
+	xRayReverseBackground  = {ccColor::white, ccColor::Rgb(224, 224, 224), false};
 	decimateMeshOnMove     = true;
 	minLoDMeshSize         = 2500000;
 	decimateCloudOnMove    = true;
@@ -128,10 +132,27 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	labelMarkerCol     = ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("labelMarkerRGBAColor", QByteArray::fromRawData((const char*)ccColor::defaultLabelMarkerColor.rgba, c_ub4ColorArraySize)).toByteArray().data()));
 	bbDefaultCol       = ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("bbDefaultRGBAColor", QByteArray::fromRawData((const char*)ccColor::yellow.rgba, c_ub4ColorArraySize)).toByteArray().data()));
 
-	lightDoubleSided        = settings.value("lightDoubleSided", true).toBool();
-	drawBackgroundGradient  = settings.value("backgroundGradient", true).toBool();
-	drawRoundedPoints       = settings.value("drawRoundedPoints", false).toBool();
-	xRayExposure            = std::max(-8.0, std::min(8.0, settings.value("xRayExposure", -3.0).toDouble()));
+	lightDoubleSided       = settings.value("lightDoubleSided", true).toBool();
+	drawBackgroundGradient = settings.value("backgroundGradient", true).toBool();
+	drawRoundedPoints      = settings.value("drawRoundedPoints", false).toBool();
+	xRayExposure           = std::max(-8.0, std::min(8.0, settings.value("xRayExposure", -3.0).toDouble()));
+	xRayReverse            = settings.value("xRayReverse", false).toBool();
+	auto loadBackground    = [&](const QString& group, XRayBackground& background)
+	{
+		settings.beginGroup(group);
+		auto loadColor = [&](const QString& key, ccColor::Rgb& color)
+		{
+			QColor value(settings.value(key, QColor(color.r, color.g, color.b).name()).toString());
+			if (value.isValid())
+				color = ccColor::FromQColor(value);
+		};
+		loadColor("color", background.color);
+		loadColor("secondColor", background.secondColor);
+		background.gradient = settings.value("gradient", false).toBool();
+		settings.endGroup();
+	};
+	loadBackground("xRayBackground", xRayBackground);
+	loadBackground("xRayReverseBackground", xRayReverseBackground);
 	decimateMeshOnMove      = settings.value("meshDecimation", true).toBool();
 	minLoDMeshSize          = settings.value("minLoDMeshSize", 2500000).toUInt();
 	decimateCloudOnMove     = settings.value("cloudDecimation", true).toBool();
@@ -177,6 +198,17 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("backgroundGradient", drawBackgroundGradient);
 	settings.setValue("drawRoundedPoints", drawRoundedPoints);
 	settings.setValue("xRayExposure", xRayExposure);
+	settings.setValue("xRayReverse", xRayReverse);
+	auto saveBackground = [&](const QString& group, const XRayBackground& background)
+	{
+		settings.beginGroup(group);
+		settings.setValue("color", QColor(background.color.r, background.color.g, background.color.b).name());
+		settings.setValue("secondColor", QColor(background.secondColor.r, background.secondColor.g, background.secondColor.b).name());
+		settings.setValue("gradient", background.gradient);
+		settings.endGroup();
+	};
+	saveBackground("xRayBackground", xRayBackground);
+	saveBackground("xRayReverseBackground", xRayReverseBackground);
 	settings.setValue("meshDecimation", decimateMeshOnMove);
 	settings.setValue("minLoDMeshSize", minLoDMeshSize);
 	settings.setValue("cloudDecimation", decimateCloudOnMove);

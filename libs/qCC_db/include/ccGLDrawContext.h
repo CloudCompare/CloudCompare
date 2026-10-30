@@ -161,6 +161,7 @@ struct ccGLDrawContext
 
 	//! Additive point-cloud rendering, with exposure in stops
 	bool  xRayEnabled;
+	bool  xRayReverse;
 	float xRayExposure;
 
 	//! Entity picking mechanism
@@ -203,6 +204,7 @@ struct ccGLDrawContext
 	    , stereoPassIndex(0)
 	    , drawRoundedPoints(false)
 	    , xRayEnabled(false)
+	    , xRayReverse(false)
 	    , xRayExposure(0.0f)
 	{
 	}

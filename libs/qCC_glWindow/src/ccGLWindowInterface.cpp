@@ -1876,6 +1876,7 @@ void ccGLWindowInterface::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	// EDL takes priority without changing any per-cloud flags.
 	CONTEXT.xRayEnabled              = false;
 	CONTEXT.xRayExposure             = static_cast<float>(guiParams.xRayExposure);
+	CONTEXT.xRayReverse              = guiParams.xRayReverse;
 	CONTEXT.decimateCloudOnMove      = guiParams.decimateCloudOnMove;
 	CONTEXT.minLODPointCount         = guiParams.minLoDCloudSize;
 	CONTEXT.decimateMeshOnMove       = guiParams.decimateMeshOnMove && m_mouseMoved;
@@ -3652,7 +3653,7 @@ void ccGLWindowInterface::display3DLabel(const QString& str, const CCVector3& po
 	ccQOpenGLFunctions* glFunc = functions();
 	if (glFunc)
 	{
-		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : getDisplayParameters().textDefaultCol);
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : effectiveTextColor());
 		renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 	}
 }
@@ -3676,7 +3677,7 @@ void ccGLWindowInterface::displayText(QString              text,
 	int y2 = y;
 
 	// actual text color
-	const ccColor::Rgba& rgba = (color ? *color : getDisplayParameters().textDefaultCol);
+	const ccColor::Rgba& rgba = (color ? *color : effectiveTextColor());
 
 	QFont textFont = (font ? *font : getTextDisplayFont());
 
@@ -5037,6 +5038,41 @@ namespace
 	}
 } // namespace
 
+bool ccGLWindowInterface::isXRayRequested() const
+{
+	return !m_xRayUnavailable
+	       && (!m_activeGLFilter || m_activeGLFilter->supportsXRay())
+	       && (HasVisibleXRayCloud(m_globalDBRoot, this) || HasVisibleXRayCloud(m_winDBRoot, this));
+}
+
+ccColor::Rgba ccGLWindowInterface::effectiveTextColor() const
+{
+	const auto& parameters = getDisplayParameters();
+	if (!m_xRayFbo)
+		return parameters.textDefaultCol;
+	const auto& background = parameters.xRayReverse ? parameters.xRayReverseBackground : parameters.xRayBackground;
+	auto        luminance  = [](const ccColor::Rgb& color)
+	{
+		auto linear = [](unsigned char value)
+		{
+			const double s = value / 255.0;
+			return s <= 0.04045 ? s / 12.92 : std::pow((s + 0.055) / 1.055, 2.4);
+		};
+		return 0.2126 * linear(color.r) + 0.7152 * linear(color.g) + 0.0722 * linear(color.b);
+	};
+	const double top      = luminance(background.color);
+	const double bottom   = background.gradient ? luminance(background.secondColor) : top;
+	auto         contrast = [&](double text)
+	{
+		auto ratio = [text](double backdrop)
+		{ return (std::max(text, backdrop) + 0.05) / (std::min(text, backdrop) + 0.05); };
+		return std::min(ratio(top), ratio(bottom));
+	};
+	if (contrast(luminance(parameters.textDefaultCol)) >= 3.0)
+		return parameters.textDefaultCol;
+	return contrast(0.0) >= contrast(1.0) ? ccColor::black : ccColor::white;
+}
+
 void ccGLWindowInterface::releaseXRay()
 {
 	// The accumulation buffer borrows the opaque scene's depth attachment.
@@ -5131,8 +5167,10 @@ void ccGLWindowInterface::drawXRayTexture(bool composite)
 		glFunc->glDepthMask(GL_FALSE);
 		glFunc->glEnable(GL_BLEND);
 		glFunc->glBlendEquation(GL_FUNC_ADD);
-		// Screen blend preserves the user's background and opaque scene.
-		glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+		if (getDisplayParameters().xRayReverse)
+			glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+		else
+			glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
 	}
 	else
 	{
@@ -5193,13 +5231,17 @@ void ccGLWindowInterface::drawXRay(CC_DRAW_CONTEXT& context)
 	glFunc->glDepthMask(GL_FALSE);
 	glFunc->glDisable(GL_LIGHTING);
 	glFunc->glDisable(GL_ALPHA_TEST);
-	glFunc->glClearColor(0, 0, 0, 0);
+	const float neutral = context.xRayReverse ? 1.0f : 0.0f;
+	glFunc->glClearColor(neutral, neutral, neutral, 0);
 	glFunc->glClear(GL_COLOR_BUFFER_BIT);
 	glFunc->glEnable(GL_BLEND);
 	glFunc->glBlendEquation(GL_FUNC_ADD);
-	// Screen each point against the preceding points: S + D * (1 - S).
-	// Contributions already include alpha/coverage; no tone compression follows.
-	glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+	// Screen accumulates on black; Multiply accumulates on white. The point
+	// shader includes exposure and alpha in the corresponding blend factor.
+	if (context.xRayReverse)
+		glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+	else
+		glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
 
 	// X-ray is recomputed against the latest opaque depth at every LOD update.
 	// It uses a compensated stride while moving and full density at rest, without
@@ -5245,9 +5287,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		return;
 	}
 
-	CONTEXT.xRayEnabled = !m_xRayUnavailable
-	                      && (!m_activeGLFilter || m_activeGLFilter->supportsXRay())
-	                      && (HasVisibleXRayCloud(m_globalDBRoot, this) || HasVisibleXRayCloud(m_winDBRoot, this));
+	CONTEXT.xRayEnabled = isXRayRequested();
 	if (CONTEXT.xRayEnabled)
 	{
 		GLint viewport[4];
@@ -5260,6 +5300,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	{
 		releaseXRay();
 	}
+	CONTEXT.textDefaultCol = effectiveTextColor();
 
 	glFunc->glPointSize(m_viewportParams.defaultPointSize);
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
@@ -5862,14 +5903,24 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		if (renderingParams.clearColorLayer)
 		{
 			const ccGui::ParamStruct& displayParams = getDisplayParameters();
-			if (displayParams.drawBackgroundGradient)
+			bool                      xRay          = isXRayRequested();
+			if (xRay)
+			{
+				// Detect unavailable resources before selecting the backdrop, so the
+				// normal-rendering fallback also keeps the normal background.
+				GLint viewport[4];
+				glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
+				xRay = initXRay(viewport[2], viewport[3]);
+			}
+			const auto&           xRayBackground = displayParams.xRayReverse ? displayParams.xRayReverseBackground : displayParams.xRayBackground;
+			const ccColor::Rgbub& bkgCol         = xRay ? xRayBackground.color : displayParams.backgroundCol;
+			const ccColor::Rgbub& frgCol         = displayParams.textDefaultCol;
+			const ccColor::Rgbub  gradientEnd    = xRay ? xRayBackground.secondColor : ccColor::Rgbub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
+			if (xRay ? xRayBackground.gradient : displayParams.drawBackgroundGradient)
 			{
 				// draw the default gradient color background
 				int w = glWidth();
 				int h = glHeight();
-
-				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
-				const ccColor::Rgbub& frgCol = getDisplayParameters().textDefaultCol;
 
 				// Gradient "texture" drawing
 				glFunc->glBegin(GL_QUADS);
@@ -5878,8 +5929,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
 					glFunc->glVertex2i(0, h);
 					glFunc->glVertex2i(w, h);
-					// and the inverse of the text color for gradient stop
-					glFunc->glColor3ub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, gradientEnd);
 					glFunc->glVertex2i(w, 0);
 					glFunc->glVertex2i(0, 0);
 				}
@@ -5890,8 +5940,6 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 				// Draw a plain quad so as to not clear the other half of the 3D view!
 				int w = glWidth();
 				int h = glHeight();
-
-				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
 
 				glFunc->glBegin(GL_QUADS);
 				{
@@ -5907,8 +5955,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			else
 			{
 				// use plain color as specified by the user
-				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
+				const ccColor::Rgbaf backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
 
 				glFunc->glClearColor(backgroundColor.r,
 				                     backgroundColor.g,
@@ -5979,7 +6026,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 	/*** overlay entities ***/
 	{
 		// default overlay color
-		const ccColor::Rgbub& textCol = getDisplayParameters().textDefaultCol;
+		const ccColor::Rgbub textCol = effectiveTextColor();
 
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
@@ -6424,7 +6471,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		if (!m_viewportParams.perspectiveView)
 		{
 			// DGM FIXME: with a zoom > 1, the renderText call inside drawScale will result in the wrong FBO being used?!
-			drawScale(getDisplayParameters().textDefaultCol);
+			drawScale(effectiveTextColor());
 		}
 
 		if (m_showTrihedron)

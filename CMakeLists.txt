@@ -35,9 +35,19 @@ endif()
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
 
+# Copy Qt and the other dependencies next to the applications (macdeployqt /
+# windeployqt). Package managers that provide them turn this off.
+option( OPTION_DEPLOY_QT "Bundle Qt and the other dependencies with the applications (macOS, Windows)" ON )
+# Without them, macOS uses the Linux layout: bin/, lib/cloudcompare, share/cloudcompare
+if( APPLE AND OPTION_DEPLOY_QT )
+	set( CC_MACOS_BUNDLE ON )
+else()
+	set( CC_MACOS_BUNDLE OFF )
+endif()
+
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
-if(WIN32 OR APPLE)
+if(WIN32 OR CC_MACOS_BUNDLE)
 	set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
 	set( CCVIEWER_DEST_FOLDER ccViewer )
 else()
@@ -51,12 +61,16 @@ if( WIN32 )
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
 	endif()
-elseif( UNIX AND NOT APPLE )
-	# RPATH Linux/Unix: (dynamic) libs are put in $prefix/$lib/cloudcompare,
-	# since they are only used by qCC/ccViewer
+elseif( UNIX AND NOT CC_MACOS_BUNDLE )
+	# RPATH Linux/Unix (and macOS without macdeployqt, e.g. for package managers):
+	# (dynamic) libs are put in $prefix/$lib/cloudcompare, since they are only used
+	# by qCC/ccViewer; Qt and the other dependencies are found where they are installed
 	include( GNUInstallDirs )
 	set( LINUX_INSTALL_SHARED_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
 	set( CMAKE_INSTALL_RPATH ${LINUX_INSTALL_SHARED_DESTINATION} )
+	if( APPLE )
+		set( CMAKE_INSTALL_RPATH_USE_LINK_PATH ON )
+	endif()
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()
 

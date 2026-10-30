@@ -24,7 +24,7 @@ function(InstallSharedLibrary)
 	message(STATUS "Install shared library: ${shared_lib_target}")
 
 	foreach (destination ${INSTALL_DESTINATIONS})
-		if(UNIX AND NOT APPLE)
+		if(LINUX_INSTALL_SHARED_DESTINATION)
 			set(destination ${LINUX_INSTALL_SHARED_DESTINATION})
 		endif()
 

@@ -2,6 +2,7 @@
 target_sources( ${PROJECT_NAME}
 	PRIVATE
 	    ${CMAKE_CURRENT_LIST_DIR}/ccWaveform.h
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayExposure.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DLabel.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DViewportLabel.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DViewportObject.h

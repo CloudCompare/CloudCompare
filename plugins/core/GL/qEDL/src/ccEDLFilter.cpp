@@ -36,7 +36,7 @@
 #endif
 
 ccEDLFilter::ccEDLFilter()
-    : ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)")
+    : ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)", false)
     , m_screenWidth(0)
     , m_screenHeight(0)
     , m_expScale(100.0f)

@@ -123,6 +123,9 @@ class CCGLWINDOW_LIB_API ccGui
 		//! Whether to draw rounded points (slower) or not
 		bool drawRoundedPoints;
 
+		//! Exposure adjustment in stops (one stop doubles the contribution)
+		double xRayExposure;
+
 		//! Whether to pick objects by single clicking in the GUI
 		//! can be slow with large point clouds/large number of objects
 		bool singleClickPicking;

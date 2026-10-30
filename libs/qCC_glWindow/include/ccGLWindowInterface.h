@@ -1176,6 +1176,11 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 
 	//! Inits FBO (frame buffer object)
 	bool initFBO(int w, int h);
+	//! Initializes the floating-point X-ray accumulation target and tone mapper.
+	bool initXRay(int w, int h);
+	void drawXRay(CC_DRAW_CONTEXT& context);
+	void drawXRayTexture(bool composite);
+	void releaseXRay();
 	//! Inits FBO (safe)
 	bool initFBOSafe(ccFrameBufferObject*& fbo, int w, int h);
 	//! Releases any active FBO
@@ -1411,6 +1416,11 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	ccFrameBufferObject* m_fbo;
 	//! Second default FBO (frame buffer object) - used for stereo rendering
 	ccFrameBufferObject* m_fbo2;
+	ccFrameBufferObject* m_xRayFbo         = nullptr;
+	ccFrameBufferObject* m_xRaySceneFbo    = nullptr;
+	ccShader*            m_xRayShader      = nullptr;
+	bool                 m_xRayUnavailable = false;
+	bool                 m_xRaySceneValid  = false;
 	//! Picking FBO (frame buffer object)
 	ccFrameBufferObject* m_pickingFbo;
 	//! Whether to always use FBO or only for GL filters

@@ -386,6 +386,10 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	QString fragmentProgSrc = FragmentProgStartSrc;
 	{
 		fragmentProgSrc += FragmentProgColorAttributesSrc;
+		if (attributes & ATTR_XRAY_FLAG)
+		{
+			fragmentProgSrc += "uniform float uXRayStrength;\n";
+		}
 
 		// add attributes
 		if (attributes & ATTR_TEX_FLAG)
@@ -421,6 +425,11 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 				fragmentProgSrc += FragmentProgMainNormalSrc;
 			}
 
+			if (attributes & ATTR_XRAY_FLAG)
+			{
+				// Screen blending uses the effective color, including point coverage.
+				fragmentProgSrc += "   gl_FragColor.rgb = clamp(gl_FragColor.rgb * uXRayStrength, 0.0, 1.0) * gl_FragColor.a;\n";
+			}
 			fragmentProgSrc += FragmentProgMainEndSrc;
 		}
 	}

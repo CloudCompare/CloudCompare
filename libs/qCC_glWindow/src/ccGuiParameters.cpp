@@ -71,6 +71,7 @@ void ccGui::ParamStruct::reset()
 	lightDoubleSided       = true;
 	drawBackgroundGradient = true;
 	drawRoundedPoints      = false;
+	xRayExposure           = -3.0;
 	decimateMeshOnMove     = true;
 	minLoDMeshSize         = 2500000;
 	decimateCloudOnMove    = true;
@@ -130,6 +131,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	lightDoubleSided        = settings.value("lightDoubleSided", true).toBool();
 	drawBackgroundGradient  = settings.value("backgroundGradient", true).toBool();
 	drawRoundedPoints       = settings.value("drawRoundedPoints", false).toBool();
+	xRayExposure            = std::max(-8.0, std::min(8.0, settings.value("xRayExposure", -3.0).toDouble()));
 	decimateMeshOnMove      = settings.value("meshDecimation", true).toBool();
 	minLoDMeshSize          = settings.value("minLoDMeshSize", 2500000).toUInt();
 	decimateCloudOnMove     = settings.value("cloudDecimation", true).toBool();
@@ -174,6 +176,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("bbDefaultRGBAColor", QByteArray((const char*)bbDefaultCol.rgba, c_ub4ColorArraySize));
 	settings.setValue("backgroundGradient", drawBackgroundGradient);
 	settings.setValue("drawRoundedPoints", drawRoundedPoints);
+	settings.setValue("xRayExposure", xRayExposure);
 	settings.setValue("meshDecimation", decimateMeshOnMove);
 	settings.setValue("minLoDMeshSize", minLoDMeshSize);
 	settings.setValue("cloudDecimation", decimateCloudOnMove);

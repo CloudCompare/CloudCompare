@@ -33,6 +33,7 @@
 // Qt
 #include <QColorDialog>
 #include <QSettings>
+#include <QSignalBlocker>
 #include <QStyle>
 #include <QStyleFactory>
 
@@ -156,6 +157,25 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	m_oldParameters = m_parameters = ccGui::Parameters();
 	m_oldOptions = m_options = ccOptions::Instance();
 
+	connect(m_ui->xRayExposureSlider, &QSlider::valueChanged, this, [this](int value)
+	        { m_ui->xRayExposureSpinBox->setValue(value / 10.0); });
+	connect(m_ui->xRayExposureSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value)
+	        {
+		        const QSignalBlocker blocker(m_ui->xRayExposureSlider);
+		        m_ui->xRayExposureSlider->setValue(qRound(value * 10));
+		        m_parameters.xRayExposure = value;
+		        previewXRay(); });
+	// Also restore the live preview when the dialog is closed with Escape or X.
+	connect(this, &QDialog::rejected, this, [this]()
+	        {
+		        ccGui::ParamStruct parameters = ccGui::Parameters();
+		        if (parameters.xRayExposure != m_oldParameters.xRayExposure)
+		        {
+			        parameters.xRayExposure = m_oldParameters.xRayExposure;
+			        ccGui::Set(parameters);
+			        Q_EMIT aspectHasChanged();
+		        } });
+
 	refresh();
 
 	setUpdatesEnabled(true);
@@ -221,6 +241,12 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->maxMeshSizeDoubleSpinBox->setValue(m_parameters.minLoDMeshSize / 1000000.0);
 		m_ui->decimateCloudBox->setChecked(m_parameters.decimateCloudOnMove);
 		m_ui->drawRoundedPointsCheckBox->setChecked(m_parameters.drawRoundedPoints);
+		{
+			const QSignalBlocker sliderBlocker(m_ui->xRayExposureSlider);
+			const QSignalBlocker spinBlocker(m_ui->xRayExposureSpinBox);
+			m_ui->xRayExposureSlider->setValue(qRound(m_parameters.xRayExposure * 10));
+			m_ui->xRayExposureSpinBox->setValue(m_parameters.xRayExposure);
+		}
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
 		m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
 		m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
@@ -529,10 +555,19 @@ void ccDisplaySettingsDlg::doReject()
 {
 	ccGui::Set(m_oldParameters);
 	ccOptions::Set(m_oldOptions);
-
 	Q_EMIT aspectHasChanged();
-
 	reject();
+}
+
+void ccDisplaySettingsDlg::previewXRay()
+{
+	// Do not apply unrelated pending edits to the display settings.
+	ccGui::ParamStruct preview = ccGui::Parameters();
+	if (preview.xRayExposure == m_parameters.xRayExposure)
+		return;
+	preview.xRayExposure = m_parameters.xRayExposure;
+	ccGui::Set(preview);
+	Q_EMIT aspectHasChanged();
 }
 
 void ccDisplaySettingsDlg::reset()
@@ -542,6 +577,7 @@ void ccDisplaySettingsDlg::reset()
 	m_ui->appStyleComboBox->setCurrentIndex(m_defaultAppStyleIndex);
 
 	refresh();
+	previewXRay();
 }
 
 void ccDisplaySettingsDlg::apply()

@@ -70,6 +70,7 @@ class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 	void changeLabelMarkerSize(int);
 
 	void changeZoomSpeed(double);
+	void previewXRay();
 
 	void changeAutoComputeOctreeOption(int);
 

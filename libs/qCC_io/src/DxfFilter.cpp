@@ -36,6 +36,10 @@
 #include <dl_dxf.h>
 #endif
 
+#if defined(_WIN32) && defined(CC_SYSTEM_DXF_LIB)
+#include <fstream>
+#endif
+
 // System
 #include <cassert>
 
@@ -787,14 +791,14 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	double     pageMargin = baseSize / 20.0;
 
 	DL_Dxf dxf;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(CC_SYSTEM_DXF_LIB)
 	DL_WriterA* dw = dxf.out(filename.toStdWString(), DL_VERSION_R12);
 #else
 	if (CheckForSpecialChars(filename))
 	{
 		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the third party library..."));
 	}
-	DL_WriterA* dw = dxf.out(filename.toStdString(), DL_VERSION_R12);
+	DL_WriterA* dw = dxf.out(filename.toStdString().c_str(), DL_VERSION_R12); // the installed dxflib takes a const char*
 #endif
 	if (!dw)
 	{
@@ -1072,7 +1076,11 @@ CC_FILE_ERROR DxfFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		DxfImporter importer(&container, parameters);
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(CC_SYSTEM_DXF_LIB)
+		// the installed dxflib has no wide-character file names: open the file here
+		std::ifstream stream(filename.toStdWString());
+		if (stream && DL_Dxf().in(stream, &importer))
+#elif defined(_WIN32)
 		if (DL_Dxf().in(filename.toStdWString(), &importer))
 #else
 		if (CheckForSpecialChars(filename))

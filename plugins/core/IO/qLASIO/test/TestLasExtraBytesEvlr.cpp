@@ -276,6 +276,13 @@ class TestLasExtraBytesEvlr : public QObject
 		const bool inEvlr = (fieldCount > static_cast<int>(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR));
 		QCOMPARE(header->number_of_extended_variable_length_records, inEvlr ? 1u : 0u);
 		QCOMPARE(header->number_of_variable_length_records, inEvlr ? 0u : 1u);
+		if (!inEvlr)
+		{
+			// the LAS specification requires the 'reserved' field of a VLR header to be 0
+			QCOMPARE(header->vlrs[0].reserved, static_cast<laszip_U16>(0));
+			// and the user ID to be padded with 0
+			QCOMPARE(QByteArray(header->vlrs[0].user_id, 16), QByteArray("LASF_Spec").leftJustified(16, '\0'));
+		}
 		if (inEvlr)
 		{
 			const quint64 evlrEnd = header->start_of_first_extended_variable_length_record + LasDetails::EvlrHeader::SIZE + fieldCount * LasExtraScalarField::VLR_FIELD_SIZE_BYTES;

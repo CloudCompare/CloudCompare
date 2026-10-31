@@ -486,6 +486,7 @@ Bug fixes:
 		If a file has both, the VLR is used and a warning is issued.
 	- LAS files: an extra field name of 32 characters (the maximum) was loaded with the field description appended to it
 	- LAS 1.4 files: only the first 341 extra fields could be saved. The others are now saved too, described by an Extra Bytes EVLR.
+	- LAS files: the unused bytes of the Extra Bytes VLR header (the 'reserved' field and the end of the user ID) were saved uninitialized, while the LAS specification requires them to be 0
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

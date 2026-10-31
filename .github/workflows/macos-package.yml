@@ -1,0 +1,199 @@
+# Builds CloudCompare for macOS (Apple Silicon) and packages it in a DMG.
+#
+# Without the secrets below, the app isn't notarized and macOS blocks it
+# until it's allowed in System Settings > Privacy & Security.
+#
+# To sign with a Developer ID:
+#   MACOS_CERTIFICATE           the .p12 certificate, in base64
+#   MACOS_CERTIFICATE_PASSWORD  its password
+#   MACOS_SIGNING_IDENTITY      e.g. "Developer ID Application: First Last (TEAMID)"
+# To notarize (App Store Connect API key):
+#   MACOS_NOTARY_KEY            the .p8 key, in base64
+#   MACOS_NOTARY_KEY_ID         key ID
+#   MACOS_NOTARY_ISSUER_ID      issuer ID
+
+name: macOS package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: macOS package (Apple Silicon)
+    runs-on: macos-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Check the signing secrets
+        id: secrets
+        env:
+          CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+        run: |
+          if [ -n "$CERTIFICATE" ]; then sign=true; else sign=false; fi
+          if [ -n "$CERTIFICATE" ] && [ -n "$NOTARY_KEY" ]; then notarize=true; else notarize=false; fi
+          echo "sign=$sign" >> "$GITHUB_OUTPUT"
+          echo "notarize=$notarize" >> "$GITHUB_OUTPUT"
+
+      - name: Name the package
+        id: name
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="$GITHUB_REF_NAME"
+          else
+            version="$(date -u +%Y%m%d)-${GITHUB_SHA::8}"
+          fi
+          name="CloudCompare-$version-macOS-arm64"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "dmg=$name.dmg" >> "$GITHUB_OUTPUT"
+          echo "volume=CloudCompare $version" >> "$GITHUB_OUTPUT"
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.11.2
+        with:
+          pixi-version: v0.81.0
+          environments: build
+          frozen: true
+          cache: true
+
+      - name: Build and bundle
+        run: |
+          ulimit -n 10240
+          pixi run --frozen -e build bundle
+
+      - name: Import the signing certificate
+        if: steps.secrets.outputs.sign == 'true'
+        env:
+          CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(openssl rand -base64 24)"
+          echo "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/certificate.p12" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain"
+          rm "$RUNNER_TEMP/certificate.p12"
+
+      - name: Sign the application
+        env:
+          # '-' means ad hoc
+          CC_BUNDLE_SIGN: ${{ steps.secrets.outputs.sign == 'true' && secrets.MACOS_SIGNING_IDENTITY || '-' }}
+        run: pixi run --frozen -e build python scripts/mac/bundle/signatureCloudCompare.py .build/install --embed_python --identifier org.cloudcompare.CloudCompare
+
+      - name: Check the application
+        run: |
+          app=.build/install/CloudCompare/CloudCompare.app
+
+          # not the pixi codesign, which can't verify
+          /usr/bin/codesign --verify --deep --strict --verbose "$app"
+
+          # no library may point to the build machine
+          find "$app" -type f \( -name "*.dylib" -o -name "*.so" -o -perm +111 \) | while read -r file; do
+            otool -l "$file" 2> /dev/null | awk '/LC_RPATH/ { getline; getline; print $2 }' | { grep -E '^/(Users|private|opt)/' || true; } | sed "s|^|$file: |"
+          done > "$RUNNER_TEMP/rpaths.txt"
+          if [ -s "$RUNNER_TEMP/rpaths.txt" ]; then
+            echo "Libraries still looking for dependencies on the build machine:"
+            cat "$RUNNER_TEMP/rpaths.txt"
+            exit 1
+          fi
+
+          # all the plugins must load
+          expected=$(ls "$app/Contents/PlugIns/ccPlugins" | wc -l | tr -d ' ')
+          loaded=$(perl -e 'alarm 300; exec @ARGV' "$app/Contents/MacOS/CloudCompare" -SILENT -AUTO_SAVE OFF 2>&1 | grep -c "Plugin found" || true)
+          echo "$loaded of $expected plugins loaded"
+          [ "$loaded" -eq "$expected" ]
+
+      - name: Notarize the application
+        if: steps.secrets.outputs.notarize == 'true'
+        env:
+          NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        run: |
+          export NOTARY_KEY_PATH="$RUNNER_TEMP/notary_key.p8"
+          echo "$NOTARY_KEY" | base64 --decode > "$NOTARY_KEY_PATH"
+          ditto -c -k --keepParent .build/install/CloudCompare/CloudCompare.app "$RUNNER_TEMP/CloudCompare.zip"
+          scripts/mac/bundle/notarizeCloudCompare.sh "$RUNNER_TEMP/CloudCompare.zip" .build/install/CloudCompare/CloudCompare.app
+
+      - name: Create the DMG
+        env:
+          DMG: ${{ steps.name.outputs.dmg }}
+          VOLUME: ${{ steps.name.outputs.volume }}
+          SIGN: ${{ steps.secrets.outputs.sign }}
+          SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          # to install by dragging the app onto Applications
+          ln -s /Applications .build/install/CloudCompare/Applications
+
+          # hdiutil sometimes fails with 'Resource busy' on CI
+          for attempt in 1 2 3; do
+            if hdiutil create -volname "$VOLUME" -srcfolder .build/install/CloudCompare -ov -format UDZO "$DMG"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep 10
+          done
+          if [ "$SIGN" = "true" ]; then
+            /usr/bin/codesign --sign "$SIGNING_IDENTITY" --timestamp "$DMG"
+          fi
+
+      - name: Notarize the DMG
+        if: steps.secrets.outputs.notarize == 'true'
+        env:
+          DMG: ${{ steps.name.outputs.dmg }}
+          NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        run: |
+          export NOTARY_KEY_PATH="$RUNNER_TEMP/notary_key.p8"
+          echo "$NOTARY_KEY" | base64 --decode > "$NOTARY_KEY_PATH"
+          scripts/mac/bundle/notarizeCloudCompare.sh "$DMG" "$DMG"
+
+      - name: Compute the checksum
+        env:
+          DMG: ${{ steps.name.outputs.dmg }}
+        run: shasum -a 256 "$DMG" | tee "$DMG.sha256"
+
+      - name: Upload the DMG
+        uses: actions/upload-artifact@v7
+        with:
+          # no .dmg, as it downloads as a zip
+          name: ${{ steps.name.outputs.name }}
+          path: |
+            ${{ steps.name.outputs.dmg }}
+            ${{ steps.name.outputs.dmg }}.sha256
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Summary
+        env:
+          DMG: ${{ steps.name.outputs.dmg }}
+          SIGN: ${{ steps.secrets.outputs.sign }}
+          NOTARIZE: ${{ steps.secrets.outputs.notarize }}
+        run: |
+          {
+            echo "### $DMG"
+            if [ "$SIGN" = "true" ]; then echo "Signed with the Developer ID."; else echo "Ad hoc signature (no Developer ID secrets)."; fi
+            if [ "$NOTARIZE" = "true" ]; then echo "Notarized and stapled."; else echo "Not notarized: macOS will block it until it's allowed in System Settings > Privacy & Security."; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the signing keychain
+        if: always() && steps.secrets.outputs.sign == 'true'
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true

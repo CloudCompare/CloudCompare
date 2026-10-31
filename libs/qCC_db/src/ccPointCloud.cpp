@@ -38,6 +38,7 @@
 #include "../include/ccPointCloudLOD.h"
 #include "../include/ccPolyline.h"
 #include "../include/ccProgressDialog.h"
+#include "../include/ccXRayDrawScope.h"
 #include "../include/ccXRayExposure.h"
 
 // CCCoreLib
@@ -3435,9 +3436,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	assert(!glParams.showSF || hasDisplayedScalarField());
 
 	// color-based entity picking
-	bool       entityPickingMode = MACRO_EntityPicking(context);
-	const bool xRayPass          = (context.drawingFlags & CC_DRAW_XRAY_PASS) && !entityPickingMode;
-	const bool xRay              = xRayPass && context.xRayEnabled;
+	bool        entityPickingMode = MACRO_EntityPicking(context);
+	const bool  xRayPass          = (context.drawingFlags & CC_DRAW_XRAY_PASS) && !entityPickingMode;
+	const auto* xRayState         = xRayPass ? ccXRayDrawScope::Current(context) : nullptr;
+	const bool  xRay              = xRayState != nullptr;
 	if (xRayPass)
 	{
 		// X-ray accumulates color/density, without directional surface lighting.
@@ -3467,7 +3469,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	DisplayDesc toDisplay(0, size());
 	if (xRayPass)
 	{
-		// The additive pass is rebuilt each frame. Use uniform sampling while
+		// The X-ray pass is rebuilt each frame. Use uniform sampling while
 		// moving instead of advancing the ordinary clouds' progressive LOD cycle.
 		if (context.decimateCloudOnMove && m_useLODRendering && context.minLODPointCount)
 		{
@@ -3772,16 +3774,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			const double areaRatio  = box.isValid()
 			                              ? ccXRay::ProjectedAreaRatio(minimum, maximum, camera.modelViewMat.data(), camera.projectionMat.data())
 			                              : 1.0;
-			xRayStrength            = ccXRay::Strength(areaRatio, context.xRayExposure) * toDisplay.decimStep;
+			xRayStrength            = ccXRay::Strength(areaRatio, xRayState->exposure()) * toDisplay.decimStep;
 		}
 		if (xRay && !useProgram)
 		{
 			// Keep the cloud visible even when its accelerated shader/VBO setup fails.
-			static bool warned = false;
-			if (!warned)
+			static bool s_warned = false;
+			if (!s_warned)
 			{
 				ccLog::Warning("[X-ray] Using the slower point rendering fallback.");
-				warned = true;
+				s_warned = true;
 			}
 			glFunc->glUseProgram(0);
 			GLfloat baseColor[4];
@@ -3812,7 +3814,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						color[c] = rgba.rgba[c] / 255.0f;
 				}
 				for (unsigned c = 0; c < 3; ++c)
-					color[c] = context.xRayReverse
+					color[c] = xRayState->reverse()
 					               ? 1.0f - std::clamp((1.0f - color[c]) * xRayStrength, 0.0f, 1.0f) * color[3]
 					               : std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
 				glFunc->glColor4fv(color);
@@ -4080,7 +4082,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (xRay)
 				{
 					prog->setUniformValue("uXRayStrength", xRayStrength);
-					prog->setUniformValue("uXRayReverse", context.xRayReverse);
+					prog->setUniformValue("uXRayReverse", xRayState->reverse());
 				}
 
 				if (glParams.showNorms)

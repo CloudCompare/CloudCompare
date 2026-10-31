@@ -1,6 +1,7 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayDrawScope.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/cc2DLabel.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/cc2DViewportLabel.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/cc2DViewportObject.cpp

@@ -36,18 +36,6 @@
 class CCGLWINDOW_LIB_API ccGui
 {
   public:
-	struct XRayBackground
-	{
-		ccColor::Rgb color;
-		ccColor::Rgb secondColor;
-		bool         gradient = false;
-
-		bool operator==(const XRayBackground& other) const
-		{
-			return color == other.color && secondColor == other.secondColor && gradient == other.gradient;
-		}
-	};
-
 	//! GUI parameters
 	struct CCGLWINDOW_LIB_API ParamStruct
 	{
@@ -134,12 +122,6 @@ class CCGLWINDOW_LIB_API ccGui
 
 		//! Whether to draw rounded points (slower) or not
 		bool drawRoundedPoints;
-
-		//! Exposure adjustment in stops (one stop doubles the contribution)
-		double         xRayExposure;
-		bool           xRayReverse;
-		XRayBackground xRayBackground;
-		XRayBackground xRayReverseBackground;
 
 		//! Whether to pick objects by single clicking in the GUI
 		//! can be slow with large point clouds/large number of objects

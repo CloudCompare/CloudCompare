@@ -739,13 +739,13 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	// the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
 	// Keep the scene traversal (and parent transforms) in both passes. Only point
-	// clouds are submitted to the additive pass; picking uses the normal traversal.
+	// clouds are submitted to the X-ray pass; picking uses the normal traversal.
 	bool drawGeometry = true;
-	if (draw3D && (context.xRayEnabled || xRayPass) && !MACRO_EntityPicking(context))
+	if (draw3D && ((context.drawingFlags & CC_DRAW_XRAY_ENABLED) || xRayPass) && !MACRO_EntityPicking(context))
 	{
 		const bool xRayCloud = isKindOf(CC_TYPES::POINT_CLOUD)
 		                       && static_cast<const ccPointCloud*>(this)->isXRayEnabled();
-		drawGeometry         = (xRayCloud == xRayPass);
+		drawGeometry = (xRayCloud == xRayPass);
 	}
 
 	if (draw3D)

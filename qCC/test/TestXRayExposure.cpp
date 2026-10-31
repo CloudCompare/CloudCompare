@@ -1,4 +1,20 @@
-// CloudCompare - GPL-2.0-or-later
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                     COPYRIGHT: CloudCompare project                    #
+// #                                                                        #
+// ##########################################################################
+
 #include "ccXRayExposure.h"
 
 #include <array>
@@ -70,9 +86,6 @@ int main()
 	ExpectNear("one EV doubles intensity", ccXRay::Strength(0.25, 1), base * 2);
 	ExpectNear("minus one EV halves intensity", ccXRay::Strength(0.25, -1), base / 2);
 	ExpectNear("default exposure is one eighth of zero EV", ccXRay::Strength(0.25, -3), base / 8);
-	ExpectNear("doubling overlap with half intensity preserves accumulated energy",
-	           200 * base / 2,
-	           100 * base);
 	std::puts("X-ray exposure tests passed.");
 	return EXIT_SUCCESS;
 }

@@ -19,6 +19,9 @@
 #include "ccGLWindow.h"
 #include "ccGLWindowStereo.h"
 #include "ccRenderingTools.h"
+#include "ccXRayRenderer.h"
+
+#include <ccXRayDrawScope.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -462,7 +465,7 @@ ccGLWindowInterface::~ccGLWindowInterface()
 
 	delete m_pickingFbo;
 	m_pickingFbo = nullptr;
-	releaseXRay();
+	ccXRayRenderer::Destroy(*this);
 
 	m_pickingPBO.release();
 
@@ -882,9 +885,8 @@ void ccGLWindowInterface::uninitializeGL()
 		m_pivotGLList = GL_INVALID_LIST_ID;
 	}
 
-	releaseXRay();
-	m_xRayUnavailable = false;
-	m_initialized     = false;
+	ccXRayRenderer::Reset(*this);
+	m_initialized = false;
 }
 
 void ccGLWindowInterface::onResizeGL(int w, int h)
@@ -1873,10 +1875,6 @@ void ccGLWindowInterface::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	const ccGui::ParamStruct& guiParams = getDisplayParameters();
 
 	// decimation options
-	// EDL takes priority without changing any per-cloud flags.
-	CONTEXT.xRayEnabled              = false;
-	CONTEXT.xRayExposure             = static_cast<float>(guiParams.xRayExposure);
-	CONTEXT.xRayReverse              = guiParams.xRayReverse;
 	CONTEXT.decimateCloudOnMove      = guiParams.decimateCloudOnMove;
 	CONTEXT.minLODPointCount         = guiParams.minLoDCloudSize;
 	CONTEXT.decimateMeshOnMove       = guiParams.decimateMeshOnMove && m_mouseMoved;
@@ -3511,9 +3509,9 @@ void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRed
 	}
 
 	m_viewportParams.viewMat         = ccGLUtils::GenerateViewMat(orientation,
-	                                                              getDefaultVertDir(),
-	                                                              &m_lockedRotationAngle_rad,
-	                                                              &m_lockedRotationOrthoAngle_rad);
+                                                          getDefaultVertDir(),
+                                                          &m_lockedRotationAngle_rad,
+                                                          &m_lockedRotationOrthoAngle_rad);
 	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)
@@ -3653,7 +3651,7 @@ void ccGLWindowInterface::display3DLabel(const QString& str, const CCVector3& po
 	ccQOpenGLFunctions* glFunc = functions();
 	if (glFunc)
 	{
-		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : effectiveTextColor());
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : ccXRayRenderer::TextColor(*this));
 		renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 	}
 }
@@ -3677,7 +3675,7 @@ void ccGLWindowInterface::displayText(QString              text,
 	int y2 = y;
 
 	// actual text color
-	const ccColor::Rgba& rgba = (color ? *color : effectiveTextColor());
+	const ccColor::Rgba& rgba = (color ? *color : ccXRayRenderer::TextColor(*this));
 
 	QFont textFont = (font ? *font : getTextDisplayFont());
 
@@ -5014,270 +5012,6 @@ void ccGLWindowInterface::doPaintGL()
 #endif
 }
 
-namespace
-{
-	// Match the normal traversal: disabled parents hide their descendants, invisible
-	// containers do not. This is a CPU flag check, with no extra drawing or allocation.
-	bool HasVisibleXRayCloud(const ccHObject* object, const ccGenericGLDisplay* display)
-	{
-		if (!object || !object->isEnabled())
-			return false;
-		if (object->isVisible() && object->getDisplay() == display
-		    && object->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			const auto* cloud = static_cast<const ccPointCloud*>(object);
-			if (cloud->isXRayEnabled() && cloud->size() != 0)
-				return true;
-		}
-		for (unsigned i = 0; i < object->getChildrenNumber(); ++i)
-		{
-			if (HasVisibleXRayCloud(object->getChild(i), display))
-				return true;
-		}
-		return false;
-	}
-} // namespace
-
-bool ccGLWindowInterface::isXRayRequested() const
-{
-	return !m_xRayUnavailable
-	       && (!m_activeGLFilter || m_activeGLFilter->supportsXRay())
-	       && (HasVisibleXRayCloud(m_globalDBRoot, this) || HasVisibleXRayCloud(m_winDBRoot, this));
-}
-
-ccColor::Rgba ccGLWindowInterface::effectiveTextColor() const
-{
-	const auto& parameters = getDisplayParameters();
-	if (!m_xRayFbo)
-		return parameters.textDefaultCol;
-	const auto& background = parameters.xRayReverse ? parameters.xRayReverseBackground : parameters.xRayBackground;
-	auto        luminance  = [](const ccColor::Rgb& color)
-	{
-		auto linear = [](unsigned char value)
-		{
-			const double s = value / 255.0;
-			return s <= 0.04045 ? s / 12.92 : std::pow((s + 0.055) / 1.055, 2.4);
-		};
-		return 0.2126 * linear(color.r) + 0.7152 * linear(color.g) + 0.0722 * linear(color.b);
-	};
-	const double top      = luminance(background.color);
-	const double bottom   = background.gradient ? luminance(background.secondColor) : top;
-	auto         contrast = [&](double text)
-	{
-		auto ratio = [text](double backdrop)
-		{ return (std::max(text, backdrop) + 0.05) / (std::min(text, backdrop) + 0.05); };
-		return std::min(ratio(top), ratio(bottom));
-	};
-	if (contrast(luminance(parameters.textDefaultCol)) >= 3.0)
-		return parameters.textDefaultCol;
-	return contrast(0.0) >= contrast(1.0) ? ccColor::black : ccColor::white;
-}
-
-void ccGLWindowInterface::releaseXRay()
-{
-	// The accumulation buffer borrows the opaque scene's depth attachment.
-	delete m_xRayFbo;
-	m_xRayFbo = nullptr;
-	delete m_xRaySceneFbo;
-	m_xRaySceneFbo = nullptr;
-	delete m_xRayShader;
-	m_xRayShader     = nullptr;
-	m_xRaySceneValid = false;
-}
-
-bool ccGLWindowInterface::initXRay(int w, int h)
-{
-	if (m_xRayUnavailable || w <= 0 || h <= 0)
-		return false;
-	ccQOpenGLFunctions*  glFunc      = functions();
-	ccFrameBufferObject* previousFbo = m_activeFbo;
-	glFunc->glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
-	glFunc->glActiveTexture(GL_TEXTURE0);
-	bool success = true;
-	if (!m_xRayShader)
-	{
-		m_xRayShader = new ccShader();
-		success      = m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Vertex,
-		                                                     "#version 120\n"
-		                                                     "void main() { gl_Position = ftransform(); gl_TexCoord[0] = gl_MultiTexCoord0; }\n")
-		               && m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Fragment,
-		                                                        "#version 120\n"
-		                                                        "uniform sampler2D uColor;\n"
-		                                                        "uniform sampler2D uDepth;\n"
-		                                                        "uniform bool uComposite;\n"
-		                                                        "void main() {\n"
-		                                                        "  vec4 color = texture2D(uColor, gl_TexCoord[0].xy);\n"
-		                                                        "  if (uComposite) {\n"
-		                                                        "    gl_FragColor = vec4(color.rgb, 1.0);\n"
-		                                                        "    gl_FragDepth = gl_FragCoord.z;\n"
-		                                                        "  } else {\n"
-		                                                        "    gl_FragColor = color;\n"
-		                                                        "    gl_FragDepth = texture2D(uDepth, gl_TexCoord[0].xy).r;\n"
-		                                                        "  }\n"
-		                                                        "}\n")
-		               && m_xRayShader->link();
-	}
-	if (success && (!m_xRayFbo || m_xRayFbo->width() != static_cast<unsigned>(w) || m_xRayFbo->height() != static_cast<unsigned>(h)))
-	{
-		delete m_xRayFbo;
-		m_xRayFbo = new ccFrameBufferObject();
-		delete m_xRaySceneFbo;
-		m_xRaySceneFbo   = new ccFrameBufferObject();
-		m_xRaySceneValid = false;
-		// Preserve the opaque image/depth between progressive LOD updates. The
-		// original destination may be a window, a stereo eye or an export FBO.
-		success = m_xRaySceneFbo->init(w, h)
-		          && m_xRaySceneFbo->initColor(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-		          && m_xRaySceneFbo->initDepth()
-		          && m_xRayFbo->init(w, h)
-		          && m_xRayFbo->initColor(GL_RGBA32F, GL_RGBA, GL_FLOAT)
-		          && m_xRayFbo->attachDepth(m_xRaySceneFbo->getDepthTexture());
-	}
-	bindFBO(previousFbo);
-	glFunc->glPopAttrib();
-	if (!success)
-	{
-		ccLog::Warning("[X-ray] Floating-point rendering is unavailable; using the normal point display.");
-		releaseXRay();
-		m_xRayUnavailable = true;
-	}
-	return success;
-}
-
-void ccGLWindowInterface::drawXRayTexture(bool composite)
-{
-	ccQOpenGLFunctions* glFunc          = functions();
-	GLint               previousProgram = 0;
-	glFunc->glGetIntegerv(GL_CURRENT_PROGRAM, &previousProgram);
-	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glFunc->glActiveTexture(GL_TEXTURE0);
-	glFunc->glDisable(GL_LIGHTING);
-	glFunc->glDisable(GL_ALPHA_TEST);
-	glFunc->glDisable(GL_CULL_FACE);
-	glFunc->glDisable(GL_STENCIL_TEST);
-	glFunc->glDisable(GL_SCISSOR_TEST);
-	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	GLint clipPlaneCount = 0;
-	glFunc->glGetIntegerv(GL_MAX_CLIP_PLANES, &clipPlaneCount);
-	for (GLint plane = 0; plane < clipPlaneCount; ++plane)
-		glFunc->glDisable(GL_CLIP_PLANE0 + plane);
-	if (composite)
-	{
-		glFunc->glDisable(GL_DEPTH_TEST);
-		glFunc->glDepthMask(GL_FALSE);
-		glFunc->glEnable(GL_BLEND);
-		glFunc->glBlendEquation(GL_FUNC_ADD);
-		if (getDisplayParameters().xRayReverse)
-			glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
-		else
-			glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
-	}
-	else
-	{
-		glFunc->glEnable(GL_DEPTH_TEST);
-		glFunc->glDepthFunc(GL_ALWAYS);
-		glFunc->glDepthMask(GL_TRUE);
-		glFunc->glDisable(GL_BLEND);
-	}
-	glFunc->glMatrixMode(GL_PROJECTION);
-	glFunc->glPushMatrix();
-	glFunc->glLoadIdentity();
-	glFunc->glMatrixMode(GL_MODELVIEW);
-	glFunc->glPushMatrix();
-	glFunc->glLoadIdentity();
-	m_xRayShader->bind();
-	m_xRayShader->setUniformValue("uColor", 0);
-	m_xRayShader->setUniformValue("uDepth", 1);
-	m_xRayShader->setUniformValue("uComposite", composite);
-	glFunc->glActiveTexture(GL_TEXTURE1);
-	glFunc->glBindTexture(GL_TEXTURE_2D, m_xRaySceneFbo->getDepthTexture());
-	glFunc->glActiveTexture(GL_TEXTURE0);
-	ccGLUtils::DisplayTexture2DPosition(composite ? m_xRayFbo->getColorTexture() : m_xRaySceneFbo->getColorTexture(), -1, -1, 2, 2);
-	m_xRayShader->release();
-	glFunc->glPopMatrix();
-	glFunc->glMatrixMode(GL_PROJECTION);
-	glFunc->glPopMatrix();
-	glFunc->glPopAttrib();
-	glFunc->glUseProgram(previousProgram);
-}
-
-void ccGLWindowInterface::drawXRay(CC_DRAW_CONTEXT& context)
-{
-	assert(m_xRayFbo && m_xRayShader);
-	ccQOpenGLFunctions*  glFunc          = functions();
-	ccFrameBufferObject* previousFbo     = m_activeFbo;
-	GLint                previousProgram = 0;
-	GLint                viewport[4];
-	GLint                drawBuffer = 0;
-	glFunc->glGetIntegerv(GL_CURRENT_PROGRAM, &previousProgram);
-	glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
-	glFunc->glGetIntegerv(GL_DRAW_BUFFER, &drawBuffer);
-	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glFunc->glActiveTexture(GL_TEXTURE0);
-	glFunc->glReadBuffer(drawBuffer);
-	// Copy on the GPU, including the viewport offset for side-by-side stereo.
-	glFunc->glBindTexture(GL_TEXTURE_2D, m_xRaySceneFbo->getColorTexture());
-	glFunc->glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, viewport[0], viewport[1], viewport[2], viewport[3]);
-	glFunc->glBindTexture(GL_TEXTURE_2D, m_xRaySceneFbo->getDepthTexture());
-	glFunc->glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, viewport[0], viewport[1], viewport[2], viewport[3]);
-	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-	m_xRaySceneValid = true;
-	bindFBO(m_xRayFbo);
-	glFunc->glViewport(0, 0, viewport[2], viewport[3]);
-	glFunc->glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glFunc->glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glFunc->glDisable(GL_SCISSOR_TEST);
-	glFunc->glEnable(GL_DEPTH_TEST);
-	glFunc->glDepthMask(GL_FALSE);
-	glFunc->glDisable(GL_LIGHTING);
-	glFunc->glDisable(GL_ALPHA_TEST);
-	const float neutral = context.xRayReverse ? 1.0f : 0.0f;
-	glFunc->glClearColor(neutral, neutral, neutral, 0);
-	glFunc->glClear(GL_COLOR_BUFFER_BIT);
-	glFunc->glEnable(GL_BLEND);
-	glFunc->glBlendEquation(GL_FUNC_ADD);
-	// Screen accumulates on black; Multiply accumulates on white. The point
-	// shader includes exposure and alpha in the corresponding blend factor.
-	if (context.xRayReverse)
-		glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
-	else
-		glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
-
-	// X-ray is recomputed against the latest opaque depth at every LOD update.
-	// It uses a compensated stride while moving and full density at rest, without
-	// modifying the ordinary clouds' progressive LOD state.
-	CC_DRAW_CONTEXT xRayContext = context;
-	xRayContext.drawingFlags |= CC_DRAW_XRAY_PASS;
-	xRayContext.drawingFlags &= ~CC_LOD_ACTIVATED;
-	xRayContext.currentLODLevel     = 0;
-	xRayContext.decimateCloudOnMove = context.decimateCloudOnMove && m_mouseMoved && !m_captureMode.enabled;
-	auto drawClouds                 = [&]()
-	{
-		if (m_globalDBRoot)
-			m_globalDBRoot->draw(xRayContext);
-		if (m_winDBRoot)
-			m_winDBRoot->draw(xRayContext);
-	};
-	drawClouds();
-	bindFBO(previousFbo);
-	glFunc->glPopAttrib();
-	glFunc->glUseProgram(previousProgram);
-	drawXRayTexture(true);
-
-	// Populate the final scene depth only AFTER accumulation. Picking, automatic
-	// pivot placement and depth filters retain a surface depth for X-ray clouds,
-	// while X-ray points never occlude each other during their color pass.
-	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glFunc->glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glFunc->glEnable(GL_DEPTH_TEST);
-	glFunc->glDepthMask(GL_TRUE);
-	glFunc->glDisable(GL_BLEND);
-	xRayContext.xRayEnabled = false;
-	drawClouds();
-	glFunc->glPopAttrib();
-	glFunc->glUseProgram(previousProgram);
-}
-
 void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
@@ -5287,20 +5021,12 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		return;
 	}
 
-	CONTEXT.xRayEnabled = isXRayRequested();
-	if (CONTEXT.xRayEnabled)
-	{
-		GLint viewport[4];
-		glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
-		CONTEXT.xRayEnabled = initXRay(viewport[2], viewport[3]);
-		if (CONTEXT.xRayEnabled && m_xRaySceneValid && m_currentLODState.level > 0 && !m_stereoModeEnabled)
-			drawXRayTexture(false);
-	}
-	else if (m_xRayFbo || m_xRayShader)
-	{
-		releaseXRay();
-	}
-	CONTEXT.textDefaultCol = effectiveTextColor();
+	auto* xRay = ccXRayRenderer::Prepare(*this);
+	if (xRay)
+		xRay->restoreScene();
+	const auto            xRaySettings = xRay ? xRay->settings() : ccXRaySettings();
+	const ccXRayDrawScope xRayScope(CONTEXT, xRaySettings.exposure, xRaySettings.reverse);
+	CONTEXT.textDefaultCol = ccXRayRenderer::TextColor(*this);
 
 	glFunc->glPointSize(m_viewportParams.defaultPointSize);
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
@@ -5308,6 +5034,8 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	glFunc->glEnable(GL_DEPTH_TEST);
 
 	CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
+	if (xRay)
+		CONTEXT.drawingFlags |= CC_DRAW_XRAY_ENABLED;
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
@@ -5455,9 +5183,9 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		m_winDBRoot->draw(CONTEXT);
 	}
 
-	if (CONTEXT.xRayEnabled)
+	if (xRay)
 	{
-		drawXRay(CONTEXT);
+		xRay->draw(CONTEXT);
 	}
 
 	glFunc->glPopAttrib(); // GL_ENABLE_BIT
@@ -5482,7 +5210,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 
 	// for connected items
 	// X-ray restores the opaque layer at each refinement, so redraw annotations.
-	if (m_currentLODState.level == 0 || CONTEXT.xRayEnabled)
+	if (m_currentLODState.level == 0 || xRay)
 	{
 		Q_EMIT m_signalEmitter->drawing3D();
 	}
@@ -5539,7 +5267,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 
 	// we display the cross at the end (and in orthographic mode)
 	if (renderingParams.draw3DCross
-	    && (m_currentLODState.level == 0 || CONTEXT.xRayEnabled)
+	    && (m_currentLODState.level == 0 || xRay)
 	    && !m_captureMode.enabled
 	    && !m_viewportParams.perspectiveView
 	    && (!renderingParams.useFBO || !m_activeGLFilter))
@@ -5548,6 +5276,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		drawCross();
 	}
 
+	CONTEXT.drawingFlags &= ~CC_DRAW_XRAY_ENABLED;
 	logGLError("ccGLWindow::draw3D");
 }
 
@@ -5903,16 +5632,9 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		if (renderingParams.clearColorLayer)
 		{
 			const ccGui::ParamStruct& displayParams = getDisplayParameters();
-			bool                      xRay          = isXRayRequested();
-			if (xRay)
-			{
-				// Detect unavailable resources before selecting the backdrop, so the
-				// normal-rendering fallback also keeps the normal background.
-				GLint viewport[4];
-				glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
-				xRay = initXRay(viewport[2], viewport[3]);
-			}
-			const auto&           xRayBackground = displayParams.xRayReverse ? displayParams.xRayReverseBackground : displayParams.xRayBackground;
+			// Allocate before choosing the backdrop, keeping normal colors on failure.
+			const auto*           xRay           = ccXRayRenderer::Prepare(*this);
+			const auto            xRayBackground = xRay ? xRay->background() : ccXRaySettings::Background{};
 			const ccColor::Rgbub& bkgCol         = xRay ? xRayBackground.color : displayParams.backgroundCol;
 			const ccColor::Rgbub& frgCol         = displayParams.textDefaultCol;
 			const ccColor::Rgbub  gradientEnd    = xRay ? xRayBackground.secondColor : ccColor::Rgbub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
@@ -6026,7 +5748,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 	/*** overlay entities ***/
 	{
 		// default overlay color
-		const ccColor::Rgbub textCol = effectiveTextColor();
+		const ccColor::Rgbub textCol = ccXRayRenderer::TextColor(*this);
 
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
@@ -6471,7 +6193,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		if (!m_viewportParams.perspectiveView)
 		{
 			// DGM FIXME: with a zoom > 1, the renderText call inside drawScale will result in the wrong FBO being used?!
-			drawScale(effectiveTextColor());
+			drawScale(ccXRayRenderer::TextColor(*this));
 		}
 
 		if (m_showTrihedron)

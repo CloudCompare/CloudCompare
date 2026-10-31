@@ -35,21 +35,14 @@ class CCFBO_LIB_API ccGlFilter
 {
   public:
 	//! Default constructor
-	ccGlFilter(const QString& description, bool supportsXRay = true)
+	ccGlFilter(const QString& description)
 	    : m_isValid(false)
 	    , m_description(description)
-	    , m_supportsXRay(supportsXRay)
 	{
 	}
 
 	//! Default destructor
 	virtual ~ccGlFilter() = default;
-
-	//! Whether additive point rendering can be used with this filter.
-	bool supportsXRay() const
-	{
-		return m_supportsXRay;
-	}
 
 	//! Returns filter name
 	inline virtual QString getDescription() const
@@ -126,6 +119,4 @@ class CCFBO_LIB_API ccGlFilter
 
 	//! Filter description
 	QString m_description;
-
-	bool m_supportsXRay;
 };

@@ -17,6 +17,8 @@
 
 #include "../include/ccDisplaySettingsDlg.h"
 
+#include "ccXRaySettingsEditor.h"
+
 // Local
 #include "../include/ccApplicationBase.h"
 
@@ -33,7 +35,6 @@
 // Qt
 #include <QColorDialog>
 #include <QSettings>
-#include <QSignalBlocker>
 #include <QStyle>
 #include <QStyleFactory>
 
@@ -157,53 +158,7 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	m_oldParameters = m_parameters = ccGui::Parameters();
 	m_oldOptions = m_options = ccOptions::Instance();
 
-	connect(m_ui->xRayExposureSlider, &QSlider::valueChanged, this, [this](int value)
-	        { m_ui->xRayExposureSpinBox->setValue(value / 10.0); });
-	connect(m_ui->xRayExposureSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value)
-	        {
-		        const QSignalBlocker blocker(m_ui->xRayExposureSlider);
-		        m_ui->xRayExposureSlider->setValue(qRound(value * 10));
-		        m_parameters.xRayExposure = value;
-		        previewXRay(); });
-	connect(m_ui->xRayReverseCheckBox, &QCheckBox::toggled, this, [this](bool checked)
-	        { m_parameters.xRayReverse = checked; previewXRay(); });
-	auto bindBackground = [this](QCheckBox* gradient, QToolButton* primary, QToolButton* secondary, ccGui::XRayBackground* background)
-	{
-		connect(gradient, &QCheckBox::toggled, this, [this, background](bool checked)
-		        { background->gradient = checked; refreshXRay(); previewXRay(); });
-		auto chooseColor = [this](QToolButton* button, ccColor::Rgb* color)
-		{
-			connect(button, &QToolButton::clicked, this, [this, color]()
-			        {
-				        const QColor selected = QColorDialog::getColor(QColor(color->r, color->g, color->b), this);
-				        if (selected.isValid())
-				        {
-					        *color = ccColor::FromQColor(selected);
-					        refreshXRay();
-					        previewXRay();
-				        } });
-		};
-		chooseColor(primary, &background->color);
-		chooseColor(secondary, &background->secondColor);
-	};
-	bindBackground(m_ui->xRayGradientCheckBox, m_ui->xRayColorButton, m_ui->xRaySecondColorButton, &m_parameters.xRayBackground);
-	bindBackground(m_ui->xRayReverseGradientCheckBox, m_ui->xRayReverseColorButton, m_ui->xRayReverseSecondColorButton, &m_parameters.xRayReverseBackground);
-	// Also restore the live preview when the dialog is closed with Escape or X.
-	connect(this, &QDialog::rejected, this, [this]()
-	        {
-		        ccGui::ParamStruct parameters = ccGui::Parameters();
-		        if (parameters.xRayExposure != m_oldParameters.xRayExposure
-		            || parameters.xRayReverse != m_oldParameters.xRayReverse
-		            || !(parameters.xRayBackground == m_oldParameters.xRayBackground)
-		            || !(parameters.xRayReverseBackground == m_oldParameters.xRayReverseBackground))
-		        {
-			        parameters.xRayExposure = m_oldParameters.xRayExposure;
-			        parameters.xRayReverse = m_oldParameters.xRayReverse;
-			        parameters.xRayBackground = m_oldParameters.xRayBackground;
-			        parameters.xRayReverseBackground = m_oldParameters.xRayReverseBackground;
-			        ccGui::Set(parameters);
-			        Q_EMIT aspectHasChanged();
-		        } });
+	new ccXRaySettingsEditor(*this, *m_ui);
 
 	refresh();
 
@@ -270,7 +225,6 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->maxMeshSizeDoubleSpinBox->setValue(m_parameters.minLoDMeshSize / 1000000.0);
 		m_ui->decimateCloudBox->setChecked(m_parameters.decimateCloudOnMove);
 		m_ui->drawRoundedPointsCheckBox->setChecked(m_parameters.drawRoundedPoints);
-		refreshXRay();
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
 		m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
 		m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
@@ -579,46 +533,10 @@ void ccDisplaySettingsDlg::doReject()
 {
 	ccGui::Set(m_oldParameters);
 	ccOptions::Set(m_oldOptions);
+
 	Q_EMIT aspectHasChanged();
+
 	reject();
-}
-
-void ccDisplaySettingsDlg::refreshXRay()
-{
-	const QSignalBlocker sliderBlocker(m_ui->xRayExposureSlider);
-	const QSignalBlocker spinBlocker(m_ui->xRayExposureSpinBox);
-	const QSignalBlocker reverseBlocker(m_ui->xRayReverseCheckBox);
-	m_ui->xRayExposureSlider->setValue(qRound(m_parameters.xRayExposure * 10));
-	m_ui->xRayExposureSpinBox->setValue(m_parameters.xRayExposure);
-	m_ui->xRayReverseCheckBox->setChecked(m_parameters.xRayReverse);
-	auto refreshBackground = [](QCheckBox* gradient, QToolButton* primary, QToolButton* secondary, QLabel* secondaryLabel, const ccGui::XRayBackground& background)
-	{
-		const QSignalBlocker blocker(gradient);
-		gradient->setChecked(background.gradient);
-		ccQtHelpers::SetButtonColor(primary, QColor(background.color.r, background.color.g, background.color.b));
-		ccQtHelpers::SetButtonColor(secondary, QColor(background.secondColor.r, background.secondColor.g, background.secondColor.b));
-		secondary->setEnabled(background.gradient);
-		secondaryLabel->setEnabled(background.gradient);
-	};
-	refreshBackground(m_ui->xRayGradientCheckBox, m_ui->xRayColorButton, m_ui->xRaySecondColorButton, m_ui->xRaySecondColorLabel, m_parameters.xRayBackground);
-	refreshBackground(m_ui->xRayReverseGradientCheckBox, m_ui->xRayReverseColorButton, m_ui->xRayReverseSecondColorButton, m_ui->xRayReverseSecondColorLabel, m_parameters.xRayReverseBackground);
-}
-
-void ccDisplaySettingsDlg::previewXRay()
-{
-	// Do not apply unrelated pending edits to the display settings.
-	ccGui::ParamStruct preview = ccGui::Parameters();
-	if (preview.xRayExposure == m_parameters.xRayExposure
-	    && preview.xRayReverse == m_parameters.xRayReverse
-	    && preview.xRayBackground == m_parameters.xRayBackground
-	    && preview.xRayReverseBackground == m_parameters.xRayReverseBackground)
-		return;
-	preview.xRayExposure          = m_parameters.xRayExposure;
-	preview.xRayReverse           = m_parameters.xRayReverse;
-	preview.xRayBackground        = m_parameters.xRayBackground;
-	preview.xRayReverseBackground = m_parameters.xRayReverseBackground;
-	ccGui::Set(preview);
-	Q_EMIT aspectHasChanged();
 }
 
 void ccDisplaySettingsDlg::reset()
@@ -628,7 +546,6 @@ void ccDisplaySettingsDlg::reset()
 	m_ui->appStyleComboBox->setCurrentIndex(m_defaultAppStyleIndex);
 
 	refresh();
-	previewXRay();
 }
 
 void ccDisplaySettingsDlg::apply()

@@ -57,7 +57,8 @@ enum CC_DRAWING_FLAGS
 	// CC_FREE_FLAG        = 0x03C0, // UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
 	CC_LOD_ACTIVATED         = 0x0400,
 	CC_VIRTUAL_TRANS_ENABLED = 0x0800,
-	CC_DRAW_XRAY_PASS        = 0x1000
+	CC_DRAW_XRAY_PASS        = 0x1000,
+	CC_DRAW_XRAY_ENABLED     = 0x2000
 };
 
 // Drawing flags testing macros (see ccDrawableObject)
@@ -159,11 +160,6 @@ struct ccGLDrawContext
 	//! Whether to draw rounded points (instead of squares)
 	bool drawRoundedPoints;
 
-	//! Additive point-cloud rendering, with exposure in stops
-	bool  xRayEnabled;
-	bool  xRayReverse;
-	float xRayExposure;
-
 	//! Entity picking mechanism
 	ccColorBasedEntityPicking entityPicking;
 
@@ -203,9 +199,6 @@ struct ccGLDrawContext
 	    , destBlend(GL_ONE_MINUS_SRC_ALPHA)
 	    , stereoPassIndex(0)
 	    , drawRoundedPoints(false)
-	    , xRayEnabled(false)
-	    , xRayReverse(false)
-	    , xRayExposure(0.0f)
 	{
 	}
 

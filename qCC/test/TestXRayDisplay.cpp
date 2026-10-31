@@ -1,4 +1,22 @@
-// CloudCompare - GPL-2.0-or-later
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                     COPYRIGHT: CloudCompare project                    #
+// #                                                                        #
+// ##########################################################################
+
+#include "../../libs/qCC_glWindow/src/ccXRayRenderer.h"
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
@@ -8,12 +26,18 @@
 #include <QToolBox>
 #include <QToolButton>
 #include <QtTest>
+#include <ccApplicationBase.h>
 #include <ccDisplaySettingsDlg.h>
 #include <ccEDLFilter.h>
 #include <ccFrameBufferObject.h>
 #include <ccGLWindow.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
+#include <ccXRayDrawScope.h>
+#include <ccXRaySettings.h>
+#include <cstdlib>
+#include <limits>
 #include <memory>
 
 class XRayTestWindow : public ccGLWindow
@@ -25,11 +49,18 @@ class XRayTestWindow : public ccGLWindow
 	}
 	bool hasXRayResources() const
 	{
-		return m_xRayFbo || m_xRaySceneFbo || m_xRayShader;
+		const auto* renderer = ccXRayRenderer::Find(*this);
+		return renderer && renderer->hasResources();
 	}
 	ccColor::Rgba overlayColor() const
 	{
-		return effectiveTextColor();
+		return ccXRayRenderer::TextColor(*this);
+	}
+
+	bool resetXRayContext()
+	{
+		uninitializeGL();
+		return initialize();
 	}
 
 	// Exercise successive updates of the same framebuffer, as progressive LOD
@@ -75,11 +106,68 @@ class TestXRayDisplay : public QObject
 {
 	Q_OBJECT
   private Q_SLOTS:
+
+	void scopedDrawState()
+	{
+		CC_DRAW_CONTEXT first;
+		CC_DRAW_CONTEXT second;
+		// Distinct display identities suffice; no GL operations are performed here.
+		ccGenericGLDisplay* firstDisplay  = reinterpret_cast<ccGenericGLDisplay*>(&first);
+		ccGenericGLDisplay* secondDisplay = reinterpret_cast<ccGenericGLDisplay*>(&second);
+		first.display                     = firstDisplay;
+		second.display                    = secondDisplay;
+		first.drawingFlags = second.drawingFlags = CC_DRAW_XRAY_ENABLED | CC_DRAW_XRAY_PASS;
+		QVERIFY(!ccXRayDrawScope::Current(first));
+		{
+			ccXRayDrawScope outer(first, -3.0, false);
+			CC_DRAW_CONTEXT copy = first;
+			QCOMPARE(ccXRayDrawScope::Current(copy), &outer);
+			QVERIFY(!ccXRayDrawScope::Current(second));
+			{
+				ccXRayDrawScope otherView(second, 1.0, true);
+				QCOMPARE(ccXRayDrawScope::Current(first), &outer);
+				QCOMPARE(ccXRayDrawScope::Current(second), &otherView);
+				ccXRayDrawScope nested(first, -1.0, true);
+				QCOMPARE(ccXRayDrawScope::Current(copy), &nested);
+				QCOMPARE(ccXRayDrawScope::Current(copy)->exposure(), -1.0);
+				QVERIFY(ccXRayDrawScope::Current(copy)->reverse());
+			}
+			QCOMPARE(ccXRayDrawScope::Current(first), &outer);
+			copy.drawingFlags = CC_DRAW_XRAY_PASS; // depth-only pass
+			QVERIFY(!ccXRayDrawScope::Current(copy));
+			copy.drawingFlags = CC_DRAW_3D; // ordinary render/picking
+			QVERIFY(!ccXRayDrawScope::Current(copy));
+		}
+		QVERIFY(!ccXRayDrawScope::Current(first));
+	}
+
+	void independentWindowSettings()
+	{
+		const auto     original = ccXRaySettings::Parameters();
+		XRayTestWindow first;
+		XRayTestWindow second;
+		ccXRaySettings global;
+		global.exposure = -2.0;
+		ccXRaySettings::Set(global);
+		ccXRaySettings local;
+		local.reverse = true;
+		ccXRaySettings::Set(local, &first);
+		QVERIFY(ccXRaySettings::Parameters(&first) == local);
+		QVERIFY(ccXRaySettings::Parameters(&second) == global);
+		global.exposure = 0.0;
+		ccXRaySettings::Set(global);
+		QVERIFY(ccXRaySettings::Parameters(&first) == local);
+		QVERIFY(ccXRaySettings::Parameters(&second) == global);
+		ccXRaySettings::ClearOverride(first);
+		QVERIFY(ccXRaySettings::Parameters(&first) == global);
+		ccXRaySettings::Set(original);
+	}
 	void settingsAndPreview()
 	{
-		const auto         original = ccGui::Parameters();
-		ccGui::ParamStruct defaults;
-		ccGui::Set(defaults);
+		const auto     ordinary = ccGui::Parameters();
+		const auto     original = ccXRaySettings::Parameters();
+		ccXRaySettings defaults;
+		ccXRaySettings::Set(defaults);
 		ccDisplaySettingsDlg dialog(nullptr);
 		dialog.setAttribute(Qt::WA_DontShowOnScreen);
 		auto* reverse         = dialog.findChild<QCheckBox*>("xRayReverseCheckBox");
@@ -97,44 +185,94 @@ class TestXRayDisplay : public QObject
 		QVERIFY(reverseSecond->isEnabled());
 		reverse->setChecked(true);
 		exposure->setValue(-2.0);
-		QVERIFY(ccGui::Parameters().xRayReverse);
-		QVERIFY(ccGui::Parameters().xRayBackground.gradient);
-		QVERIFY(ccGui::Parameters().xRayReverseBackground.gradient);
-		QCOMPARE(ccGui::Parameters().xRayExposure, -2.0);
-		QVERIFY(ccGui::Parameters().backgroundCol == defaults.backgroundCol);
+		QVERIFY(ccXRaySettings::Parameters().reverse);
+		QVERIFY(ccXRaySettings::Parameters().background.gradient);
+		QVERIFY(ccXRaySettings::Parameters().reverseBackground.gradient);
+		QCOMPARE(ccXRaySettings::Parameters().exposure, -2.0);
+		QVERIFY(ccGui::Parameters().backgroundCol == ordinary.backgroundCol);
 		toolbox->setCurrentIndex(toolbox->count() - 1);
 		dialog.show();
 		QTest::qWait(30);
 		QVERIFY(dialog.grab().save("xray-settings.png"));
 		dialog.reject(); // includes Escape and window-close path
-		QVERIFY(!ccGui::Parameters().xRayReverse);
-		QVERIFY(ccGui::Parameters().xRayBackground == defaults.xRayBackground);
-		QVERIFY(ccGui::Parameters().xRayReverseBackground == defaults.xRayReverseBackground);
-		QCOMPARE(ccGui::Parameters().xRayExposure, defaults.xRayExposure);
-		ccGui::Set(original);
+		QVERIFY(!ccXRaySettings::Parameters().reverse);
+		QVERIFY(ccXRaySettings::Parameters().background == defaults.background);
+		QVERIFY(ccXRaySettings::Parameters().reverseBackground == defaults.reverseBackground);
+		QCOMPARE(ccXRaySettings::Parameters().exposure, defaults.exposure);
+		ccXRaySettings::Set(original);
 
-		// Write settings in an isolated directory, never into the user's profile.
-		QTemporaryDir dir;
-		QVERIFY(dir.isValid());
-		const auto organization = QCoreApplication::organizationName();
-		const auto application  = QCoreApplication::applicationName();
-		const auto format       = QSettings::defaultFormat();
-		QSettings::setDefaultFormat(QSettings::IniFormat);
-		QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, dir.path());
-		QCoreApplication::setOrganizationName("XRaySettingsTest");
-		QCoreApplication::setApplicationName("RoundTrip");
-		defaults.xRayReverse           = true;
-		defaults.xRayBackground        = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(40, 50, 60), true};
-		defaults.xRayReverseBackground = {ccColor::Rgb(210, 220, 230), ccColor::Rgb(140, 150, 160), false};
+		// main() isolates all settings, including writes by the real dialog buttons.
+		defaults.reverse           = true;
+		defaults.background        = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(40, 50, 60), true};
+		defaults.reverseBackground = {ccColor::Rgb(210, 220, 230), ccColor::Rgb(140, 150, 160), false};
 		defaults.toPersistentSettings();
-		ccGui::ParamStruct loaded;
+		ccXRaySettings loaded;
 		loaded.fromPersistentSettings();
-		QCoreApplication::setOrganizationName(organization);
-		QCoreApplication::setApplicationName(application);
-		QSettings::setDefaultFormat(format);
-		QVERIFY(loaded.xRayReverse);
-		QVERIFY(loaded.xRayBackground == defaults.xRayBackground);
-		QVERIFY(loaded.xRayReverseBackground == defaults.xRayReverseBackground);
+		QVERIFY(loaded.reverse);
+		QVERIFY(loaded.background == defaults.background);
+		QVERIFY(loaded.reverseBackground == defaults.reverseBackground);
+	}
+
+	void invalidSavedExposure()
+	{
+		QSettings settings;
+		settings.beginGroup("OpenGL");
+		const QVariant saved = settings.value("xRayExposure");
+		for (const auto& value : {QVariant("not a number"), QVariant(std::numeric_limits<double>::quiet_NaN()), QVariant(std::numeric_limits<double>::infinity())})
+		{
+			settings.setValue("xRayExposure", value);
+			settings.sync();
+			ccXRaySettings loaded;
+			loaded.fromPersistentSettings();
+			QCOMPARE(loaded.exposure, -3.0);
+		}
+		for (double value : {-99.0, 99.0})
+		{
+			settings.setValue("xRayExposure", value);
+			settings.sync();
+			ccXRaySettings loaded;
+			loaded.fromPersistentSettings();
+			QCOMPARE(loaded.exposure, value < 0 ? -8.0 : 8.0);
+		}
+		settings.setValue("xRayExposure", saved);
+	}
+
+	void settingsButtons()
+	{
+		const auto     original = ccXRaySettings::Parameters();
+		ccXRaySettings opening;
+		opening.exposure = -4.0;
+		ccXRaySettings::Set(opening);
+		{
+			ccDisplaySettingsDlg dialog(nullptr);
+			auto*                exposure = dialog.findChild<QDoubleSpinBox*>("xRayExposureSpinBox");
+			auto*                reset    = dialog.findChild<QAbstractButton*>("resetButton");
+			auto*                apply    = dialog.findChild<QAbstractButton*>("applyButton");
+			auto*                cancel   = dialog.findChild<QAbstractButton*>("cancelButton");
+			QVERIFY(exposure && reset && apply && cancel);
+			exposure->setValue(1.0);
+			reset->click();
+			QCOMPARE(exposure->value(), -3.0);
+			QVERIFY(ccXRaySettings::Parameters() == ccXRaySettings());
+			exposure->setValue(-1.0);
+			apply->click();
+			QCOMPARE(ccXRaySettings::Parameters().exposure, -1.0);
+			cancel->click();
+			QVERIFY(ccXRaySettings::Parameters() == opening);
+		}
+		{
+			ccDisplaySettingsDlg dialog(nullptr);
+			auto*                exposure = dialog.findChild<QDoubleSpinBox*>("xRayExposureSpinBox");
+			auto*                accept   = dialog.findChild<QAbstractButton*>("okButton");
+			QVERIFY(exposure && accept);
+			exposure->setValue(-2.0);
+			accept->click();
+			QCOMPARE(dialog.result(), static_cast<int>(QDialog::Accepted));
+			ccXRaySettings saved;
+			saved.fromPersistentSettings();
+			QCOMPARE(saved.exposure, -2.0);
+		}
+		ccXRaySettings::Set(original);
 	}
 
 	void persistenceAndClone()
@@ -156,8 +294,8 @@ class TestXRayDisplay : public QObject
 		QVERIFY(cloud.toFile(file, version));
 		QVERIFY(file.seek(0));
 		QCOMPARE(ccObject::ReadClassIDFromFile(file, version), CC_TYPES::POINT_CLOUD);
-		int                                  flags = (sizeof(PointCoordinateType) == 8 ? ccSerializableObject::DF_POINT_COORDS_64_BITS : 0)
-		                                             | (sizeof(ScalarType) == 4 ? ccSerializableObject::DF_SCALAR_VAL_32_BITS : 0);
+		int flags = (sizeof(PointCoordinateType) == 8 ? ccSerializableObject::DF_POINT_COORDS_64_BITS : 0)
+		            | (sizeof(ScalarType) == 4 ? ccSerializableObject::DF_SCALAR_VAL_32_BITS : 0);
 		ccSerializableObject::LoadingContext context(version, flags);
 		ccPointCloud                         loaded;
 		QVERIFY(loaded.fromFile(file, context));
@@ -178,13 +316,15 @@ class TestXRayDisplay : public QObject
 		window.doMakeCurrent();
 
 		ccGui::ParamStruct parameters;
-		QCOMPARE(parameters.xRayExposure, -3.0);
+		ccXRaySettings     xRaySettings;
+		QCOMPARE(xRaySettings.exposure, -3.0);
 		parameters.backgroundCol          = ccColor::black;
 		parameters.drawBackgroundGradient = false;
 		parameters.displayCross           = false;
 		parameters.decimateCloudOnMove    = false;
-		parameters.xRayExposure           = 2;
+		xRaySettings.exposure             = 2;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		window.setSunLight(false);
 		window.setCustomLight(false);
 		window.setPivotVisibility(ccGLWindowInterface::PIVOT_HIDE);
@@ -233,6 +373,39 @@ class TestXRayDisplay : public QObject
 		QVERIFY(center(front).red() > 0);
 		QVERIFY(center(front).green() > 200); // opaque surface remains visible beneath X-ray
 		QVERIFY(front != baseline);
+		QVERIFY(window.resetXRayContext());
+		QVERIFY(!window.hasXRayResources());
+		QCOMPARE(capture(), front);
+		// A second context has its own buffers and settings. Rendering and destroying
+		// it must leave the first view's Screen result unchanged.
+		{
+			ccHObject      secondScene;
+			XRayTestWindow secondView;
+			secondView.setAttribute(Qt::WA_DontShowOnScreen);
+			secondView.resize(256, 256);
+			secondView.show();
+			QTest::qWait(50);
+			QVERIFY(secondView.isValid());
+			auto* secondCloud = xray->cloneThis();
+			QVERIFY(secondCloud);
+			secondCloud->setDisplay(&secondView);
+			secondScene.addChild(secondCloud);
+			secondView.setSceneDB(&secondScene);
+			secondView.setView(CC_TOP_VIEW, false);
+			secondView.zoomGlobal();
+			ccXRaySettings reverseSettings;
+			reverseSettings.reverse  = true;
+			reverseSettings.exposure = 2;
+			ccXRaySettings::Set(reverseSettings, &secondView);
+			secondView.doMakeCurrent();
+			const QImage secondImage = secondView.renderToImage(1, false, false, true);
+			QVERIFY(!secondImage.isNull());
+			QCOMPARE(secondImage.pixelColor(2, 2), QColor(Qt::white));
+			QVERIFY(secondView.hasXRayResources());
+			QCOMPARE(capture(), front);
+			secondView.setSceneDB(nullptr);
+		}
+		QCOMPARE(capture(), front);
 		scene.swapChildren(0, 1);
 		QCOMPARE(capture(), front); // ordinary geometry occludes independently of tree order
 
@@ -339,6 +512,35 @@ class TestXRayDisplay : public QObject
 		window.setSunLight(false);
 		window.setCustomLight(false);
 
+		// Existing clipping, segmentation visibility and scalar-field filtering
+		// must still expose the opaque surface behind hidden X-ray points.
+		ccClipPlane clip;
+		clip.equation = Tuple4Tpl<double>(0, 0, 1, -0.25);
+		QVERIFY(xray->addClipPlanes(clip));
+		QCOMPARE(center(capture()), QColor(Qt::green));
+		xray->removeAllClipPlanes();
+		QCOMPARE(capture(), front);
+		QVERIFY(xray->resetVisibilityArray());
+		xray->getTheVisibilityArray()[144] = CCCoreLib::POINT_HIDDEN;
+		QCOMPARE(center(capture()), QColor(Qt::green));
+		xray->unallocateVisibilityArray();
+		QCOMPARE(capture(), front);
+		const int scalarIndex = xray->addScalarField("Xray filtering test");
+		QVERIFY(scalarIndex >= 0);
+		auto scalarField = xray->getScalarField(scalarIndex);
+		for (unsigned i = 0; i < xray->size(); ++i)
+			scalarField->setValue(i, i == 144 ? 1.0 : 0.0);
+		scalarField->computeMinAndMax();
+		xray->setCurrentDisplayedScalarField(scalarIndex);
+		xray->showSF(true);
+		auto displayedSF = xray->getCurrentDisplayedScalarField();
+		displayedSF->setMaxDisplayed(0.5);
+		displayedSF->showNaNValuesInGrey(false);
+		QCOMPARE(center(capture()), QColor(Qt::green));
+		xray->showSF(false);
+		xray->deleteScalarField(scalarIndex);
+		QCOMPARE(capture(), front);
+
 		// Changing the cloud property must enlarge its point footprints without
 		// fading them. Also check the inherited window size and explicit override.
 		auto redCoverage = [](const QImage& image)
@@ -374,12 +576,14 @@ class TestXRayDisplay : public QObject
 		window.setPointSize(1);
 		xray->setPointSize(7);
 
-		parameters.xRayExposure = 1;
+		xRaySettings.exposure = 1;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		const QImage dimmer = capture();
 		QVERIFY(center(dimmer).red() < center(front).red());
-		parameters.xRayExposure = 2;
+		xRaySettings.exposure = 2;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 
 		// EDL remains active, suspends X-ray, and leaves the per-cloud preference intact.
 		window.setGlFilter(new ccEDLFilter());
@@ -400,8 +604,9 @@ class TestXRayDisplay : public QObject
 		QVERIFY(!window.hasXRayResources());
 
 		// Reverse uses original hues with Multiply, including between clouds.
-		parameters.xRayReverse = true;
+		xRaySettings.reverse = true;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		QCOMPARE(capture(), baseline); // no X-ray cloud: no background override
 		xray->setXRayEnabled(true);
 		opaque->setVisible(false);
@@ -436,28 +641,33 @@ class TestXRayDisplay : public QObject
 		secondCloud->setEnabled(false);
 		const QImage reverseLOD = window.renderLODFrame(0);
 		QCOMPARE(window.renderLODFrame(1), reverseLOD);
-		parameters.xRayExposure = 3;
+		xRaySettings.exposure = 3;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		QVERIFY(center(capture()).green() < redLayer.green());
-		parameters.xRayExposure          = 2;
-		parameters.xRayReverseBackground = {ccColor::Rgb(240, 220, 200), ccColor::Rgb(100, 120, 140), true};
+		xRaySettings.exposure          = 2;
+		xRaySettings.reverseBackground = {ccColor::Rgb(240, 220, 200), ccColor::Rgb(100, 120, 140), true};
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		const QImage reverseGradientImage = capture();
 		QVERIFY(reverseGradientImage.pixelColor(2, 2).red() > 230);
 		QVERIFY(reverseGradientImage.pixelColor(2, reverseGradientImage.height() - 3).red() < 110);
-		parameters.xRayReverseBackground.gradient = false;
+		xRaySettings.reverseBackground.gradient = false;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		const QImage reverseFlat = capture();
 		QCOMPARE(reverseFlat.pixelColor(2, 2), QColor(240, 220, 200));
 		QCOMPARE(reverseFlat.pixelColor(2, reverseFlat.height() - 3), QColor(240, 220, 200));
-		parameters.xRayReverse    = false;
-		parameters.xRayBackground = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(50, 60, 70), true};
+		xRaySettings.reverse    = false;
+		xRaySettings.background = {ccColor::Rgb(10, 20, 30), ccColor::Rgb(50, 60, 70), true};
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		const QImage screenGradientImage = capture();
 		QVERIFY(screenGradientImage.pixelColor(2, 2).red() < 15);
 		QVERIFY(screenGradientImage.pixelColor(2, screenGradientImage.height() - 3).red() > 45);
-		parameters.xRayReverse = true;
+		xRaySettings.reverse = true;
 		window.setDisplayParameters(parameters, true);
+		ccXRaySettings::Set(xRaySettings, &window);
 		QCOMPARE(capture(), reverseFlat); // independent profiles survive mode switches
 		opaque->setVisible(true);
 		opaque->setGLTransformation(transform);
@@ -474,5 +684,20 @@ class TestXRayDisplay : public QObject
 	}
 };
 
-QTEST_MAIN(TestXRayDisplay)
+int main(int argc, char** argv)
+{
+	// Use the application's actual OpenGL initialization and application type.
+	// QTEST_MAIN creates only QApplication, which is insufficient for ccApp users.
+	ccApplicationBase::InitOpenGL();
+	QTemporaryDir settingsDir;
+	if (!settingsDir.isValid())
+		return EXIT_FAILURE;
+	QSettings::setDefaultFormat(QSettings::IniFormat);
+	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir.path());
+	QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, settingsDir.path());
+	QCoreApplication::setApplicationName("TestXRayDisplay");
+	ccApplicationBase app(argc, argv, true, "X-ray tests");
+	TestXRayDisplay   test;
+	return QTest::qExec(&test, argc, argv);
+}
 #include "TestXRayDisplay.moc"

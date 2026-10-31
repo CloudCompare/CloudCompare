@@ -23,7 +23,7 @@ if( MSVC )
 
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
-elseif( APPLE )
+elseif( CC_MACOS_BUNDLE )
 	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${generated_ui_list} ${source_list}  ${generated_qrc_list} ${rc_list} )
 else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
@@ -83,7 +83,7 @@ if( WIN32 )
 	endif()
 endif()
 
-if (NOT APPLE)
+if (NOT CC_MACOS_BUNDLE)
 	# install program
 	install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
 endif()
@@ -97,16 +97,16 @@ if( WIN32 )
 endif()
 
 # Install auxiliary files
-if(APPLE OR WIN32) # For Linux it's already installed in by qCC
+if(CC_MACOS_BUNDLE OR WIN32) # For Linux it's already installed in by qCC
 	foreach( filename ${auxFiles} )
 		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} "" )
 	endforeach()
 endif()
 
 # Put together our Application bundle on macOS
-if( APPLE )
+if( CC_MACOS_BUNDLE )
 	add_subdirectory( Mac )
-endif( APPLE )
+endif( CC_MACOS_BUNDLE )
 
 # Export common shader files to all install destinations
 if( WIN32 ) # For Linux it's already installed in by qCC
@@ -114,7 +114,7 @@ if( WIN32 ) # For Linux it's already installed in by qCC
 endif()
 
 # Install plugins & shaders in the correct folder for each platform
-if( APPLE )	
+if( CC_MACOS_BUNDLE )	
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CCVIEWER_MAC_PLUGIN_DIR}"

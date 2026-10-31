@@ -185,29 +185,42 @@ void ccApplicationBase::setupPaths()
 
 	// Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
-	QDir bundleDir = appDir;
-	if (bundleDir.dirName() == "MacOS")
+	if (appDir.dirName() == "bin")
 	{
-		bundleDir.cdUp();
-	}
+		// Installed like on Linux (OPTION_DEPLOY_QT=OFF, e.g. by a package manager)
+		QDir theDir = appDir;
+		theDir.cdUp();
 
-	m_pluginPaths << (bundleDir.absolutePath() + "/PlugIns/ccPlugins");
+		m_pluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
+		m_shaderPath      = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+		m_translationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
+	}
+	else
+	{
+		QDir bundleDir = appDir;
+		if (bundleDir.dirName() == "MacOS")
+		{
+			bundleDir.cdUp();
+		}
+
+		m_pluginPaths << (bundleDir.absolutePath() + "/PlugIns/ccPlugins");
 
 #if defined(CC_MAC_DEV_PATHS)
-	// Used for development only - this is the path where the plugins are built
-	// and the shaders are located.
-	// This avoids having to install into the application bundle when developing.
-	bundleDir.cdUp();
-	bundleDir.cdUp();
-	bundleDir.cdUp();
+		// Used for development only - this is the path where the plugins are built
+		// and the shaders are located.
+		// This avoids having to install into the application bundle when developing.
+		bundleDir.cdUp();
+		bundleDir.cdUp();
+		bundleDir.cdUp();
 
-	m_pluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
-	m_shaderPath      = (bundleDir.absolutePath() + "/shaders");
-	m_translationPath = (bundleDir.absolutePath() + "/qCC/translations");
+		m_pluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
+		m_shaderPath      = (bundleDir.absolutePath() + "/shaders");
+		m_translationPath = (bundleDir.absolutePath() + "/qCC/translations");
 #else
-	m_shaderPath      = (bundleDir.absolutePath() + "/Shaders");
-	m_translationPath = (bundleDir.absolutePath() + "/translations");
+		m_shaderPath      = (bundleDir.absolutePath() + "/Shaders");
+		m_translationPath = (bundleDir.absolutePath() + "/translations");
 #endif
+	}
 #elif defined(Q_OS_WIN)
 	m_pluginPaths << (appDir.absolutePath() + "/plugins");
 	m_shaderPath      = (appDir.absolutePath() + "/shaders");

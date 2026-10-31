@@ -41,6 +41,7 @@
 // ccFbo
 #include <ccBilateralFilter.h>
 #include <ccGlFilter.h>
+#include <ccXRayFilterSupport.h>
 
 // Qt
 #include <QOpenGLFunctions_2_1>
@@ -50,8 +51,14 @@ class ccFrameBufferObject;
 
 //!	EyeDome Lighting
 class ccEDLFilter : public ccGlFilter
+    , public ccXRayFilterSupport
 {
   public:
+	bool supportsXRay() const override
+	{
+		return false;
+	}
+
 	//! Default constructor
 	ccEDLFilter();
 

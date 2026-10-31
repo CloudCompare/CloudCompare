@@ -114,6 +114,7 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 		OBJECT_CLOUD_NORMAL_LENGTH,
 		OBJECT_CLOUD_DRAW_NORMALS,
 		OBJECT_CLOUD_USE_LOD,
+		OBJECT_CLOUD_XRAY,
 	};
 
 	//! Default constructor

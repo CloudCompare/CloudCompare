@@ -38,6 +38,8 @@
 #include "../include/ccPointCloudLOD.h"
 #include "../include/ccPolyline.h"
 #include "../include/ccProgressDialog.h"
+#include "../include/ccXRayDrawScope.h"
+#include "../include/ccXRayExposure.h"
 
 // CCCoreLib
 #include <GeometricalAnalysisTools.h>
@@ -3434,7 +3436,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	assert(!glParams.showSF || hasDisplayedScalarField());
 
 	// color-based entity picking
-	bool         entityPickingMode = MACRO_EntityPicking(context);
+	bool        entityPickingMode = MACRO_EntityPicking(context);
+	const bool  xRayPass          = (context.drawingFlags & CC_DRAW_XRAY_PASS) && !entityPickingMode;
+	const auto* xRayState         = xRayPass ? ccXRayDrawScope::Current(context) : nullptr;
+	const bool  xRay              = xRayState != nullptr;
+	if (xRayPass)
+	{
+		// X-ray accumulates color/density, without directional surface lighting.
+		glParams.showNorms = false;
+	}
 	ccColor::Rgb pickingColor;
 	if (entityPickingMode)
 	{
@@ -3457,7 +3467,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	// L.O.D. display
 	DisplayDesc toDisplay(0, size());
-	if (!entityPickingMode)
+	if (xRayPass)
+	{
+		// The X-ray pass is rebuilt each frame. Use uniform sampling while
+		// moving instead of advancing the ordinary clouds' progressive LOD cycle.
+		if (context.decimateCloudOnMove && m_useLODRendering && context.minLODPointCount)
+		{
+			const unsigned step = 1 + (toDisplay.count - 1) / context.minLODPointCount;
+			// Keep all attribute strides within OpenGL's portable 2048-byte limit.
+			toDisplay.decimStep = std::min<unsigned>(step, 2048 / (3 * sizeof(PointCoordinateType)));
+		}
+	}
+	else if (!entityPickingMode)
 	{
 		if (context.decimateCloudOnMove
 		    && m_useLODRendering
@@ -3644,7 +3665,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// by default, we'll try to use a composite GLSL program (if possible)
 		QSharedPointer<QOpenGLShaderProgram> prog;
-		if ((false == s_normalLUTTextureFailed)
+		if ((xRay || false == s_normalLUTTextureFailed)
 		    && (false == s_globalVBOCreationFailed))
 		{
 			int attributes = ccGLSL::ATTR_POS_FLAG; // ccGLSL::ATTR_POS_FLAG == 0
@@ -3667,6 +3688,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (entityPickingMode)
 			{
 				attributes |= ccGLSL::ATTR_PICK_FLAG;
+			}
+			else if (xRay)
+			{
+				attributes |= ccGLSL::ATTR_XRAY_FLAG;
 			}
 
 			prog = ccGLSL::BuildDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField.get() : nullptr);
@@ -3735,8 +3760,70 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
-		bool displayDone = false;
-		bool useProgram  = (nullptr != prog);
+		bool  displayDone  = false;
+		bool  useProgram   = (nullptr != prog);
+		float xRayStrength = 0.0f;
+		if (xRay)
+		{
+			ccGLCameraParameters camera;
+			glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+			glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+			const ccBBox box        = getOwnBB();
+			const double minimum[3] = {box.minCorner().x, box.minCorner().y, box.minCorner().z};
+			const double maximum[3] = {box.maxCorner().x, box.maxCorner().y, box.maxCorner().z};
+			const double areaRatio  = box.isValid()
+			                              ? ccXRay::ProjectedAreaRatio(minimum, maximum, camera.modelViewMat.data(), camera.projectionMat.data())
+			                              : 1.0;
+			xRayStrength            = ccXRay::Strength(areaRatio, xRayState->exposure()) * toDisplay.decimStep;
+		}
+		if (xRay && !useProgram)
+		{
+			// Keep the cloud visible even when its accelerated shader/VBO setup fails.
+			static bool s_warned = false;
+			if (!s_warned)
+			{
+				ccLog::Warning("[X-ray] Using the slower point rendering fallback.");
+				s_warned = true;
+			}
+			glFunc->glUseProgram(0);
+			GLfloat baseColor[4];
+			glFunc->glGetFloatv(GL_CURRENT_COLOR, baseColor);
+			glFunc->glBegin(GL_POINTS);
+			for (unsigned j = 0; j < size(); j += toDisplay.decimStep)
+			{
+				if (visTableEnabled && m_pointsVisibility[j] != CCCoreLib::POINT_VISIBLE)
+					continue;
+				GLfloat color[4] = {baseColor[0], baseColor[1], baseColor[2], baseColor[3]};
+				if (glParams.showSF)
+				{
+					const ccColor::Rgb* rgb = m_currentDisplayedScalarField->getValueColor(j);
+					if (!rgb)
+					{
+						if (!visTableEnabled)
+							continue;
+						rgb = &ccColor::lightGreyRGB;
+					}
+					for (unsigned c = 0; c < 3; ++c)
+						color[c] = rgb->rgb[c] / 255.0f;
+					color[3] = 1.0f;
+				}
+				else if (glParams.showColors)
+				{
+					const ccColor::Rgba& rgba = m_rgbaColors->getValue(j);
+					for (unsigned c = 0; c < 4; ++c)
+						color[c] = rgba.rgba[c] / 255.0f;
+				}
+				for (unsigned c = 0; c < 3; ++c)
+					color[c] = xRayState->reverse()
+					               ? 1.0f - std::clamp((1.0f - color[c]) * xRayStrength, 0.0f, 1.0f) * color[3]
+					               : std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
+				glFunc->glColor4fv(color);
+				ccGL::Vertex3v(glFunc, m_points[j].u);
+			}
+			glFunc->glEnd();
+			glFunc->glPopAttrib();
+			return;
+		}
 
 		if (!useProgram) // no program available
 		{
@@ -3992,6 +4079,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				assert(prog);
 				prog->bind();
 
+				if (xRay)
+				{
+					prog->setUniformValue("uXRayStrength", xRayStrength);
+					prog->setUniformValue("uXRayReverse", xRayState->reverse());
+				}
+
 				if (glParams.showNorms)
 				{
 					ccGLSL::SetLightUniforms(glFunc, prog.data());
@@ -4198,7 +4291,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
 
-	if (m_normalsDrawnAsLines)
+	if (m_normalsDrawnAsLines && !xRayPass)
 	{
 		drawNormalsAsLines(context);
 	}

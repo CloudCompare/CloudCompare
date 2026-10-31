@@ -119,7 +119,7 @@ depends-on = ["configure"]
 
 [feature.build.tasks.install]
 cmd = ["cmake", "--install", ".build", "--config", "Release"]
-depends-on = ["configure"]
+depends-on = ["build"]
 
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
@@ -132,7 +132,7 @@ cmd = [
 ]
 depends-on = ["install"]
 
-# Bundel signature
+# Bundle signature
 [feature.build.tasks.sign_bundle]
 cmd = [
 	"python",
@@ -140,7 +140,7 @@ cmd = [
 	".build/install",
 	"--embed_python",
 ]
-depends-on = ["install"]
+depends-on = ["bundle"]
 
 [environments]
 build = ["build"]

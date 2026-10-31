@@ -21,10 +21,14 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 )
 
+# the qdarkstyle folder of QDarkStyleSheet (the submodule, or e.g. an installed
+# qdarkstyle Python package, which ships the same style sheets)
+set( QDARKSTYLESHEET_DIR "${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle" CACHE PATH "QDarkStyleSheet's qdarkstyle folder (dark/ and light/ style sheets)" )
+
 target_sources(${PROJECT_NAME}
 		PRIVATE
-		${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qrc
-		${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle/light/lightstyle.qrc
+		${QDARKSTYLESHEET_DIR}/dark/darkstyle.qrc
+		${QDARKSTYLESHEET_DIR}/light/lightstyle.qrc
 )
 
 # We run find_package here for HIDAPI since it will link to the CCAppCommon

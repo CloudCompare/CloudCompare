@@ -8,14 +8,20 @@ if ( PLUGIN_IO_QE57 )
 
 	add_subdirectory( include )
 	add_subdirectory( src )
-	add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL )
-	
-	set_target_properties( E57Format PROPERTIES
-		AUTOMOC OFF
-		AUTORCC OFF
-		AUTOUIC OFF
-	)
-			
+	option( PLUGIN_IO_QE57_USE_SYSTEM_LIBE57FORMAT "Use an installed libE57Format instead of the bundled copy" OFF )
+	if ( PLUGIN_IO_QE57_USE_SYSTEM_LIBE57FORMAT )
+		find_package( E57Format CONFIG REQUIRED )
+	else()
+		add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL )
+
+		set_target_properties( E57Format PROPERTIES
+			AUTOMOC OFF
+			AUTORCC OFF
+			AUTOUIC OFF
+		)
+	endif()
+
+
 	target_link_libraries( ${PROJECT_NAME} E57Format )
 	
 	if ( USING_STATIC_XERCES )

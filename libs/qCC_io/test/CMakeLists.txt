@@ -39,6 +39,19 @@ target_link_libraries( TestDepthMapFilter
 
 add_test( NAME TestDepthMapFilter COMMAND TestDepthMapFilter )
 
+# ASCII Filter tests
+add_executable( TestAsciiFilter
+    TestAsciiFilter.cpp
+)
+
+target_link_libraries( TestAsciiFilter
+    PRIVATE
+        QCC_IO_LIB
+        Qt6::Test
+)
+
+add_test( NAME TestAsciiFilter COMMAND TestAsciiFilter )
+
 # Shape files filter tests
 if ( OPTION_USE_SHAPE_LIB )
 

@@ -21,4 +21,8 @@ if ( PLUGIN_IO_QE57 )
 	if ( USING_STATIC_XERCES )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE XERCES_STATIC_LIBRARY )
 	endif() 
+
+	if( BUILD_TESTING )
+		add_subdirectory( test )
+	endif()
 endif()

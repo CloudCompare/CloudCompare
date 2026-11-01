@@ -6,15 +6,22 @@ authors = ["Daniel Girardeau-Montaut <admin@cloudcompare.org>"]
 channels = ["conda-forge"]
 platforms = ["osx-arm64", "linux-64"]
 
-[tasks.CloudCompare]
+[feature.build.target.osx-arm64.tasks.CloudCompare]
 # Start the built executable
-cmd = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-#input = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-depends-on = ["install"]
+cmd =  [
+    "CC_SHADER_PATH=.build/shaders",
+    "CC_PLUGIN_PATH=.build/ccPlugins",
+    "CC_TRANSLATION_PATH=.build/qCC/translations",
+    ".build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
+]
+inputs = [".build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"]
+depends-on = ["build"]
 
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
 cxx-compiler = ">=1.9.0,<1.10"
+# Be sure to use the same clang format than the one in the CI
+# 19-20 introduce breaking changes.
 clang-format = ">=18,<19"
 ninja = "1.13.*"
 # CCPythonRuntime plugin dependency
@@ -26,7 +33,7 @@ qt6-main= ">=6.9.1,<6.10.0" # at least 6.9.1 for PCL 1.15.1
 laszip = ">=3.4.3,<3.5"
 opencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
-python = ">3.12,<3.13"
+python = ">=3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
@@ -37,7 +44,8 @@ cgal-cpp = ">=6.1,<7"
 libgdal-core = ">=3.12.0,<4"
 # CCPythonRuntime plugin dependencies
 numpy = ">=2.5.1,<3"
-pyside6 = ">=6.9.0"
+# CCPythonRuntime plugin dependencies
+pyside6 = ">=6.9.0,<6.10.0"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -51,7 +59,7 @@ cmd = [
 	"-DCMAKE_BUILD_TYPE=Release",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DBUILD_SHARED_LIBS=OFF",
-	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
+	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX",
 	"-DCCCORELIB_USE_TBB=ON",
 	"-DCCCORELIB_USE_CGAL=ON",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
@@ -104,7 +112,7 @@ cmd = [
 	"-DPLUGIN_GL_QSSAO=ON",
 ]
 
-inputs = ["CMakeLists.txt"]
+inputs = ["CMakeLists.txt", "cmake/"]
 outputs = [".build/CMakeFiles/"]
 
 [feature.build.tasks.build]
@@ -123,24 +131,24 @@ depends-on = ["build"]
 
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
-[feature.build.tasks.bundle]
+[feature.build.target.osx-arm64.tasks.bundle]
 cmd = [
 	"python",
 	"scripts/mac/bundle/libBundleCloudCompare.py",
 	".build/install",
-	"--embed_python",
+	"--embed_python"
 ]
 depends-on = ["install"]
 
 # Bundle signature
-[feature.build.tasks.sign_bundle]
+[feature.build.target.osx-arm64.tasks.sign_bundle]
 cmd = [
 	"python",
 	"scripts/mac/bundle/signatureCloudCompare.py",
 	".build/install",
-	"--embed_python",
+	"--embed_python"
 ]
-depends-on = ["bundle"]
+inputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"]
 
 [environments]
 build = ["build"]

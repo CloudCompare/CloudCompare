@@ -62,7 +62,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 	endif()
 endforeach()
 
-if( APPLE )
+if( CC_MACOS_BUNDLE )
 	install( FILES ${TRANSLATION_QM} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/translations )
 elseif( UNIX )
 	install( FILES ${TRANSLATION_QM} DESTINATION share/cloudcompare/translations )

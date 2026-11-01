@@ -475,6 +475,14 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow(ITEM(tr("Colors")), PERSISTENT_EDITOR(OBJECT_COLOR_SOURCE), true);
 	}
 
+	if (_obj->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		const auto* cloud = static_cast<const ccPointCloud*>(_obj);
+		auto*       item  = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
+		item->setToolTip(tr("Unlit point display. Adjust Xray settings in Display Settings. Temporarily inactive while EDL is enabled."));
+		appendRow(ITEM(tr("Xray")), item);
+	}
+
 	// Bounding-box
 	{
 		ccBBox box;
@@ -2395,6 +2403,13 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem* item)
 	case OBJECT_NAME_IN_3D:
 		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
 		redraw = true;
+		break;
+	case OBJECT_CLOUD_XRAY:
+		if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			static_cast<ccPointCloud*>(m_currentObject)->setXRayEnabled(item->checkState() == Qt::Checked);
+			redraw = true;
+		}
 		break;
 	case OBJECT_SHOW_TRANS_BUFFER_PATH:
 	{

@@ -78,6 +78,19 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Default destructor
 	~ccPointCloud() override;
 
+	//! Per-cloud X-ray display flag. Metadata preserves BIN compatibility and cloning.
+	bool isXRayEnabled() const
+	{
+		return getMetaData(QStringLiteral("CloudCompare.XRay.Enabled")).toBool();
+	}
+	void setXRayEnabled(bool enabled)
+	{
+		if (enabled)
+			setMetaData(QStringLiteral("CloudCompare.XRay.Enabled"), true);
+		else
+			removeMetaData(QStringLiteral("CloudCompare.XRay.Enabled"));
+	}
+
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override
 	{

@@ -13,6 +13,19 @@ target_link_libraries(TestPlyFilter
 
 add_test( NAME TestPlyFilter COMMAND TestPlyFilter )
 
+# ASCII open dialog tests
+add_executable( TestAsciiOpenDlg
+    TestAsciiOpenDlg.cpp
+)
+
+target_link_libraries( TestAsciiOpenDlg
+    PRIVATE
+        QCC_IO_LIB
+        Qt6::Test
+)
+
+add_test( NAME TestAsciiOpenDlg COMMAND TestAsciiOpenDlg )
+
 # File Round Trip tests
 add_executable( TestFileRoundTrip
     TestFileRoundTrip.cpp

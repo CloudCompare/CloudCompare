@@ -423,6 +423,9 @@ Improvements:
 
 Bug fixes:
 	- ASCII files saved with legacy Mac line endings (a lone CR) were read as a single line, silently loading only one point
+	- ASCII file open dialog: the column types set by hand were reset when the table was refreshed (e.g. after changing the number of
+		lines to skip, or when a header line appeared). They are now kept: the header names and the default rule only fill the columns
+		that were not changed. Changing the separator still detects all the columns again.
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead

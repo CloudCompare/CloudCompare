@@ -66,10 +66,18 @@ elseif( UNIX AND NOT CC_MACOS_BUNDLE )
 	# (dynamic) libs are put in $prefix/$lib/cloudcompare, since they are only used
 	# by qCC/ccViewer; Qt and the other dependencies are found where they are installed
 	include( GNUInstallDirs )
-	set( LINUX_INSTALL_SHARED_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
-	set( CMAKE_INSTALL_RPATH ${LINUX_INSTALL_SHARED_DESTINATION} )
+	set( UNIX_INSTALL_SHARED_CC_LIB_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
 	if( APPLE )
-		set( CMAKE_INSTALL_RPATH_USE_LINK_PATH ON )
+		# relative to the installing file (executables in bin, plugins in lib/cloudcompare/plugins,
+		# libraries in lib/cloudcompare), so that the installation can be relocated
+		list( APPEND CMAKE_INSTALL_RPATH
+			"@loader_path/../${CMAKE_INSTALL_LIBDIR}/cloudcompare"
+			"@loader_path/.."
+			"@loader_path"
+		)
+	else()
+		# keeps any CMAKE_INSTALL_RPATH set by the caller (e.g. a package manager)
+		list( APPEND CMAKE_INSTALL_RPATH ${UNIX_INSTALL_SHARED_CC_LIB_DESTINATION} )
 	endif()
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()

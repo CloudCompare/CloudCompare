@@ -17,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// CCPluginStub
 #include <ccIOPluginInterface.h>
 
 class qDracoIO : public QObject

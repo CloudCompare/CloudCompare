@@ -1,8 +1,5 @@
-# MeshIO is a git submodule: source archives without submodules can still be
-# built (without it)
-if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MeshIO/CMakeLists.txt" )
-	add_subdirectory( MeshIO )
-endif()
+# MeshIO is a git submodule: built only when it is checked out
+AddSubmodulePlugins( ${CMAKE_CURRENT_SOURCE_DIR}/MeshIO )
 add_subdirectory( qAdditionalIO )
 add_subdirectory( qCoreIO )
 add_subdirectory( qCSVMatrixIO )

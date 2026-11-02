@@ -20,9 +20,11 @@
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QMouseEvent>
+#include <QSettings>
 
 // qCC_db
 #include <ccExternalFactory.h>
+#include <ccFileUtils.h>
 
 //CCCoreLib
 #include <Neighbourhood.h>
@@ -32,6 +34,7 @@
 #include <random>
 
 //common
+#include <ccPersistentSettings.h>
 #include <ccPickingHub.h>
 #include <ccBox.h>
 
@@ -3537,13 +3540,18 @@ void ccCompass::exportToSVG()
 {
 	constexpr float zoom = 2.0f; //TODO: create popup box
 
-	//get filename for the svg file
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("SVG Output file"), "", tr("SVG files (*.svg)"));
+	//get filename for the svg file (start in the last saving location)
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("SVG Output file"), currentPath, tr("SVG files (*.svg)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(filename).absolutePath());
+	settings.endGroup();
 
 	if (QFileInfo(filename).suffix() != "svg")
 	{
@@ -3556,13 +3564,18 @@ void ccCompass::exportToSVG()
 //export interpretations to csv or xml
 void ccCompass::onSave()
 {
-	//get output file path
-	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt);;XML (*.xml)"));
+	//get output file path (start in the last saving location)
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), currentPath, tr("CSV files (*.csv *.txt);;XML (*.xml)"));
 	if (filename.isEmpty())
 	{
 		//process cancelled by the user
 		return;
 	}
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(filename).absolutePath());
+	settings.endGroup();
 
 	QFileInfo fi(filename);
 	if (fi.suffix() == "xml")

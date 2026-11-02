@@ -145,3 +145,15 @@ define_property( TARGET
 	FULL_DOCS
 		"Path to the folder containing the shader files for a gl plugin. Files are copied from here when installing."
 )
+
+# AddSubmodulePlugins adds the plugins in the given directories that are present.
+# Plugins kept as git submodules are skipped when they are not checked out (e.g. in
+# source archives without submodules).
+function( AddSubmodulePlugins )
+	foreach( dir ${ARGN} )
+		if( IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt )
+			message( STATUS "Found submodule plugin: " ${dir} )
+			add_subdirectory( ${dir} )
+		endif()
+	endforeach()
+endfunction()

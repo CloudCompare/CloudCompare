@@ -15,9 +15,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qCSVMatrixIO.h"
+#include "../include/qCSVMatrixIO.h"
 
-// local
+// Local
 #include "CSVMatrixFilter.h"
 
 qCSVMatrixIO::qCSVMatrixIO(QObject* parent)

@@ -15,14 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CSV_MATRIX_OPEN_DIALOG_HEADER
-#define CSV_MATRIX_OPEN_DIALOG_HEADER
+#pragma once
+
+// Ui
+#include <ui_openCSVMatrixDlg.h>
 
 // Qt
 #include <QDialog>
-
-// GUI
-#include "ui_openCSVMatrixDlg.h"
 
 //! CSV Matrix Open dialog
 class CSVMatrixOpenDialog : public QDialog
@@ -32,11 +31,9 @@ class CSVMatrixOpenDialog : public QDialog
 
   public:
 	//! Default constructor
-	explicit CSVMatrixOpenDialog(QWidget* parent = 0);
+	explicit CSVMatrixOpenDialog(QWidget* parent = nullptr);
 
   protected:
 	//! Bowse texture file
 	void browseTextureFile();
 };
-
-#endif

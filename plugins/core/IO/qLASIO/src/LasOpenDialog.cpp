@@ -17,6 +17,9 @@
 
 #include "LasOpenDialog.h"
 
+// qCC_db
+#include <ccFileUtils.h>
+
 // Qt
 #include <QFileDialog>
 #include <QLocale>
@@ -111,7 +114,7 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	{
 		QSettings settings;
 		settings.beginGroup("LasIO");
-		QString tilingPath   = settings.value("TilingPath", QCoreApplication::applicationDirPath()).toString();
+		QString tilingPath   = settings.value("TilingPath", ccFileUtils::defaultDocPath()).toString();
 		int     tiling0Count = settings.value("Tiling0", 1).toInt();
 		int     tiling1Count = settings.value("Tiling1", 1).toInt();
 		int     tilingDim    = settings.value("TilingDim", 0).toInt();

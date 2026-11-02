@@ -26,6 +26,7 @@
 #include <ccQtHelpers.h>
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 
 //Qt
@@ -160,8 +161,8 @@ void qCanupoClassifDialog::loadParamsFromPersistentSettings()
 	double subsampleRadius = settings.value("SubsampleRadius", cpSubsamplingDoubleSpinBox->value()).toDouble();
 	bool subsampleEnabled = settings.value("SubsampleEnabled", cpSubsampleRadioButton->isChecked()).toBool();
 
-	QString currentPath = settings.value("CurrentPath", QApplication::applicationDirPath()).toString();
-	QString mscCurrentPath = settings.value("MscCurrentPath", QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value("CurrentPath", ccFileUtils::defaultDocPath()).toString();
+	QString mscCurrentPath = settings.value("MscCurrentPath", ccFileUtils::defaultDocPath()).toString();
 
 	bool useConfThreshold = settings.value("UseConfThreshold", useConfThresholdGroupBox->isChecked()).toBool();
 	double pok = settings.value("Pok", pokDoubleSpinBox->value()).toDouble();

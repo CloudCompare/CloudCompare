@@ -12,9 +12,11 @@ option( OPTION_USE_DXF_LIB "Build with Ribbonsoft's DXF Lib (AutoCAD DXF files s
 option( OPTION_USE_SYSTEM_DXF_LIB "Use an installed dxflib (CMake package) instead of the bundled copy" OFF )
 if( ${OPTION_USE_DXF_LIB} )
 	if( ${OPTION_USE_SYSTEM_DXF_LIB} )
+		# the installed dxflib must have the file name overloads of the bundled copy
+		# (std::string for DL_Dxf::out, std::wstring for in/out with MSVC)
 		find_package( dxflib 3.26 CONFIG REQUIRED )
 		target_link_libraries( ${PROJECT_NAME} PRIVATE dxflib::dxflib )
-		target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_DXF_SUPPORT CC_SYSTEM_DXF_LIB )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_DXF_SUPPORT )
 	else()
 		set( DXF_LIB_DIR "extern/dxflib" CACHE PATH "DXF lib path" )
 		add_subdirectory( "${DXF_LIB_DIR}" )

@@ -1,5 +1,4 @@
-#ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
-#define Q_CSV_MATRIX_IO_PLUGIN_HEADER
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// CCPluginStub
 #include <ccIOPluginInterface.h>
 
 //! CSV Matrix file (2.5D cloud)
@@ -37,5 +37,3 @@ class qCSVMatrixIO : public QObject
 	// inherited from ccIOPluginInterface
 	FilterList getFilters() override;
 };
-
-#endif // Q_CSV_MATRIX_IO_PLUGIN_HEADER

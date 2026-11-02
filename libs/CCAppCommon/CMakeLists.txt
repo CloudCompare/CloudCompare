@@ -16,6 +16,11 @@ target_link_libraries( ${PROJECT_NAME}
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCAPPCOMMON_LIBRARY_BUILD )
 
+if( APPLE AND NOT OPTION_DEPLOY_QT )
+	# bin/, lib/cloudcompare and share/cloudcompare instead of an application bundle
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_INSTALL_FHS_LAYOUT )
+endif()
+
 set_target_properties( ${PROJECT_NAME} PROPERTIES
 	AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
 	CXX_VISIBILITY_PRESET hidden

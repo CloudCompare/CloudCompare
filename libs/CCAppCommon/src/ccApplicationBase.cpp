@@ -185,6 +185,7 @@ void ccApplicationBase::setupPaths()
 
 	// Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
+#if defined(CC_INSTALL_FHS_LAYOUT)
 	if (appDir.dirName() == "bin")
 	{
 		// Installed like on Linux (OPTION_DEPLOY_QT=OFF, e.g. by a package manager)
@@ -196,6 +197,7 @@ void ccApplicationBase::setupPaths()
 		m_translationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
 	}
 	else
+#endif
 	{
 		QDir bundleDir = appDir;
 		if (bundleDir.dirName() == "MacOS")

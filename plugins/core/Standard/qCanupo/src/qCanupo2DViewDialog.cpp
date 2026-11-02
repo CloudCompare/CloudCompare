@@ -24,6 +24,7 @@
 #include "ccMainAppInterface.h"
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
 #include <ccSphere.h>
@@ -395,7 +396,7 @@ void qCanupo2DViewDialog::saveClassifier()
 	//select file to save
 	QSettings settings("qCanupo");
 	settings.beginGroup("Classif");
-	QString currentPath = settings.value("MscCurrentPath",QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value("MscCurrentPath",ccFileUtils::defaultDocPath()).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,"Save Classifier",currentPath,"*.prm");
 	if (filename.isEmpty())

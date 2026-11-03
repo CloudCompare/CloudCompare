@@ -67,10 +67,18 @@ jobs:
           frozen: true
           cache: true
 
-      - name: Build and bundle
+      - name: Build
         run: |
           ulimit -n 10240
-          pixi run --frozen -e build bundle
+          pixi run --frozen build
+
+      - name: Install
+        run: |
+          pixi run --frozen install
+
+      - name: Bundle
+        run: |
+          pixi run --frozen -e build python scripts/mac/bundle/libBundleCloudCompare.py .build/install
 
       - name: Import the signing certificate
         if: steps.secrets.outputs.sign == 'true'
@@ -93,7 +101,7 @@ jobs:
         env:
           # '-' means ad hoc
           CC_BUNDLE_SIGN: ${{ steps.secrets.outputs.sign == 'true' && secrets.MACOS_SIGNING_IDENTITY || '-' }}
-        run: pixi run --frozen -e build python scripts/mac/bundle/signatureCloudCompare.py .build/install --embed_python --identifier org.cloudcompare.CloudCompare
+        run: pixi run --frozen -e build python scripts/mac/bundle/signatureCloudCompare.py .build/install --identifier org.cloudcompare.CloudCompare
 
       - name: Check the application
         run: |

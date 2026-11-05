@@ -18,6 +18,7 @@ jobs:
               generator: "Ninja",
               conda_library_dir: "Library",
               compile_riegl: "ON",
+              build_testing: "OFF",
               conda_dep_file: ".ci/conda-win.yml",
             }
           - {
@@ -26,6 +27,7 @@ jobs:
               generator: "Ninja",
               conda_library_dir: ".",
               compile_riegl: "OFF",
+              build_testing: "ON",
               conda_dep_file: ".ci/conda-macos.yml",
             }
 
@@ -104,6 +106,7 @@ jobs:
             -DPLUGIN_STANDARD_QPCL=OFF \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             -DPLUGIN_STANDARD_QVOXFALL=ON \
+            -DBUILD_TESTING=${{ matrix.config.build_testing }} \
             .
 
       - name: Check Format
@@ -112,6 +115,10 @@ jobs:
 
       - name: Build
         run: cmake --build build --parallel
+
+      - name: Test
+        if: matrix.config.build_testing == 'ON'
+        run: ctest --test-dir build
 
       - name: Install (macOS)
         if: matrix.config.os == 'macos-latest'

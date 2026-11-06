@@ -15,16 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "E57Filter.h"
-
-#include "FileIO.h"
+#include "../include/E57Filter.h"
 
 // Local
-#include "E57Header.h"
-#include "E57Version.h"
-
-// libE57Format
-#include <E57Format.h>
+#include "../include/E57Header.h"
 
 // qCC_db
 #include <ccCameraSensor.h>
@@ -35,12 +29,19 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
+// qCC_io
+#include <FileIO.h>
+
 // Qt
 #include <QApplication>
 #include <QBuffer>
 #include <QUuid>
 
-// system
+// libE57Format
+#include <E57Format.h>
+#include <E57Version.h>
+
+// System
 #include <cassert>
 #include <string>
 

@@ -1,5 +1,4 @@
-#ifndef E57_IO_HEADER
-#define E57_IO_HEADER
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// CCPluginStub
 #include <ccIOPluginInterface.h>
 
 class qE57IO : public QObject
@@ -35,5 +35,3 @@ class qE57IO : public QObject
 
 	FilterList getFilters() override;
 };
-
-#endif

@@ -9,9 +9,9 @@ platforms = ["osx-arm64", "linux-64"]
 [feature.build.target.osx-arm64.tasks.CloudCompare]
 # Start the built executable
 cmd =  [
-    "CC_SHADER_PATH=.build/shaders",
-    "CC_PLUGIN_PATH=.build/ccPlugins",
-    "CC_TRANSLATION_PATH=.build/qCC/translations",
+    "CC_SHADER_PATH=$PIXI_WORKSPACE_ROOT/.build/shaders",
+    "CC_PLUGIN_PATH=$PIXI_WORKSPACE_ROOT/.build/ccPlugins",
+    "CC_TRANSLATION_PATH=$PIXI_WORKSPACE_ROOT/.build/qCC/translations",
     ".build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
 ]
 inputs = [".build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"]
@@ -19,7 +19,7 @@ depends-on = ["build"]
 
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
-cxx-compiler = ">=1.9.0,<1.10"
+cxx-compiler = ">=1.10.0,<1.11"
 # Be sure to use the same clang format than the one in the CI
 # 19-20 introduce breaking changes.
 clang-format = ">=18,<19"
@@ -48,6 +48,12 @@ numpy = ">=2.5.1,<3"
 pyside6 = ">=6.9.0,<6.10.0"
 
 [feature.build.tasks.configure]
+args = [
+    {"arg" = "build_type", "default" = "Release", choices=["Release", "Debug"]},
+    {"arg" = "with_plugins", "default" = "ON", choices=["ON", "OFF"]},
+    {"arg" = "with_tests", "default" = "ON", choices=["ON", "OFF"]},
+    {"arg" = "with_python", "default" = "OFF", choices=["ON", "OFF"] }
+]
 # Configures CMake
 cmd = [
 	"cmake",
@@ -65,51 +71,52 @@ cmd = [
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCC_USE_EIGEN=ON",
 	"-DOPTION_USE_GDAL=ON",
-	"-DPLUGIN_IO_QLAS=ON",
-	"-DPLUGIN_STANDARD_3DMASC=ON",
-	"-DPLUGIN_PYTHON=ON",
-	"-DPLUGIN_STANDARD_QM3C2=ON",
-	"-DPLUGIN_STANDARD_QANIMATION=ON",
-	"-DQANIMATION_WITH_FFMPEG_SUPPORT=ON",
-	"-DPLUGIN_STANDARD_QBROOM=ON",
-	"-DPLUGIN_STANDARD_QCSF=ON",
-	"-DPLUGIN_STANDARD_QCANUPO=ON",
-	"-DPLUGIN_STANDARD_QCLOUDLAYERS=ON",
-	"-DPLUGIN_STANDARD_QCOMPASS=ON",
-	"-DPLUGIN_STANDARD_QCOLORIMETRIC_SEGMENTER=ON",
-	"-DPLUGIN_STANDARD_QFACETS=ON",
-	"-DPLUGIN_STANDARD_QHPR=ON",
-	"-DPLUGIN_STANDARD_QHOUGH_NORMALS=ON",
-	"-DPLUGIN_STANDARD_QM3C2=ON",
-	"-DPLUGIN_STANDARD_QMPLANE=ON",
+	"-DPLUGIN_IO_QLAS={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_3DMASC={{ with_plugins }}",
+	"-DPLUGIN_PYTHON={{ with_python }}",
+	"-DPLUGIN_STANDARD_QM3C2={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QANIMATION={{ with_plugins }}",
+	"-DQANIMATION_WITH_FFMPEG_SUPPORT={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QBROOM={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QCSF={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QCANUPO={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QCLOUDLAYERS={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QCOMPASS={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QCOLORIMETRIC_SEGMENTER={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QFACETS={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QHPR={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QHOUGH_NORMALS={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QM3C2={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QMPLANE={{ with_plugins }}",
 	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF", # TODO: need libigl for osx-arm64
-	"-DPLUGIN_STANDARD_QPCL=ON",
-	"-DPLUGIN_STANDARD_QPCV=ON",
-	"-DPLUGIN_STANDARD_QPOISSON_RECON=ON",
-	"-DPLUGIN_STANDARD_QRANSAC_SD=ON",
-	"-DPLUGIN_STANDARD_QSRA=ON",
-	"-DPLUGIN_STANDARD_QTREEISO=ON",
-	"-DPLUGIN_STANDARD_QVOXFALL=ON",
-	"-DPLUGIN_STANDARD_3DFIN=ON",
-	"-D3DFin_EXPORT_XLSX=ON",
+	"-DPLUGIN_STANDARD_QPCL={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QPCV={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QPOISSON_RECON={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QRANSAC_SD={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QSRA={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QTREEISO={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_QVOXFALL={{ with_plugins }}",
+	"-DPLUGIN_STANDARD_3DFIN={{ with_plugins }}",
+	"-D3DFin_EXPORT_XLSX={{ with_plugins }}",
 	#--IO PLUGINS--
-	"-DPLUGIN_IO_QADDITIONAL=ON",
-	"-DPLUGIN_IO_QCORE=ON",
-	"-DPLUGIN_IO_QDRACO=ON",
-	"-DPLUGIN_IO_QE57=ON",
+	"-DPLUGIN_IO_QADDITIONAL={{ with_plugins }}",
+	"-DPLUGIN_IO_QCORE={{ with_plugins }}",
+	"-DPLUGIN_IO_QDRACO={{ with_plugins }}",
+	"-DPLUGIN_IO_QE57={{ with_plugins }}",
 	"-DE57_RELEASE_LTO=OFF", # Needed else it won't find the AR/Ranlib binary
 	"-DPLUGIN_IO_QFBX=OFF", # Possible, but it needs a proprietary SDK / could be implemented via ASSIMP in qMESHIO
-	"-DPLUGIN_IO_QPHOTOSCAN=ON",
+	"-DPLUGIN_IO_QPHOTOSCAN={{ with_plugins }}",
 	"-DQUAZIP_INSTALL=OFF",
 	"-DPLUGIN_IO_QRDB=OFF", # Needs a proprietary lib. The lib is not available for osx-arm64
-	"-DPLUGIN_IO_QSTEP=ON", # Could it be deprecated in favor of qMESHIO?
+	"-DPLUGIN_IO_QSTEP={{ with_plugins }}", # Could it be deprecated in favor of qMESHIO?
 	"-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
 	"-DOPENCASCADE_LIB_DIR=$CONDA_PREFIX/lib",
-	"-DOPENCASCADE_78_OR_NEWER=ON",
-	"-DPLUGIN-3rdParty_MESH_IO=ON",
+	"-DOPENCASCADE_78_OR_NEWER={{ with_plugins }}",
+	"-DPLUGIN-3rdParty_MESH_IO={{ with_plugins }}",
+  "-DPLUGIN_G3POINT=ON",
 	#--GL PLUGINS--
-	"-DPLUGIN_GL_QEDL=ON",
-	"-DPLUGIN_GL_QSSAO=ON",
+	"-DPLUGIN_GL_QEDL={{ with_plugins }}",
+	"-DPLUGIN_GL_QSSAO={{ with_plugins }}",
 ]
 
 inputs = ["CMakeLists.txt", "cmake/"]
@@ -117,17 +124,17 @@ outputs = [".build/CMakeFiles/"]
 
 [feature.build.tasks.build]
 cmd = ["cmake", "--build", ".build"]
-depends-on = ["configure"]
-inputs = ["CMakeLists.txt", "qCC/"]
+#depends-on = ["configure"]
+inputs = [".build/CMakeCache.txt"]
 outputs = [".build/qCC/CloudCompare"]
 
 [feature.build.tasks.format]
 cmd = ["cmake", "--build", ".build", "--target", "check-format"]
-depends-on = ["configure"]
+#depends-on = ["configure"]
 
 [feature.build.tasks.install]
 cmd = ["cmake", "--install", ".build", "--config", "Release"]
-depends-on = ["build"]
+#depends-on = ["build"]
 
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
@@ -136,9 +143,8 @@ cmd = [
 	"python",
 	"scripts/mac/bundle/libBundleCloudCompare.py",
 	".build/install",
-	"--embed_python"
 ]
-depends-on = ["install"]
+#depends-on = ["install"]
 
 # Bundle signature
 [feature.build.target.osx-arm64.tasks.sign_bundle]
@@ -146,7 +152,6 @@ cmd = [
 	"python",
 	"scripts/mac/bundle/signatureCloudCompare.py",
 	".build/install",
-	"--embed_python"
 ]
 inputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"]
 

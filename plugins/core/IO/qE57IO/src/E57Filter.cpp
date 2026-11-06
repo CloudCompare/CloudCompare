@@ -43,6 +43,7 @@
 
 // System
 #include <cassert>
+#include <memory>
 #include <string>
 
 using colorFieldType = double;
@@ -115,10 +116,8 @@ QString GetStringFromNode(const e57::StructureNode& node, const char* fieldName,
 	{
 		return QString::fromStdString(e57::StringNode(node.get(fieldName)).value());
 	}
-	else
-	{
-		return defaultValue;
-	}
+
+	return defaultValue;
 }
 
 void AddToE57NodeMap(E57NodeMap& nodeMap, const e57::StructureNode& node, const char* fieldName)
@@ -789,7 +788,7 @@ void SaveImage(const ccImage*    image,
 	}
 
 	// Create pose structure for image (if any)
-	const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
+	const ccCameraSensor* sensor = image->getAssociatedSensor();
 	{
 		ccGLMatrixd toSensorCS; // 'Sensor' output coordinate system (no Global Shift applied)
 		toSensorCS.toIdentity();
@@ -1053,7 +1052,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 		if (parameters.parentWidget)
 		{
-			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+			progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 			progressDlg->setAutoClose(false);
 		}
 		s_cancelRequestedByUser = false;
@@ -1061,7 +1060,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		// Extension for normals
 		bool hasNormals = false;
 
-		for (auto cloud : scans)
+		for (auto* cloud : scans)
 		{
 			QString scanGUID = GetNewGuid();
 
@@ -1308,17 +1307,15 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
-		else
+
+		try
 		{
-			try
-			{
-				NodeToConsole(s.get(childName));
-			}
-			catch (e57::E57Exception& ex)
-			{
-				ex.report(__FILE__, __LINE__, __FUNCTION__);
-				return false;
-			}
+			NodeToConsole(s.get(childName));
+		}
+		catch (e57::E57Exception& ex)
+		{
+			ex.report(__FILE__, __LINE__, __FUNCTION__);
+			return false;
 		}
 	}
 	else if (node.type() == e57::TypeVector)
@@ -1329,17 +1326,15 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
-		else
+
+		try
 		{
-			try
-			{
-				NodeToConsole(v.get(childName));
-			}
-			catch (e57::E57Exception& ex)
-			{
-				ex.report(__FILE__, __LINE__, __FUNCTION__);
-				return false;
-			}
+			NodeToConsole(v.get(childName));
+		}
+		catch (e57::E57Exception& ex)
+		{
+			ex.report(__FILE__, __LINE__, __FUNCTION__);
+			return false;
 		}
 	}
 	else
@@ -1485,7 +1480,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 		if (proto.get("timeStamp").type() == e57::TypeInteger)
 			header.pointFields.timeMaximum = static_cast<double>(e57::IntegerNode(proto.get("timeStamp")).maximum());
 		else if (proto.get("timeStamp").type() == e57::TypeFloat)
-			header.pointFields.timeMaximum = static_cast<double>(e57::FloatNode(proto.get("timeStamp")).maximum());
+			header.pointFields.timeMaximum = e57::FloatNode(proto.get("timeStamp")).maximum();
 	}
 
 	header.pointFields.intensityField          = proto.isDefined("intensity");
@@ -1813,7 +1808,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				int64_t                   groupCount = groups.childCount(); // total number of groups
 
 				e57::StringNode idElementName(groupingByLine.get("idElementName"));
-				if (idElementName.value().compare("columnIndex") == 0)
+				if (idElementName.value() == "columnIndex")
 				{
 					bColumnIndex = true;
 				}
@@ -2371,7 +2366,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		delete cloud;
 		return {};
 	}
-	else if (realCount < pointCount)
+	if (realCount < pointCount)
 	{
 		if ((realCount + invalidCount) != pointCount)
 		{
@@ -2631,7 +2626,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		strcpy(imageFormat, "png");
 		assert(cameraRepresentationNode.isDefined("pngImage"));
 		e57::BlobNode pngImage(cameraRepresentationNode.get("pngImage"));
-		pngImage.read((uint8_t*)imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
+		pngImage.read(imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
 		break;
 	}
 	default:
@@ -2805,7 +2800,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 			if (parameters.parentWidget)
 			{
-				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+				progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 				progressDlg->setAutoClose(false);
 			}
 
@@ -2905,7 +2900,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 				if (parameters.parentWidget)
 				{
-					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+					progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 					progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
 					progressDlg->setInfo(QObject::tr("Images: %1").arg(imageCount));
 					progressDlg->start();

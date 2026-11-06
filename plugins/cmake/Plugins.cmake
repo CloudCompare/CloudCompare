@@ -7,7 +7,7 @@ set( CC_PLUGIN_TARGET_LIST "" CACHE INTERNAL "Internal plugin list" )
 # Arguments:
 #	NAME The name of the plugin (this is the target)
 #	TYPE One of "gl", "io", or "standard". If TYPE is not specified, it will default to "standard".
-#	SHADER_FOLDER If it is a gl plugin, this is the folder containing the shaders. Ignored otherwise.
+#	SHADER_FOLDER If it is a gl or standard plugin, this is the folder containing the shaders. Ignored otherwise.
 function( AddPlugin )
 	cmake_parse_arguments(
 			ADD_PLUGIN
@@ -51,7 +51,7 @@ function( AddPlugin )
 	)
 
 	# Keep track of our shader folder if it was given
-	if( ("${ADD_PLUGIN_TYPE}" STREQUAL "gl") AND ADD_PLUGIN_SHADER_FOLDER )
+	if( ("${ADD_PLUGIN_TYPE}" STREQUAL "gl" OR "${ADD_PLUGIN_TYPE}" STREQUAL "standard") AND ADD_PLUGIN_SHADER_FOLDER )
 		# Because they are added relative to the CMakeLists file, add the path
 		set( SHADER_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${ADD_PLUGIN_SHADER_FOLDER}" )
 
@@ -114,14 +114,14 @@ function( AddPlugin )
 					${PLUGINS_OUTPUT_DIR}
 		)
 
-		# Also copy the shaders of gl plugins to the shaders directory other CC shaders,
+		# Also copy the shaders of gl / standard+gl plugins to the shaders directory other CC shaders,
 		# so we can find them without installing everything.
-		if( ("${ADD_PLUGIN_TYPE}" STREQUAL "gl") AND ADD_PLUGIN_SHADER_FOLDER )
+		if( ("${ADD_PLUGIN_TYPE}" STREQUAL "gl" OR "${ADD_PLUGIN_TYPE}" STREQUAL "standard") AND ADD_PLUGIN_SHADER_FOLDER )
 			set( SHADERS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/shaders/${ADD_PLUGIN_SHADER_FOLDER}" )
 
 			add_custom_command( TARGET ${PLUGIN_TARGET} POST_BUILD
 				COMMAND
-					${CMAKE_COMMAND} -E copy_directory #copy_directory_if_different cmake > 3.26
+					${CMAKE_COMMAND} -E copy_directory # copy_directory_if_different cmake > 3.26
 						${SHADER_FOLDER}
 						${SHADERS_OUTPUT_DIR}
 			)
@@ -145,18 +145,18 @@ define_property( TARGET
 	PROPERTY
 		SHADER_FOLDER_NAME
 	BRIEF_DOCS
-		"Name of the shader folder for a gl plugin."
+		"Name of the shader folder for a gl or a standard plugin."
 	FULL_DOCS
-		"Name of the shader folder for a gl plugin. Used as the name of the folder when installing the shader files."
+		"Name of the shader folder for a gl or a standard plugin. Used as the name of the folder when installing the shader files."
 )
 
 define_property( TARGET
 	PROPERTY
 		SHADER_FOLDER_PATH
 	BRIEF_DOCS
-		"Path to the folder containing the shader files for a gl plugin."
+		"Path to the folder containing the shader files for a gl or a standard plugin."
 	FULL_DOCS
-		"Path to the folder containing the shader files for a gl plugin. Files are copied from here when installing."
+		"Path to the folder containing the shader files for a gl or a standard plugin. Files are copied from here when installing."
 )
 
 # AddSubmodulePlugins adds the plugins in the given directories that are present.

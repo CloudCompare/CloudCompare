@@ -969,7 +969,7 @@ void SaveImage(const ccImage*    image,
 
 	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentationNode);
 	images2D.append(imageNode);
-	blob.write((uint8_t*)ba.data(), 0, static_cast<size_t>(imageSize));
+	blob.write(reinterpret_cast<uint8_t*>(ba.data()), 0, static_cast<size_t>(imageSize));
 }
 
 CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
@@ -2561,8 +2561,12 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		return {};
 	}
 
-	uint8_t* imageBits = new uint8_t[cameraRepresentation->imageSize];
-	if (!imageBits)
+	std::vector<uint8_t> imageBits;
+	try
+	{
+		imageBits.resize(static_cast<size_t>(cameraRepresentation->imageSize));
+	}
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[E57] Not enough memory to load image!");
 		return {};
@@ -2618,7 +2622,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	{
 		assert(cameraRepresentationNode.isDefined("jpegImage"));
 		e57::BlobNode jpegImage(cameraRepresentationNode.get("jpegImage"));
-		jpegImage.read(imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
+		jpegImage.read(imageBits.data(), 0, imageBits.size());
 		break;
 	}
 	case E57_PNG_IMAGE:
@@ -2626,7 +2630,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		strcpy(imageFormat, "png");
 		assert(cameraRepresentationNode.isDefined("pngImage"));
 		e57::BlobNode pngImage(cameraRepresentationNode.get("pngImage"));
-		pngImage.read(imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
+		pngImage.read(imageBits.data(), 0, imageBits.size());
 		break;
 	}
 	default:
@@ -2645,18 +2649,15 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 
 	QImage qImage;
-	assert(imageBits);
-	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), imageFormat);
+	assert(!imageBits.empty());
+	bool loadResult = qImage.loadFromData(imageBits.data(), static_cast<int>(imageBits.size()), imageFormat);
 
 	// a bug in some 2.13.alpha versions was causing CC to save JPEG images declared as PNG images :(
 	if (!loadResult && cameraRepresentation->imageType == E57_PNG_IMAGE)
 	{
-		loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), "jpegImage");
+		loadResult = qImage.loadFromData(imageBits.data(), static_cast<int>(imageBits.size()), "jpegImage");
 		ccLog::Warning("[E57] JPG image was wrongly tagged as PNG. You should save this E57 again to fix this...");
 	}
-
-	delete[] imageBits;
-	imageBits = nullptr;
 
 	if (!loadResult)
 	{

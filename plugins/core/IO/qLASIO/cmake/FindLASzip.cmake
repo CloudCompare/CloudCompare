@@ -45,5 +45,8 @@ if (LASzip_FOUND AND NOT TARGET LASzip::LASzip)
         set_target_properties(LASzip::LASzip PROPERTIES
                 IMPORTED_LOCATION ${LASZIP_LIBRARY})
     endif ()
-    target_include_directories(LASzip::LASzip INTERFACE ${LASZIP_INCLUDE_DIR})
+    target_include_directories(LASzip::LASzip INTERFACE
+            ${LASZIP_INCLUDE_DIR}
+            ${LASZIP_INCLUDE_DIR}/laszip
+            )
 endif ()

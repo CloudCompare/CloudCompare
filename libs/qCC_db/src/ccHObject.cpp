@@ -733,10 +733,20 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// are we currently drawing objects in 2D or 3D?
-	bool draw3D = MACRO_Draw3D(context);
+	bool       draw3D   = MACRO_Draw3D(context);
+	const bool xRayPass = (context.drawingFlags & CC_DRAW_XRAY_PASS) != 0;
 
 	// the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
+	// Keep the scene traversal (and parent transforms) in both passes. Only point
+	// clouds are submitted to the X-ray pass; picking uses the normal traversal.
+	bool drawGeometry = true;
+	if (draw3D && ((context.drawingFlags & CC_DRAW_XRAY_ENABLED) || xRayPass) && !MACRO_EntityPicking(context))
+	{
+		const bool xRayCloud = isKindOf(CC_TYPES::POINT_CLOUD)
+		                       && static_cast<const ccPointCloud*>(this)->isXRayEnabled();
+		drawGeometry = (xRayCloud == xRayPass);
+	}
 
 	if (draw3D)
 	{
@@ -772,7 +782,18 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 				toggleClipPlanes(context, true);
 			}
 
-			drawMeOnly(context);
+			if (drawGeometry)
+			{
+				drawMeOnly(context);
+			}
+			else if (!xRayPass && isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				// Normal vectors remain ordinary scene annotations, even when the
+				// cloud's points are deferred to the unlit X-ray pass.
+				auto* cloud = static_cast<ccPointCloud*>(this);
+				if (cloud->normalsAreDrawn())
+					cloud->drawNormalsAsLines(context);
+			}
 
 			// disable clipping planes (if any)
 			if (useClipPlanes)
@@ -783,7 +804,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// draw name - container objects are not visible but can still show a name
-	if (m_currentDisplay == context.display && m_showNameIn3D && !MACRO_EntityPicking(context))
+	if (!xRayPass && m_currentDisplay == context.display && m_showNameIn3D && !MACRO_EntityPicking(context))
 	{
 		if (MACRO_Draw3D(context))
 		{
@@ -818,7 +839,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// if the entity is currently selected, we draw its bounding-box
-	if (m_selected && draw3D && drawInThisContext && !MACRO_EntityPicking(context) && context.currentLODLevel == 0)
+	if (!xRayPass && m_selected && draw3D && drawInThisContext && !MACRO_EntityPicking(context) && context.currentLODLevel == 0)
 	{
 		drawBB(context, context.bbDefaultCol);
 	}

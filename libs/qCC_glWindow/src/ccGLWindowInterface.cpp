@@ -19,6 +19,9 @@
 #include "ccGLWindow.h"
 #include "ccGLWindowStereo.h"
 #include "ccRenderingTools.h"
+#include "ccXRayRenderer.h"
+
+#include <ccXRayDrawScope.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -34,6 +37,7 @@
 // CCFbo
 #include <ccFrameBufferObject.h>
 #include <ccGlFilter.h>
+#include <ccShader.h>
 
 // Qt
 #include <QApplication>
@@ -461,6 +465,7 @@ ccGLWindowInterface::~ccGLWindowInterface()
 
 	delete m_pickingFbo;
 	m_pickingFbo = nullptr;
+	ccXRayRenderer::Destroy(*this);
 
 	m_pickingPBO.release();
 
@@ -880,6 +885,7 @@ void ccGLWindowInterface::uninitializeGL()
 		m_pivotGLList = GL_INVALID_LIST_ID;
 	}
 
+	ccXRayRenderer::Reset(*this);
 	m_initialized = false;
 }
 
@@ -3645,7 +3651,7 @@ void ccGLWindowInterface::display3DLabel(const QString& str, const CCVector3& po
 	ccQOpenGLFunctions* glFunc = functions();
 	if (glFunc)
 	{
-		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : getDisplayParameters().textDefaultCol);
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : ccXRayRenderer::TextColor(*this));
 		renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 	}
 }
@@ -3669,7 +3675,7 @@ void ccGLWindowInterface::displayText(QString              text,
 	int y2 = y;
 
 	// actual text color
-	const ccColor::Rgba& rgba = (color ? *color : getDisplayParameters().textDefaultCol);
+	const ccColor::Rgba& rgba = (color ? *color : ccXRayRenderer::TextColor(*this));
 
 	QFont textFont = (font ? *font : getTextDisplayFont());
 
@@ -5015,12 +5021,21 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		return;
 	}
 
+	auto* xRay = ccXRayRenderer::Prepare(*this);
+	if (xRay)
+		xRay->restoreScene();
+	const auto            xRaySettings = xRay ? xRay->settings() : ccXRaySettings();
+	const ccXRayDrawScope xRayScope(CONTEXT, xRaySettings.exposure, xRaySettings.reverse);
+	CONTEXT.textDefaultCol = ccXRayRenderer::TextColor(*this);
+
 	glFunc->glPointSize(m_viewportParams.defaultPointSize);
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
 
 	glFunc->glEnable(GL_DEPTH_TEST);
 
 	CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
+	if (xRay)
+		CONTEXT.drawingFlags |= CC_DRAW_XRAY_ENABLED;
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
@@ -5168,6 +5183,11 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		m_winDBRoot->draw(CONTEXT);
 	}
 
+	if (xRay)
+	{
+		xRay->draw(CONTEXT);
+	}
+
 	glFunc->glPopAttrib(); // GL_ENABLE_BIT
 
 	// do this before drawing the pivot!
@@ -5189,7 +5209,8 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	}
 
 	// for connected items
-	if (m_currentLODState.level == 0)
+	// X-ray restores the opaque layer at each refinement, so redraw annotations.
+	if (m_currentLODState.level == 0 || xRay)
 	{
 		Q_EMIT m_signalEmitter->drawing3D();
 	}
@@ -5246,7 +5267,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 
 	// we display the cross at the end (and in orthographic mode)
 	if (renderingParams.draw3DCross
-	    && m_currentLODState.level == 0
+	    && (m_currentLODState.level == 0 || xRay)
 	    && !m_captureMode.enabled
 	    && !m_viewportParams.perspectiveView
 	    && (!renderingParams.useFBO || !m_activeGLFilter))
@@ -5255,6 +5276,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		drawCross();
 	}
 
+	CONTEXT.drawingFlags &= ~CC_DRAW_XRAY_ENABLED;
 	logGLError("ccGLWindow::draw3D");
 }
 
@@ -5610,14 +5632,17 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		if (renderingParams.clearColorLayer)
 		{
 			const ccGui::ParamStruct& displayParams = getDisplayParameters();
-			if (displayParams.drawBackgroundGradient)
+			// Allocate before choosing the backdrop, keeping normal colors on failure.
+			const auto*           xRay           = ccXRayRenderer::Prepare(*this);
+			const auto            xRayBackground = xRay ? xRay->background() : ccXRaySettings::Background{};
+			const ccColor::Rgbub& bkgCol         = xRay ? xRayBackground.color : displayParams.backgroundCol;
+			const ccColor::Rgbub& frgCol         = displayParams.textDefaultCol;
+			const ccColor::Rgbub  gradientEnd    = xRay ? xRayBackground.secondColor : ccColor::Rgbub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
+			if (xRay ? xRayBackground.gradient : displayParams.drawBackgroundGradient)
 			{
 				// draw the default gradient color background
 				int w = glWidth();
 				int h = glHeight();
-
-				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
-				const ccColor::Rgbub& frgCol = getDisplayParameters().textDefaultCol;
 
 				// Gradient "texture" drawing
 				glFunc->glBegin(GL_QUADS);
@@ -5626,8 +5651,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
 					glFunc->glVertex2i(0, h);
 					glFunc->glVertex2i(w, h);
-					// and the inverse of the text color for gradient stop
-					glFunc->glColor3ub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, gradientEnd);
 					glFunc->glVertex2i(w, 0);
 					glFunc->glVertex2i(0, 0);
 				}
@@ -5638,8 +5662,6 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 				// Draw a plain quad so as to not clear the other half of the 3D view!
 				int w = glWidth();
 				int h = glHeight();
-
-				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
 
 				glFunc->glBegin(GL_QUADS);
 				{
@@ -5655,8 +5677,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			else
 			{
 				// use plain color as specified by the user
-				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
+				const ccColor::Rgbaf backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
 
 				glFunc->glClearColor(backgroundColor.r,
 				                     backgroundColor.g,
@@ -5727,7 +5748,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 	/*** overlay entities ***/
 	{
 		// default overlay color
-		const ccColor::Rgbub& textCol = getDisplayParameters().textDefaultCol;
+		const ccColor::Rgbub textCol = ccXRayRenderer::TextColor(*this);
 
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
@@ -6172,7 +6193,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		if (!m_viewportParams.perspectiveView)
 		{
 			// DGM FIXME: with a zoom > 1, the renderText call inside drawScale will result in the wrong FBO being used?!
-			drawScale(getDisplayParameters().textDefaultCol);
+			drawScale(ccXRayRenderer::TextColor(*this));
 		}
 
 		if (m_showTrihedron)

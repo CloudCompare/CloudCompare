@@ -17,6 +17,8 @@
 
 #include "../include/ccDisplaySettingsDlg.h"
 
+#include "ccXRaySettingsEditor.h"
+
 // Local
 #include "../include/ccApplicationBase.h"
 
@@ -155,6 +157,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 
 	m_oldParameters = m_parameters = ccGui::Parameters();
 	m_oldOptions = m_options = ccOptions::Instance();
+
+	new ccXRaySettingsEditor(*this, *m_ui);
 
 	refresh();
 

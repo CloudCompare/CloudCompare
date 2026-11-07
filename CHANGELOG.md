@@ -403,6 +403,11 @@ Improvements:
 	- Tools > Other > Compute geometric feature:
 		- faster computation of multiple geometric features (only one octree traversal)
 
+	- ASCII loading dialog
+		- the column types set by hand are now kept after changing the number of lines to skip, or when a header line appeared.
+		- CC now warns the user when a file has more columns than it can handle (only the first 512 columns are loaded,
+			the other ones were previously ignored silently)
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
@@ -416,16 +421,11 @@ Improvements:
 		- CloudCompare is now built upon Qt 6.
 		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
 		- point picking now works on mesh displayed with wireframe
-		- the ASCII loading dialog now warns the user when a file has more columns than it can handle
-			(only the first 512 columns are loaded, the other ones were previously ignored silently)
 		- the PoissonRecon library (used by the Poisson Surface reconstruction plugin) has been updated to version 18.76
 		- dxflib upgraded from version 3.17.0 to 3.26.4
 
 Bug fixes:
 	- ASCII files saved with legacy Mac line endings (a lone CR) were read as a single line, silently loading only one point
-	- ASCII file open dialog: the column types set by hand were reset when the table was refreshed (e.g. after changing the number of
-		lines to skip, or when a header line appeared). They are now kept: the header names and the default rule only fill the columns
-		that were not changed. Changing the separator still detects all the columns again.
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead

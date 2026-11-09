@@ -40,6 +40,10 @@
 #include <atomic>
 #include <vector>
 
+//! Converts raw axes (tx, ty, tz, rx, ry, rz; about +/-350 at full deflection)
+//! to the motion vector emitted by Mouse3DInput::sigMove3d
+std::vector<float> RawAxesToMotion(const int rawAxes[6]);
+
 //! Thread that reads HID reports from the 3DConnexion device and emits signals
 class HIDWorker : public QThread
 {

@@ -4716,7 +4716,7 @@ void MainWindow::doActionCutPursuit()
 			}
 			pc->setCurrentScalarField(sfIdx);
 
-			std::vector<int32_t> componentLabels;
+			std::vector<int32_t> components;
 			int componentCount = 0;
 
 			try
@@ -4792,12 +4792,14 @@ void MainWindow::doActionCutPursuit()
 				// we try to label all CCs
 				componentCount = PCP::Partition::LabelCutPursuitComponents(pc,
 				                                                           params,
-				                                                           componentLabels,
+				                                                           components,
+																		   nullptr,
+																		   nullptr,
 				                                                           &pDlg,
 				                                                           theOctree.data());
 
 				// error handling
-				if (componentCount < 0 || componentLabels.size() != static_cast<size_t>(pc->size()))
+				if (componentCount < 0 || components.size() != static_cast<size_t>(pc->size()))
 				{
 					ccConsole::Error(tr("[Cut Pursuit] Failed to compute component labels!"));
 					pc->deleteScalarField(sfIdx);
@@ -4808,7 +4810,7 @@ void MainWindow::doActionCutPursuit()
 				ccScalarField::Shared sf = pc->getCCScalarField(sfIdx);
 				for (unsigned i = 0; i < pc->size(); ++i)
 				{
-					sf->setValue(i, static_cast<ScalarType>(componentLabels[i]));
+					sf->setValue(i, static_cast<ScalarType>(components[i]));
 				}
 				sf->computeMinAndMax();
 				pc->setCurrentDisplayedScalarField(sfIdx);
@@ -4833,7 +4835,7 @@ void MainWindow::doActionCutPursuit()
 
 					for (unsigned i = 0; i < pc->size(); ++i)
 					{
-						int32_t              compIdx = componentLabels[i];
+						int32_t              compIdx = components[i];
 						const ccColor::Rgba& C       = pc->getPointColor(i);
 						compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
 						compCount[compIdx]++;
@@ -4841,7 +4843,7 @@ void MainWindow::doActionCutPursuit()
 
 					for (unsigned i = 0; i < pc->size(); ++i)
 					{
-						int32_t compIdx = componentLabels[i];
+						int32_t compIdx = components[i];
 						if (compCount[compIdx] > 0)
 						{
 							CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);

@@ -1,5 +1,6 @@
-#ifndef CC_E57_HEADER_HEADER
-#define CC_E57_HEADER_HEADER
+#pragma once
+// Most of the code of Taken from "E57 Simple API" by Stan Coleby
+// Boost Software License 1.0
 
 #include <cstdint>
 
@@ -384,5 +385,3 @@ class CylindricalRepresentation : public SphericalRepresentation
 	double radius          = 0; //!< The closest distance from the cylindrical image surface to the center of projection (that is, the radius of the cylinder) (in meters). Shall be non-negative
 	double principalPointY = 0; //!< The Y coordinate in the image of the principal point (in pixels). This is the intersection of the z = 0 plane with the image
 };
-
-#endif

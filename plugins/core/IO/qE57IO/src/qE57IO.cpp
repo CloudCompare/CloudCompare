@@ -15,9 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qE57IO.h"
+#include "../include/qE57IO.h"
 
-#include "E57Filter.h"
+// Local
+#include "../include/E57Filter.h"
 
 qE57IO::qE57IO(QObject* parent)
     : QObject(parent)

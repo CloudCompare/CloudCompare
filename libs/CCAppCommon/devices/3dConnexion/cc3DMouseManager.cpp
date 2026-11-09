@@ -28,8 +28,18 @@
 
 // Qt
 #include <QAction>
+#include <QGuiApplication>
 #include <QMainWindow>
 #include <QMenu>
+
+//! Returns whether CloudCompare is the active application
+/** The hidapi backend reads the device directly, so it keeps receiving input
+    while another application is in front.
+**/
+static bool IsApplicationActive()
+{
+	return QGuiApplication::applicationState() == Qt::ApplicationActive;
+}
 
 cc3DMouseManager::cc3DMouseManager(ccMainAppInterface* appInterface, QObject* parent)
     : QObject(parent)
@@ -112,6 +122,9 @@ void cc3DMouseManager::on3DMouseCMDKeyUp(int)
 
 void cc3DMouseManager::on3DMouseKeyDown(int key)
 {
+	if (!IsApplicationActive())
+		return;
+
 	switch (key)
 	{
 		// ccLog::Print(QString("on3DMouseKeyDown Key = %1").arg(key));
@@ -202,6 +215,9 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 
 void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 {
+	if (!IsApplicationActive())
+		return;
+
 	switch (cmd)
 	{
 	// ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
@@ -309,6 +325,9 @@ void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 
 void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 {
+	if (!IsApplicationActive())
+		return;
+
 	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;

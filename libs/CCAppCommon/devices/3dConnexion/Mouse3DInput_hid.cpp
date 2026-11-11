@@ -122,6 +122,34 @@ static const int c_buttonMap[]{
 };
 static constexpr size_t c_buttonMapSize = sizeof(c_buttonMap) / sizeof(c_buttonMap[0]);
 
+std::vector<float> RawAxesToMotion(const int rawAxes[6])
+{
+	const int tx = rawAxes[0];
+	const int ty = rawAxes[1];
+	const int tz = rawAxes[2];
+	const int rx = rawAxes[3];
+	const int ry = rawAxes[4];
+	const int rz = rawAxes[5];
+
+	// Scaling: progressive (non-linear) curve so small deflections stay fine
+	// while large deflections are amplified for fast navigation.
+	double ds = c_HIDPollPeriod_ms * c_3DMouseAngularVelocity_hid;
+
+	std::vector<float> axes(6);
+	// The device has Y forward/back and Z up/down; the view has Y up/down and
+	// Z towards the viewer. So Y and Z are swapped, for rotation too (like
+	// spacenavd's DF_SWAPYZ). The signs, chosen so the view follows the cap,
+	// differ per axis: rx and ry keep theirs.
+	axes[0] = -ScaleAxis(tx, ds); // pan X
+	axes[1] = -ScaleAxis(tz, ds); // pan Y   <- device Z
+	axes[2] = -ScaleAxis(ty, ds); // zoom    <- device Y
+	axes[3] = ScaleAxis(rx, ds);  // orbit X
+	axes[4] = -ScaleAxis(rz, ds); // orbit Y <- device RZ
+	axes[5] = ScaleAxis(ry, ds);  // orbit Z <- device RY
+
+	return axes;
+}
+
 //! Known 3DConnexion space-mouse product IDs (VID 0x046d / Logitech era)
 static const unsigned short c_old3dconnexionPIDs[]{
     0xc603, // SpaceMouse Plus XT
@@ -526,45 +554,14 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 		break;
 	}
 
-	int tx = m_lastAxes[0];
-	int ty = m_lastAxes[1];
-	int tz = m_lastAxes[2];
-	int rx = m_lastAxes[3];
-	int ry = m_lastAxes[4];
-	int rz = m_lastAxes[5];
-
-	if (tx == 0 && ty == 0 && tz == 0 && rx == 0 && ry == 0 && rz == 0)
+	if (std::all_of(m_lastAxes, m_lastAxes + 6, [](int axis)
+	                { return axis == 0; }))
 	{
 		// No motion - don't fire a move event.
 		return;
 	}
 
-	// Scaling: progressive (non-linear) curve so small deflections stay fine
-	// while large deflections are amplified for fast navigation.
-	double ds = c_HIDPollPeriod_ms * c_3DMouseAngularVelocity_hid;
-
-	std::vector<float> axes(6);
-	// NDOF axis mapping with Y/Z swap (matching spacenavd's DF_SWAPYZ flag).
-	// The device HID coordinate system uses Y=forward/back, Z=up/down, but
-	// CloudCompare's world coordinate system uses Y=up/down, Z=forward/back.
-	// We swap Y and Z for both translation and rotation so that the device's
-	// physical axes align with the on-screen world.
-	//
-	// spacenavd also inverts Y and Z values (DF_INVYZ). Combined swap+invert:
-	//   tx (cap left/right)      -> pan X    = -tx
-	//   tz (cap lift/compress)   -> pan Y    = -tz  (device Z -> CC Y, swap+invert)
-	//   ty (cap forward/back)    -> zoom     = -ty  (device Y -> CC Z, swap+invert)
-	//   rx (pitch)               -> orbit X  = +rx  (no swap, no invert)
-	//   rz (yaw / twist)         -> orbit Y  = -rz  (device RZ -> CC RY, swap+invert)
-	//   ry (roll / tilt sideways)-> orbit Z  = -ry  (device RY -> CC RZ, swap+invert)
-	axes[0] = -ScaleAxis(tx, ds); // pan X
-	axes[1] = -ScaleAxis(tz, ds); // pan Y (Y/Z swap)
-	axes[2] = -ScaleAxis(ty, ds); // zoom   (Y/Z swap)
-	axes[3] = ScaleAxis(rx, ds);  // orbit X
-	axes[4] = -ScaleAxis(rz, ds); // orbit Y (Y/Z swap)
-	axes[5] = ScaleAxis(ry, ds);  // orbit Z (Y/Z swap)
-
-	Q_EMIT sigMove3d(axes);
+	Q_EMIT sigMove3d(RawAxesToMotion(m_lastAxes));
 }
 
 void HIDWorker::processButtons(const unsigned char* buf, int n, unsigned int& prevButtonMask)

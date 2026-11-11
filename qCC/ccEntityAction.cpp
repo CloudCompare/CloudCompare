@@ -159,7 +159,7 @@ namespace ccEntityAction
 				}
 				else
 				{
-					cloud->setColor(ccColor::FromQColora(colour));
+					cloud->setColor(ccColor::ToRgba(colour));
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); // just in case
@@ -192,7 +192,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::POLY_LINE))
 			{
 				ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-				poly->setColor(ccColor::FromQColor(colour));
+				poly->setColor(ccColor::ToRgb(colour));
 				ent->showColors(true);
 				ent->showSF(false); // just in case
 				ent->prepareDisplayForRefresh();
@@ -200,7 +200,7 @@ namespace ccEntityAction
 			else if (ent->isA(CC_TYPES::FACET))
 			{
 				ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-				facet->setColor(ccColor::FromQColor(colour));
+				facet->setColor(ccColor::ToRgb(colour));
 				ent->showColors(true);
 				ent->showSF(false); // just in case
 				ent->prepareDisplayForRefresh();
@@ -1575,11 +1575,11 @@ namespace ccEntityAction
 							referenceCloud.addPointIndex(index);
 						}
 					}
-					ccPointCloud* pc = pc->partialClone(&referenceCloud);
-					if (pc)
+					ccPointCloud* clonedCloud = pc->partialClone(&referenceCloud);
+					if (clonedCloud)
 					{
-						pc->setName("class #" + QString::number(pointClass));
-						destObject->addChild(pc);
+						clonedCloud->setName("class #" + QString::number(pointClass));
+						destObject->addChild(clonedCloud);
 					}
 					else
 					{

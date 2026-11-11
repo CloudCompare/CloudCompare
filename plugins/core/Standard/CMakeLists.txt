@@ -29,9 +29,4 @@ set( submod_plugins
 		${CMAKE_CURRENT_SOURCE_DIR}/qVoxFall
 )
 
-foreach( dir ${submod_plugins} )
-    if( IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt )
-		message( STATUS "Found submodule plugin: " ${dir} )
-		add_subdirectory( ${dir} )
-	endif()
-endforeach()
+AddSubmodulePlugins( ${submod_plugins} )

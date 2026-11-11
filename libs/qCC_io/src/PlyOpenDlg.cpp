@@ -49,7 +49,7 @@ struct PlyLoadingContext
 	bool                 applyAll;
 };
 //! Last loading context
-static PlyLoadingContext s_lastContext;
+static PlyLoadingContext s_previousContext;
 
 PlyOpenDlg::PlyOpenDlg(QWidget* parent)
     : QDialog(parent)
@@ -57,28 +57,9 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	try
-	{
-		m_standardCombos.push_back(xComboBox);
-		m_standardCombos.push_back(yComboBox);
-		m_standardCombos.push_back(zComboBox);
-		m_standardCombos.push_back(rComboBox);
-		m_standardCombos.push_back(gComboBox);
-		m_standardCombos.push_back(bComboBox);
-		m_standardCombos.push_back(iComboBox);
-		m_standardCombos.push_back(nxComboBox);
-		m_standardCombos.push_back(nyComboBox);
-		m_standardCombos.push_back(nzComboBox);
-
-		m_listCombos.push_back(facesComboBox);
-		m_listCombos.push_back(textCoordsComboBox);
-
-		m_singleCombos.push_back(texIndexComboBox);
-	}
-	catch (const std::bad_alloc&)
-	{
-		// not enough memory?! What can we do...
-	}
+	m_standardCombos = {xComboBox, yComboBox, zComboBox, rComboBox, gComboBox, bComboBox, iComboBox, nxComboBox, nyComboBox, nzComboBox};
+	m_listCombos     = {facesComboBox, textCoordsComboBox};
+	m_singleCombos   = {texIndexComboBox};
 
 	connect(addSFToolButton, &QAbstractButton::clicked, this, &PlyOpenDlg::addSFComboBox);
 	connect(addAllSFToolButton, &QAbstractButton::clicked, this, &PlyOpenDlg::addAllStdPropsAsSF);
@@ -136,27 +117,130 @@ void PlyOpenDlg::setSingleComboItems(const QStringList& singlePropsText)
 
 void PlyOpenDlg::ResetApplyAll()
 {
-	s_lastContext.applyAll = false;
+	s_previousContext.applyAll = false;
 }
 
-bool PlyOpenDlg::restorePreviousContext(bool& hasAPreviousContext)
+bool PlyOpenDlg::shouldApplyAll() const
 {
-	hasAPreviousContext = s_lastContext.valid;
-	if (!hasAPreviousContext)
-		return false;
+	return s_previousContext.valid && s_previousContext.applyAll;
+}
 
-	int  unassignedProps = 0;
-	int  mismatchProps   = 0;
-	bool restored        = restoreContext(&s_lastContext, unassignedProps, mismatchProps);
-
-	// auto-stop: we can't keep 'apply all' if something has changed
-	if (!restored || mismatchProps != 0 /* || unassignedProps > 0*/)
+bool PlyOpenDlg::restorePreviousContext(std::set<QString>& restoredProps, bool restoreSFs)
+{
+	if (!s_previousContext.valid)
 	{
-		s_lastContext.applyAll = false;
 		return false;
 	}
 
-	return true;
+	bool missingProps = false;
+
+	// restore standard combos
+	for (size_t i = 0; i < m_standardCombos.size(); ++i)
+	{
+		if (m_standardCombos[i])
+		{
+			m_standardCombos[i]->setCurrentIndex(0);
+			// if a specific property was previously defined for this field/combo
+			const QString& prevProp = s_previousContext.standardCombosProperties[i];
+			if (!prevProp.isNull())
+			{
+				// try to find it in the combobox items
+				int idx = m_standardCombos[i]->findText(prevProp);
+				if (idx >= 0)
+				{
+					m_standardCombos[i]->setCurrentIndex(idx);
+					restoredProps.insert(prevProp);
+				}
+				else
+				{
+					missingProps = true;
+				}
+			}
+		}
+	}
+
+	// restore list combos
+	for (size_t i = 0; i < m_listCombos.size(); ++i)
+	{
+		if (m_listCombos[i])
+		{
+			m_listCombos[i]->setCurrentIndex(0);
+			// if a specific property was previously defined for this field/combo
+			const QString& prevProp = s_previousContext.listCombosProperties[i];
+			if (!prevProp.isNull())
+			{
+				// try to find it in the combobox items
+				int idx = m_listCombos[i]->findText(prevProp);
+				if (idx >= 0)
+				{
+					m_listCombos[i]->setCurrentIndex(idx);
+					restoredProps.insert(prevProp);
+				}
+				else
+				{
+					missingProps = true;
+				}
+			}
+		}
+	}
+
+	// restore single combos
+	for (size_t i = 0; i < m_singleCombos.size(); ++i)
+	{
+		if (m_singleCombos[i])
+		{
+			m_singleCombos[i]->setCurrentIndex(0);
+			// if a specific property was previously defined for this field/combo
+			const QString& prevProp = s_previousContext.singleCombosProperties[i];
+			if (!prevProp.isNull())
+			{
+				// try to find it in the combobox items
+				int idx = m_singleCombos[i]->findText(prevProp);
+				if (idx >= 0)
+				{
+					m_singleCombos[i]->setCurrentIndex(idx);
+					restoredProps.insert(prevProp);
+				}
+				else
+				{
+					missingProps = true;
+				}
+			}
+		}
+	}
+
+	// restore SF combos
+	if (restoreSFs)
+	{
+		for (const auto& oldSFProp : s_previousContext.sfCombosProperties)
+		{
+			// try to find it in the new property list
+			int idx = m_stdPropsText.lastIndexOf(oldSFProp);
+			if (idx >= 0)
+			{
+				addSFComboBox(idx);
+				restoredProps.insert(oldSFProp);
+			}
+			else
+			{
+				ccLog::Warning(QString("[PLY] Previously seleceted field '%1' is not available in the current file").arg(oldSFProp));
+				// missingProps = true;
+			}
+		}
+
+		for (int i = 1; i < m_stdPropsText.size(); ++i) // skip the first element which is always 'empty'
+		{
+			// try to find it in the new property list
+			const auto& newSFProp = m_stdPropsText[i];
+			auto        it        = std::find(restoredProps.begin(), restoredProps.end(), newSFProp);
+			if (it == restoredProps.end())
+			{
+				ccLog::Warning(QString("[PLY] Field '%1' was not in the previous selection and will be ignored").arg(newSFProp));
+			}
+		}
+	}
+
+	return !missingProps;
 }
 
 void PlyOpenDlg::saveContext(PlyLoadingContext* context)
@@ -250,141 +334,12 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 	context->valid        = true;
 }
 
-bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps, int& mismatchProps)
-{
-	if (!context || !context->valid)
-	{
-		assert(false);
-		return false;
-	}
-
-	// first check if all new properties are in the old properties set
-	mismatchProps  = 0;
-	int totalProps = 0;
-	{
-		assert(m_standardCombos.front());
-		if (m_standardCombos.front())
-			for (int i = 1; i < m_standardCombos.front()->count(); ++i) // the first item is always 'NONE'
-			{
-				++totalProps;
-				if (!context->allProperties.contains(m_standardCombos.front()->itemText(i)))
-					++mismatchProps;
-			}
-		assert(m_listCombos.front());
-		if (m_listCombos.front())
-			for (int i = 1; i < m_listCombos.front()->count(); ++i) // the first item is always 'NONE'
-			{
-				++totalProps;
-				if (!context->allProperties.contains(m_listCombos.front()->itemText(i)))
-					++mismatchProps;
-			}
-		assert(m_singleCombos.front());
-		if (m_singleCombos.front())
-			for (int i = 1; i < m_singleCombos.front()->count(); ++i) // the first item is always 'NONE'
-			{
-				++totalProps;
-				if (!context->allProperties.contains(m_singleCombos.front()->itemText(i)))
-					++mismatchProps;
-			}
-	}
-
-	int assignedEntries = 0;
-
-	// standard combos
-	assert(m_standardCombos.size() == context->standardCombosProperties.size());
-	{
-		for (size_t i = 0; i < m_standardCombos.size(); ++i)
-		{
-			if (m_standardCombos[i])
-			{
-				m_standardCombos[i]->setCurrentIndex(0);
-				// if a specific property was defined for this field
-				if (!context->standardCombosProperties[i].isNull())
-				{
-					// try to find it in the new property list!
-					int idx = m_standardCombos[i]->findText(context->standardCombosProperties[i]);
-					if (idx >= 0)
-					{
-						++assignedEntries;
-						m_standardCombos[i]->setCurrentIndex(idx);
-					}
-				}
-			}
-		}
-	}
-
-	// list combos
-	assert(m_listCombos.size() == context->listCombosProperties.size());
-	{
-		for (size_t i = 0; i < m_listCombos.size(); ++i)
-		{
-			if (m_listCombos[i])
-			{
-				m_listCombos[i]->setCurrentIndex(0);
-				// if a specific property was defined for this field
-				if (!context->listCombosProperties[i].isNull())
-				{
-					// try to find it in the new property list!
-					int idx = m_listCombos[i]->findText(context->listCombosProperties[i]);
-					if (idx >= 0)
-					{
-						++assignedEntries;
-						m_listCombos[i]->setCurrentIndex(idx);
-					}
-				}
-			}
-		}
-	}
-
-	// single combox
-	assert(m_singleCombos.size() == context->singleCombosProperties.size());
-	{
-		for (size_t i = 0; i < m_singleCombos.size(); ++i)
-		{
-			if (m_singleCombos[i])
-			{
-				m_singleCombos[i]->setCurrentIndex(0);
-				// if a specific property was defined for this field
-				if (!context->singleCombosProperties[i].isNull())
-				{
-					// try to find it in the new property list!
-					int idx = m_singleCombos[i]->findText(context->singleCombosProperties[i]);
-					if (idx >= 0)
-					{
-						++assignedEntries;
-						m_singleCombos[i]->setCurrentIndex(idx);
-					}
-				}
-			}
-		}
-	}
-
-	// additional SF combos
-	{
-		for (const auto& property : context->sfCombosProperties)
-		{
-			// try to find it in the new property list!
-			int idx = m_stdPropsText.lastIndexOf(property);
-			if (idx >= 0)
-			{
-				++assignedEntries;
-				addSFComboBox(idx);
-			}
-		}
-	}
-
-	assert(assignedEntries <= totalProps);
-	unassignedProps = totalProps - assignedEntries;
-
-	return true;
-}
-
 void PlyOpenDlg::apply()
 {
 	if (isValid())
 	{
-		saveContext(&s_lastContext);
-		s_lastContext.applyAll = false;
+		saveContext(&s_previousContext);
+		s_previousContext.applyAll = false;
 		Q_EMIT fullyAccepted();
 	}
 }
@@ -393,8 +348,8 @@ void PlyOpenDlg::applyAll()
 {
 	if (isValid())
 	{
-		saveContext(&s_lastContext);
-		s_lastContext.applyAll = true;
+		saveContext(&s_previousContext);
+		s_previousContext.applyAll = true;
 		Q_EMIT fullyAccepted();
 	}
 }
@@ -449,7 +404,7 @@ bool PlyOpenDlg::isValid(bool displayErrors /*=true*/) const
 
 bool PlyOpenDlg::canBeSkipped() const
 {
-	return s_lastContext.valid && s_lastContext.applyAll && isValid(false);
+	return s_previousContext.valid && s_previousContext.applyAll && isValid(false);
 }
 
 void PlyOpenDlg::addSFComboBox(int selectedIndex /*=0*/)
@@ -527,5 +482,16 @@ void PlyOpenDlg::addAllStdPropsAsSF()
 	if (createdSFCount == 0)
 	{
 		QMessageBox::warning(this, "Add all SFs", "No unused property");
+	}
+}
+
+void PlyOpenDlg::getSFPropIndexes(std::vector<int>& sfPropIndexes) const
+{
+	for (const auto* sfCombo : m_sfCombos)
+	{
+		if (sfCombo && sfCombo->currentIndex() > 0)
+		{
+			sfPropIndexes.push_back(sfCombo->currentIndex());
+		}
 	}
 }

@@ -24,6 +24,7 @@
 // Local
 #ifdef CC_3DMOUSE_HID
 #include "Mouse3DInput_hid.h"
+#include "Mouse3DInput_macDriver.h"
 #endif
 
 // CCCoreLib
@@ -125,10 +126,30 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 
 #ifdef CC_3DMOUSE_HID
 	Q_UNUSED(mainWidget)
+#ifndef CC_MAC_OS
 	Q_UNUSED(appName)
+#endif
 
 	// Required for Qt::QueuedConnection across thread boundaries.
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
+
+#ifdef CC_MAC_OS
+	// While the 3Dconnexion driver runs it holds the device, so use the driver
+	// when it's there and hidapi otherwise.
+	m_macDriverClient = new MacDriverClient(this);
+	if (m_macDriverClient->registerWithDriver(appName))
+	{
+		QObject::connect(m_macDriverClient, &MacDriverClient::sigMove3d, this, [this](std::vector<float> v)
+		                 { Q_EMIT sigMove3d(v); },
+		                 Qt::QueuedConnection);
+		QObject::connect(m_macDriverClient, &MacDriverClient::sigReleased, this, &Mouse3DInput::sigReleased, Qt::QueuedConnection);
+		QObject::connect(m_macDriverClient, &MacDriverClient::sigOn3DMouseKeyDown, this, &Mouse3DInput::sigOn3DMouseKeyDown, Qt::QueuedConnection);
+		QObject::connect(m_macDriverClient, &MacDriverClient::sigOn3DMouseKeyUp, this, &Mouse3DInput::sigOn3DMouseKeyUp, Qt::QueuedConnection);
+		return true;
+	}
+	delete m_macDriverClient;
+	m_macDriverClient = nullptr;
+#endif
 
 	// drive the device directly via hidapi (HIDWorker thread)
 	m_hidWorker = new HIDWorker(this);
@@ -221,6 +242,10 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 void Mouse3DInput::disconnectDriver()
 {
 #ifdef CC_3DMOUSE_HID
+#ifdef CC_MAC_OS
+	delete m_macDriverClient;
+	m_macDriverClient = nullptr;
+#endif
 	if (m_hidWorker)
 	{
 		m_hidWorker->stop();

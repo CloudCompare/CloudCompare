@@ -461,7 +461,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 											if (loadAsTexturedQuad)
 											{
 												QRgb origColor = quadTexture.pixel(k, j);
-												C              = ccColor::FromQRgba(origColor);
+												C              = ccColor::ToRgba(origColor);
 											}
 											else
 											{

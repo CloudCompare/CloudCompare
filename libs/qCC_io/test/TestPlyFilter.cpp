@@ -2,6 +2,7 @@
 #include <ccHObject.h>
 #include <ccMaterialSet.h>
 #include <ccMesh.h>
+#include <ccPointCloud.h>
 
 // qCC_io
 #include <PlyFilter.h>
@@ -83,6 +84,73 @@ class TestPlyFilter : public QObject
 		// the file's only face had an out-of-range texnumber (5, only 1 texture declared):
 		// it must come out as 'no material' (-1), not as a stray index into the material set
 		QCOMPARE(mesh->getTriangleMtlIndex(0), -1);
+	}
+
+	// Colors can also be stored as floating point values between 0 and 1. In an ASCII file
+	// they are rounded (2/255 = 0.0078431... is written 0.007843), so they must be rounded
+	// to the closest integer when loaded: truncating them gave 1 instead of 2 for instance.
+	void testFloatColorsAreRounded() const
+	{
+		QTemporaryDir tmpDir;
+		QVERIFY(tmpDir.isValid());
+
+		// one point per color value (with a different value for each channel)
+		auto expectedColor = [](unsigned k)
+		{
+			return ccColor::Rgb(static_cast<ColorCompType>(k),
+			                    static_cast<ColorCompType>(255 - k),
+			                    static_cast<ColorCompType>((k * 7) % 256));
+		};
+
+		QString plyPath = tmpDir.filePath("float_colors.ply");
+		{
+			QFile file(plyPath);
+			QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
+			QTextStream out(&file);
+			out << "ply\n"
+			    << "format ascii 1.0\n"
+			    << "element vertex 256\n"
+			    << "property float x\n"
+			    << "property float y\n"
+			    << "property float z\n"
+			    << "property float red\n"
+			    << "property float green\n"
+			    << "property float blue\n"
+			    << "end_header\n";
+			for (unsigned k = 0; k < 256; ++k)
+			{
+				out << k << " 0 0";
+				for (ColorCompType value : expectedColor(k).rgb)
+				{
+					out << ' ' << QString::number(value / 255.0, 'f', 6);
+				}
+				out << '\n';
+			}
+		}
+
+		ccHObject                    container;
+		FileIOFilter::LoadParameters params;
+		params.alwaysDisplayLoadDialog = false;
+		PlyFilter filter;
+
+		CC_FILE_ERROR error = filter.loadFile(plyPath, container, params);
+		QVERIFY(error == CC_FERR_NO_ERROR);
+
+		QCOMPARE(container.getChildrenNumber(), 1u);
+		ccHObject* cloudObject = container.getFirstChild();
+		QVERIFY(cloudObject->isA(CC_TYPES::POINT_CLOUD));
+		auto* cloud = static_cast<ccPointCloud*>(cloudObject);
+		QCOMPARE(cloud->size(), 256u);
+		QVERIFY(cloud->hasColors());
+
+		for (unsigned k = 0; k < 256; ++k)
+		{
+			const ccColor::Rgb   expected = expectedColor(k);
+			const ccColor::Rgba& loaded   = cloud->getPointColor(k);
+			QCOMPARE(static_cast<int>(loaded.r), static_cast<int>(expected.r));
+			QCOMPARE(static_cast<int>(loaded.g), static_cast<int>(expected.g));
+			QCOMPARE(static_cast<int>(loaded.b), static_cast<int>(expected.b));
+		}
 	}
 };
 

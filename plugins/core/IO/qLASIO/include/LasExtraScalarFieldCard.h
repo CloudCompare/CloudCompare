@@ -18,7 +18,7 @@
 // ##########################################################################
 
 #include "LasExtraScalarField.h"
-#include "ui_extra_scarlar_field_card.h"
+#include "ui_extra_scalar_field_card.h"
 
 class LasExtraScalarFieldCard : public QWidget
     , public Ui::ExtraScalarFieldCard

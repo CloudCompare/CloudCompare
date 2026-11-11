@@ -280,7 +280,7 @@ void ccDisplaySettingsDlg::changeLightDiffuseColor()
 
 	m_lightDiffuseColor = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, m_lightDiffuseColor);
-	m_parameters.lightDiffuseColor = ccColor::FromQColoraf(m_lightDiffuseColor);
+	m_parameters.lightDiffuseColor = ccColor::ToRgbaf(m_lightDiffuseColor);
 }
 
 void ccDisplaySettingsDlg::changeLightAmbientColor()
@@ -291,7 +291,7 @@ void ccDisplaySettingsDlg::changeLightAmbientColor()
 
 	m_lightAmbientColor = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, m_lightAmbientColor);
-	m_parameters.lightAmbientColor = ccColor::FromQColoraf(m_lightAmbientColor);
+	m_parameters.lightAmbientColor = ccColor::ToRgbaf(m_lightAmbientColor);
 
 	update();
 }
@@ -304,7 +304,7 @@ void ccDisplaySettingsDlg::changeLightSpecularColor()
 
 	m_lightSpecularColor = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, m_lightSpecularColor);
-	m_parameters.lightSpecularColor = ccColor::FromQColoraf(m_lightSpecularColor);
+	m_parameters.lightSpecularColor = ccColor::ToRgbaf(m_lightSpecularColor);
 
 	update();
 }
@@ -318,7 +318,7 @@ void ccDisplaySettingsDlg::changeMeshFrontDiffuseColor()
 	m_meshFrontDiff = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, m_meshFrontDiff);
 
-	m_parameters.meshFrontDiff = ccColor::FromQColoraf(m_meshFrontDiff);
+	m_parameters.meshFrontDiff = ccColor::ToRgbaf(m_meshFrontDiff);
 
 	update();
 }
@@ -331,7 +331,7 @@ void ccDisplaySettingsDlg::changeMeshBackDiffuseColor()
 
 	m_meshBackDiff = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, m_meshBackDiff);
-	m_parameters.meshBackDiff = ccColor::FromQColoraf(m_meshBackDiff);
+	m_parameters.meshBackDiff = ccColor::ToRgbaf(m_meshBackDiff);
 
 	update();
 }
@@ -344,7 +344,7 @@ void ccDisplaySettingsDlg::changeMeshSpecularColor()
 
 	m_meshSpecularColor = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, m_meshSpecularColor);
-	m_parameters.meshSpecular = ccColor::FromQColoraf(m_meshSpecularColor);
+	m_parameters.meshSpecular = ccColor::ToRgbaf(m_meshSpecularColor);
 
 	update();
 }
@@ -357,7 +357,7 @@ void ccDisplaySettingsDlg::changePointsColor()
 
 	m_pointsDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, m_pointsDefaultCol);
-	m_parameters.pointsDefaultCol = ccColor::FromQColora(m_pointsDefaultCol);
+	m_parameters.pointsDefaultCol = ccColor::ToRgba(m_pointsDefaultCol);
 
 	update();
 }
@@ -370,7 +370,7 @@ void ccDisplaySettingsDlg::changeBBColor()
 
 	m_bbDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, m_bbDefaultCol);
-	m_parameters.bbDefaultCol = ccColor::FromQColora(m_bbDefaultCol);
+	m_parameters.bbDefaultCol = ccColor::ToRgba(m_bbDefaultCol);
 
 	update();
 }
@@ -383,7 +383,7 @@ void ccDisplaySettingsDlg::changeTextColor()
 
 	m_textDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->textColorButton, m_textDefaultCol);
-	m_parameters.textDefaultCol = ccColor::FromQColora(m_textDefaultCol);
+	m_parameters.textDefaultCol = ccColor::ToRgba(m_textDefaultCol);
 
 	update();
 }
@@ -396,7 +396,7 @@ void ccDisplaySettingsDlg::changeBackgroundColor()
 
 	m_backgroundCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, m_backgroundCol);
-	m_parameters.backgroundCol = ccColor::FromQColor(m_backgroundCol);
+	m_parameters.backgroundCol = ccColor::ToRgb(m_backgroundCol);
 
 	update();
 }
@@ -409,7 +409,7 @@ void ccDisplaySettingsDlg::changeLabelBackgroundColor()
 
 	m_labelBackgroundCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, m_labelBackgroundCol);
-	m_parameters.labelBackgroundCol = ccColor::FromQColora(m_labelBackgroundCol);
+	m_parameters.labelBackgroundCol = ccColor::ToRgba(m_labelBackgroundCol);
 
 	update();
 }
@@ -422,7 +422,7 @@ void ccDisplaySettingsDlg::changeLabelMarkerColor()
 
 	m_labelMarkerCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, m_labelMarkerCol);
-	m_parameters.labelMarkerCol = ccColor::FromQColora(m_labelMarkerCol);
+	m_parameters.labelMarkerCol = ccColor::ToRgba(m_labelMarkerCol);
 
 	update();
 }

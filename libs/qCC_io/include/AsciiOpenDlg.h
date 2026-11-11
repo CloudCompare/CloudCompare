@@ -341,5 +341,8 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 	//! Identifies columns with numbers only [mandatory]
 	std::vector<ColumnType> m_columnType;
 
+	//! Identifies columns whose type was set by the user (they are not detected again when the table is refreshed)
+	std::vector<bool> m_columnSetByUser;
+
 	unsigned m_columnsCount;
 };

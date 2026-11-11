@@ -4793,6 +4793,8 @@ void MainWindow::doActionCutPursuit()
 				componentCount = PCP::Partition::LabelCutPursuitComponents(pc,
 				                                                           params,
 				                                                           componentLabels,
+																		   nullptr,
+																		   nullptr,
 				                                                           &pDlg,
 				                                                           theOctree.data());
 

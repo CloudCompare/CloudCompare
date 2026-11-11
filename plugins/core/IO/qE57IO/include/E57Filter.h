@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_E57_FILTER_HEADER
-#define CC_E57_FILTER_HEADER
-
-// qCC_IO
+// qCC_io
 #include <FileIOFilter.h>
 
 //! E57 filter (relies on E57format lib)
@@ -33,5 +32,3 @@ class E57Filter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_E57_FILTER_HEADER

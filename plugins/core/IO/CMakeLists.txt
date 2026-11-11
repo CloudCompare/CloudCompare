@@ -1,4 +1,5 @@
-add_subdirectory( MeshIO )
+# MeshIO is a git submodule: built only when it is checked out
+AddSubmodulePlugins( ${CMAKE_CURRENT_SOURCE_DIR}/MeshIO )
 add_subdirectory( qAdditionalIO )
 add_subdirectory( qCoreIO )
 add_subdirectory( qCSVMatrixIO )

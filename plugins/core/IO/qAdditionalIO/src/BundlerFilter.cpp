@@ -29,6 +29,7 @@
 #include <ccHObjectCaster.h>
 #include <ccImage.h>
 #include <ccLog.h>
+#include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -44,7 +45,6 @@
 // CCCoreLib
 #include <MeshSamplingTools.h>
 #include <PointProjectionTools.h>
-#include <ccMesh.h>
 
 // System
 #include <algorithm>

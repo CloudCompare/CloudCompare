@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>550</width>
-    <height>390</height>
+    <height>422</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,10 +35,10 @@
    <item>
     <widget class="QFrame" name="scalarFieldCardFrame">
      <property name="frameShape">
-      <enum>QFrame::Panel</enum>
+      <enum>QFrame::Shape::Panel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -115,7 +115,7 @@
       <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -173,10 +173,10 @@
       <item>
        <widget class="QFrame" name="advancedOptionFrame">
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Shadow::Raised</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="leftMargin">
@@ -281,6 +281,15 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="firstScalarFieldScaleSpinBox">
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>0.000001000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
                 <property name="value">
                  <double>1.000000000000000</double>
                 </property>
@@ -288,6 +297,15 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="secondScalarFieldScaleSpinBox">
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>0.000001000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
                 <property name="value">
                  <double>1.000000000000000</double>
                 </property>
@@ -295,6 +313,15 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="thirdScalarFieldScaleSpinBox">
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>0.000001000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
                 <property name="value">
                  <double>1.000000000000000</double>
                 </property>
@@ -312,13 +339,46 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="firstScalarFieldOffsetSpinBox"/>
+               <widget class="QDoubleSpinBox" name="firstScalarFieldOffsetSpinBox">
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="minimum">
+                 <double>-1000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="secondScalarFieldOffsetSpinBox"/>
+               <widget class="QDoubleSpinBox" name="secondScalarFieldOffsetSpinBox">
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="minimum">
+                 <double>-1000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="thirdScalarFieldOffsetSpinBox"/>
+               <widget class="QDoubleSpinBox" name="thirdScalarFieldOffsetSpinBox">
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="minimum">
+                 <double>-1000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000.000000000000000</double>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

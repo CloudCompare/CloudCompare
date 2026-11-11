@@ -7,17 +7,20 @@ find_package( Qt6
 get_target_property( qmake_location Qt6::qmake IMPORTED_LOCATION )
 get_filename_component( qt6_bin_dir ${qmake_location} DIRECTORY )
 
-if ( APPLE )
-	find_program( mac_deploy_qt macdeployqt HINTS "${qt6_bin_dir}" )
+if ( NOT OPTION_DEPLOY_QT )
+	# the applications are installed without their dependencies (see DeployQt)
+	if ( APPLE )
+		find_program( mac_deploy_qt macdeployqt HINTS "${qt6_bin_dir}" )
 
-	if( NOT EXISTS "${mac_deploy_qt}" )
-		message( FATAL_ERROR "macdeployqt not found in ${qt6_bin_dir}" )
-	endif()
-elseif( WIN32 )
-	find_program( win_deploy_qt windeployqt HINTS "${qt6_bin_dir}" )
+		if( NOT EXISTS "${mac_deploy_qt}" )
+			message( FATAL_ERROR "macdeployqt not found in ${qt6_bin_dir}" )
+		endif()
+	elseif( WIN32 )
+		find_program( win_deploy_qt windeployqt HINTS "${qt6_bin_dir}" )
 
-	if( NOT EXISTS "${win_deploy_qt}" )
-		message( FATAL_ERROR "windeployqt not found in ${qt6_bin_dir}" )
+		if( NOT EXISTS "${win_deploy_qt}" )
+			message( FATAL_ERROR "windeployqt not found in ${qt6_bin_dir}" )
+		endif()
 	endif()
 endif()
 
@@ -40,6 +43,12 @@ function( DeployQt )
 
 	# For readability
 	set( deploy_path "${DEPLOY_QT_DEPLOY_PATH}" )
+
+	if( NOT OPTION_DEPLOY_QT )
+		# The application is installed like on Linux (install_ext), its dependencies
+		# are found where they are installed (e.g. by a package manager)
+		return()
+	endif()
 
 	message( STATUS "Installing ${DEPLOY_QT_TARGET} to ${deploy_path}" )
 

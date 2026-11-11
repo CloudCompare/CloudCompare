@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CSV_MATRIX_FILTER_HEADER
-#define CC_CSV_MATRIX_FILTER_HEADER
-
 // qCC_io
 #include <FileIOFilter.h>
 
@@ -30,5 +29,3 @@ class CSVMatrixFilter : public FileIOFilter
 	// inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 };
-
-#endif // CC_CSV_MATRIX_FILTER_HEADER

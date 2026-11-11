@@ -272,6 +272,9 @@ Improvements:
 
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+		- slightly smarter auto-fill of the fields to reproduce the previous loading pattern. If 'apply all' was used when loading multiple
+			PLY files at once, even the SF selection will be restored. Else, only the properties selection will be restored, and all available
+			scalar fields will be added. This also fixes an issue when duplicate fields could be populated under certain conditions.
 		- at saving time, CC will not change the internal name of scalar fields that were already present in the input PLY file
 
 	- PCD format:
@@ -403,6 +406,11 @@ Improvements:
 	- Tools > Other > Compute geometric feature:
 		- faster computation of multiple geometric features (only one octree traversal)
 
+	- ASCII loading dialog
+		- the column types set by hand are now kept after changing the number of lines to skip, or when a header line appeared.
+		- CC now warns the user when a file has more columns than it can handle (only the first 512 columns are loaded,
+			the other ones were previously ignored silently)
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
@@ -416,8 +424,6 @@ Improvements:
 		- CloudCompare is now built upon Qt 6.
 		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
 		- point picking now works on mesh displayed with wireframe
-		- the ASCII loading dialog now warns the user when a file has more columns than it can handle
-			(only the first 512 columns are loaded, the other ones were previously ignored silently)
 		- the PoissonRecon library (used by the Poisson Surface reconstruction plugin) has been updated to version 18.76
 		- dxflib upgraded from version 3.17.0 to 3.26.4
 
@@ -485,7 +491,10 @@ Bug fixes:
 		(a VLR can describe at most 341 extra fields, so files with more fields have to use an EVLR).
 		If a file has both, the VLR is used and a warning is issued.
 	- LAS files: an extra field name of 32 characters (the maximum) was loaded with the field description appended to it
+	- LAS files: the VLR data kept in the cloud meta-data (and in each copy of it) was never released
 	- LAS 1.4 files: only the first 341 extra fields could be saved. The others are now saved too, described by an Extra Bytes EVLR.
+	- LAS files: the unused bytes of the Extra Bytes VLR header (the 'reserved' field and the end of the user ID) were saved uninitialized, while the LAS specification requires them to be 0
+	- LAS files: the copy of the VLRs (including the Extra Bytes VLR) made when saving a file was never released
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

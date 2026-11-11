@@ -20,11 +20,6 @@
 // Local
 #include "CSVMatrixOpenDialog.h"
 
-// Qt
-#include <QFile>
-#include <QFileInfo>
-#include <QTextStream>
-
 // qCC_db
 #include <ccHObject.h>
 #include <ccLog.h>
@@ -33,9 +28,13 @@
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 
-// System
-#include <assert.h>
-#include <string.h>
+// Qt
+#include <QChar>
+#include <QFile>
+#include <QImage>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
 
 // semi-persistent parameters
 static QChar  s_separator(',');
@@ -269,7 +268,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 							for (unsigned i = 0; i < colCount; ++i)
 							{
 								QRgb col = texture.pixel(static_cast<int>(i), static_cast<int>(j));
-								cloud->addColor(ccColor::FromQRgb(col));
+								cloud->addColor(ccColor::ToRgb(col));
 							}
 						}
 						cloud->showColors(true);

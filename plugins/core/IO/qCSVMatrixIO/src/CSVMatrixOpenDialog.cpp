@@ -17,7 +17,8 @@
 
 #include "CSVMatrixOpenDialog.h"
 
-#include "ccFileUtils.h"
+// qCC_io
+#include <ccFileUtils.h>
 
 // Qt
 #include <QFileDialog>

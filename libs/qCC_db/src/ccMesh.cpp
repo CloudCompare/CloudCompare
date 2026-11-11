@@ -2907,14 +2907,14 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 				QRgb pixel = texture.pixel(xPix, yPix);
 
-				color         = ccColor::FromQRgba(pixel);
+				color         = ccColor::ToRgba(pixel);
 				foundMaterial = true;
 			}
 		}
 		else
 		{
 			const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
-			color                         = ccColor::FromRgbafToRgba(diffuse);
+			color                         = ccColor::ToRgba(diffuse);
 
 			foundMaterial = true;
 		}
@@ -2957,7 +2957,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	if (!material->hasTexture())
 	{
 		const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
-		color                         = ccColor::FromRgbafToRgba(diffuse);
+		color                         = ccColor::ToRgba(diffuse);
 		return true;
 	}
 

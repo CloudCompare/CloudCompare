@@ -215,7 +215,7 @@ int ccCloudLayersHelper::applyClassColor(ccAsprsModel::AsprsItem& item, bool red
 		return 0;
 	}
 
-	ccColor::Rgba ccColor = ccColor::FromQColora(item.color);
+	ccColor::Rgba ccColor = ccColor::ToRgba(item.color);
 	ccColor.a = item.visible ? ccColor::MAX : 0;
 
 	ScalarType code = static_cast<ScalarType>(item.code);
@@ -265,7 +265,7 @@ int ccCloudLayersHelper::moveItem(const ccAsprsModel::AsprsItem& from, const ccA
 
 	ScalarType code = static_cast<ScalarType>(from.code);
 	ScalarType emptyCode = static_cast<ScalarType>(nullptr != to ? to->code : 0);
-	ccColor::Rgba color = (nullptr != to ? ccColor::FromQColora(to->color) : ccColor::black);
+	ccColor::Rgba color = (nullptr != to ? ccColor::ToRgba(to->color) : ccColor::black);
 
 	int affected = 0;
 	for (size_t i = 0; i < sf->size(); ++i)
@@ -381,7 +381,7 @@ void ccCloudLayersHelper::mouseMove(const CCVector2& center2D, PointCoordinateTy
 	ScalarType outputCode = static_cast<ScalarType>(m_parameters.output->code);
 
 	unsigned char alpha = (m_parameters.output->visible ? ccColor::MAX : 0);
-	ccColor::Rgba outputColor = ccColor::Rgba(ccColor::FromQColor(m_parameters.output->color), alpha);
+	ccColor::Rgba outputColor = ccColor::Rgba(ccColor::ToRgb(m_parameters.output->color), alpha);
 
 	unsigned cloudSize = m_cloud->size();
 	for (unsigned i = 0; i < cloudSize; ++i)

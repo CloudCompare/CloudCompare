@@ -1149,13 +1149,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 			// preferred dimension?
 			PointCoordinateType* preferredNormDir = nullptr;
 			PointCoordinateType* preferredUpDir   = nullptr;
+			ccGLMatrix           invLocalTrans; // must outlive the two pointers above
 			if (repeatDimensionsSum == 1)
 			{
 				for (int i = 0; i < 3; ++i)
 				{
 					if (repeatDimensions[i])
 					{
-						ccGLMatrix invLocalTrans = localTrans.inverse();
+						invLocalTrans = localTrans.inverse();
 						if (!projectOnBestFitPlane) // otherwise the normal will be automatically computed
 							preferredNormDir = invLocalTrans.getColumn(i);
 						preferredUpDir = invLocalTrans.getColumn(i < 2 ? 2 : 0);

@@ -83,6 +83,8 @@ elseif( OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI )
 				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput.cpp
 				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput_hid.h
 				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput_hid.cpp
+				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput_macDriver.h
+				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput_macDriver.cpp
 		)
 
 	target_include_directories( ${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR} )

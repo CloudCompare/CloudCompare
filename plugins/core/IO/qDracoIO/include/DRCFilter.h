@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_DRC_FILTER_HEADER
-#define CC_DRC_FILTER_HEADER
-
+// qCC_io
 #include <FileIOFilter.h>
 
 //! Draco compressed cloud and mesh file I/O filter
@@ -32,5 +32,3 @@ class DRCFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_DRC_FILTER_HEADER

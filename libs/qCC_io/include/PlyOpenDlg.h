@@ -24,6 +24,8 @@
 #include <QStringList>
 
 // System
+#include <array>
+#include <set>
 #include <vector>
 
 class QComboBox;
@@ -36,29 +38,28 @@ class PlyOpenDlg : public QDialog
 	Q_OBJECT
 
   public:
+	//! Default constructor
 	explicit PlyOpenDlg(QWidget* parent = nullptr);
 
+	//! Sets the items of the standard comboboxes (coordinates, color components, etc.)
 	void setDefaultComboItems(const QStringList& stdPropsText);
+	//! Sets the items of the list-related comboboxes (faces, etc.)
 	void setListComboItems(const QStringList& listPropsText);
+	//! Sets the items of the single-related comboboxes (texture index, etc.)
 	void setSingleComboItems(const QStringList& singlePropsText);
-
-	//! Standard comboboxes
-	std::vector<QComboBox*> m_standardCombos;
-	//! List-related comboboxes (faces, etc.)
-	std::vector<QComboBox*> m_listCombos;
-	//! Single-related comboboxes (texture index, etc.)
-	std::vector<QComboBox*> m_singleCombos;
-	//! SF comboboxes
-	std::vector<QComboBox*> m_sfCombos;
 
 	//! Returns whether the current configuration is valid or not
 	bool isValid(bool displayErrors = true) const;
 
+	//! Returns whether the user chose to apply the current configuration to all subsequent files
+	bool shouldApplyAll() const;
+
 	//! Restores the previously saved configuration (if any)
-	/** \param hasAPreviousContext returns whether a previous context is stored
+	/** \param restoredProps list of restored properties (if any)
+	    \param restoreSFs whether the SFs should be restored or not
 	    \return whether the previous context can be restored or not
 	**/
-	bool restorePreviousContext(bool& hasAPreviousContext);
+	bool restorePreviousContext(std::set<QString>& restoredProps, bool restoreSFs);
 
 	//! Resets the "apply all" flag (if set)
 	static void ResetApplyAll();
@@ -69,8 +70,8 @@ class PlyOpenDlg : public QDialog
 	**/
 	bool canBeSkipped() const;
 
-  public:
 	void addSFComboBox(int selectedIndex = 0);
+	void getSFPropIndexes(std::vector<int>& sfPropIndexes) const;
 
   protected:
 	void apply();
@@ -83,8 +84,16 @@ class PlyOpenDlg : public QDialog
   protected:
 	//! Saves current configuration (for internal use)
 	void saveContext(PlyLoadingContext* context);
-	//! Restore a previously saved configuration (for internal use)
-	bool restoreContext(PlyLoadingContext* context, int& unassignedProps, int& mismatchProps);
+
+  protected:
+	//! Standard comboboxes
+	std::array<QComboBox*, 10> m_standardCombos;
+	//! List-related comboboxes (faces, etc.)
+	std::array<QComboBox*, 2> m_listCombos;
+	//! Single-related comboboxes (texture index, etc.)
+	std::array<QComboBox*, 1> m_singleCombos;
+	//! SF comboboxes
+	std::vector<QComboBox*> m_sfCombos;
 
 	//! Standard comboboxes elements
 	QStringList m_stdPropsText;

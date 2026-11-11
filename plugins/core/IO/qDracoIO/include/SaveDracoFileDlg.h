@@ -17,10 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ui_saveDracoFileDlg.h"
+// Ui
+#include <ui_saveDracoFileDlg.h>
 
+// Qt
 #include <QDialog>
-#include <qCC_io.h>
 
 //! DRACO file (https://github.com/google/draco) saving dialog
 class SaveDracoFileDlg : public QDialog

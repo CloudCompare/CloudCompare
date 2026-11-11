@@ -21,8 +21,6 @@
 #include "ccRenderingTools.h"
 #include "ccXRayRenderer.h"
 
-#include <ccXRayDrawScope.h>
-
 // qCC_db
 #include <cc2DLabel.h>
 #include <ccClipBox.h>
@@ -33,6 +31,7 @@
 #include <ccPolyline.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccSubMesh.h>
+#include <ccXRayDrawScope.h>
 
 // CCFbo
 #include <ccFrameBufferObject.h>
@@ -5023,7 +5022,9 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 
 	auto* xRay = ccXRayRenderer::Prepare(*this);
 	if (xRay)
+	{
 		xRay->restoreScene();
+	}
 	const auto            xRaySettings = xRay ? xRay->settings() : ccXRaySettings();
 	const ccXRayDrawScope xRayScope(CONTEXT, xRaySettings.exposure, xRaySettings.reverse);
 	CONTEXT.textDefaultCol = ccXRayRenderer::TextColor(*this);
@@ -5035,7 +5036,9 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 
 	CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
 	if (xRay)
+	{
 		CONTEXT.drawingFlags |= CC_DRAW_XRAY_ENABLED;
+	}
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;

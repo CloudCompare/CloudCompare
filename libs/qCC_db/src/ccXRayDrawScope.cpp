@@ -45,11 +45,15 @@ ccXRayDrawScope::~ccXRayDrawScope()
 const ccXRayDrawScope* ccXRayDrawScope::Current(const ccGLDrawContext& context)
 {
 	if (!(context.drawingFlags & CC_DRAW_XRAY_ENABLED))
+	{
 		return nullptr;
+	}
 	for (auto* scope = s_current; scope; scope = scope->m_previous)
 	{
 		if (scope->m_display == context.display && scope->m_glContext == context.qGLContext)
+		{
 			return scope;
+		}
 	}
 	return nullptr;
 }

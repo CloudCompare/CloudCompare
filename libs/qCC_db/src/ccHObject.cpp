@@ -733,15 +733,16 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// are we currently drawing objects in 2D or 3D?
-	bool       draw3D   = MACRO_Draw3D(context);
-	const bool xRayPass = (context.drawingFlags & CC_DRAW_XRAY_PASS) != 0;
+	bool draw3D      = MACRO_Draw3D(context);
+	bool xRayPass    = (context.drawingFlags & CC_DRAW_XRAY_PASS) != 0;
+	bool xRayEnabled = (context.drawingFlags & CC_DRAW_XRAY_ENABLED) != 0;
 
 	// the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
 	// Keep the scene traversal (and parent transforms) in both passes. Only point
 	// clouds are submitted to the X-ray pass; picking uses the normal traversal.
 	bool drawGeometry = true;
-	if (draw3D && ((context.drawingFlags & CC_DRAW_XRAY_ENABLED) || xRayPass) && !MACRO_EntityPicking(context))
+	if (draw3D && (xRayEnabled || xRayPass) && !MACRO_EntityPicking(context))
 	{
 		const bool xRayCloud = isKindOf(CC_TYPES::POINT_CLOUD)
 		                       && static_cast<const ccPointCloud*>(this)->isXRayEnabled();
@@ -792,7 +793,9 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 				// cloud's points are deferred to the unlit X-ray pass.
 				auto* cloud = static_cast<ccPointCloud*>(this);
 				if (cloud->normalsAreDrawn())
+				{
 					cloud->drawNormalsAsLines(context);
+				}
 			}
 
 			// disable clipping planes (if any)

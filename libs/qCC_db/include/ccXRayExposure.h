@@ -37,13 +37,13 @@ namespace ccXRay
 		double maxY = -minX;
 		for (unsigned corner = 0; corner < 8; ++corner)
 		{
-			double position[4] = {0, 0, 0, 1};
+			double position[4]{0, 0, 0, 1};
 			for (unsigned axis = 0; axis < 3; ++axis)
 			{
 				position[axis] = (corner & (1 << axis)) ? maximum[axis] : minimum[axis];
 			}
-			double eye[4]  = {};
-			double clip[4] = {};
+			double eye[4]{};
+			double clip[4]{};
 			for (unsigned row = 0; row < 4; ++row)
 			{
 				for (unsigned col = 0; col < 4; ++col)

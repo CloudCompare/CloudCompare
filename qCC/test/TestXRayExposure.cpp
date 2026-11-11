@@ -39,8 +39,8 @@ static void ExpectNear(const char* name, double actual, double expected)
 
 int main()
 {
-	const double minimum[3] = {-0.5, -0.5, -2.0};
-	const double maximum[3] = {0.5, 0.5, -2.0};
+	const double minimum[3]{-0.5, -0.5, -2.0};
+	const double maximum[3]{0.5, 0.5, -2.0};
 	Matrix       view       = Identity();
 	Matrix       projection = Identity();
 	auto         area       = [&]()
@@ -72,9 +72,9 @@ int main()
 	view[14] = 2;
 	ExpectNear("eye-plane division is bounded", area(), 64);
 
-	view                   = Identity();
-	projection             = Identity();
-	const double point[3]  = {0, 0, 0};
+	view       = Identity();
+	projection = Identity();
+	const double point[3]{0, 0, 0};
 	const double pointArea = ccXRay::ProjectedAreaRatio(point, point, view.data(), projection.data());
 	if (!(pointArea > 0 && std::isfinite(pointArea)))
 	{

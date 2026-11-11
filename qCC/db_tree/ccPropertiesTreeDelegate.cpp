@@ -71,6 +71,7 @@
 #include <QLocale>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QSignalBlocker>
 #include <QSlider>
 #include <QSpinBox>
 #include <QStandardItemModel>
@@ -78,6 +79,7 @@
 
 // System
 #include <cassert>
+#include <cmath>
 
 class FilterMouseWheelNoFocusEvent : public QObject
 {
@@ -481,6 +483,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		auto*       item  = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
 		item->setToolTip(tr("Unlit point display. Adjust Xray settings in Display Settings. Temporarily inactive while EDL is enabled."));
 		appendRow(ITEM(tr("Xray")), item);
+		appendRow(ITEM(tr("Xray intensity")), PERSISTENT_EDITOR(OBJECT_CLOUD_XRAY_INTENSITY), true);
 	}
 
 	// Bounding-box
@@ -1525,6 +1528,49 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget*                    pare
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CLOUD_XRAY_INTENSITY:
+	{
+		QWidget* widget = new QWidget(parent);
+		widget->setObjectName(QStringLiteral("xRayIntensityEditor"));
+		auto* layout = new QHBoxLayout(widget);
+		layout->setContentsMargins(0, 0, 0, 0);
+		auto* slider = new QSlider(Qt::Horizontal, widget);
+		slider->setObjectName(QStringLiteral("xRayIntensitySlider"));
+		slider->setRange(0, 2000);
+		auto* spinBox = new QSpinBox(widget);
+		spinBox->setObjectName(QStringLiteral("xRayIntensityValue"));
+		spinBox->setRange(0, 1600);
+		layout->addWidget(slider, 1);
+		layout->addWidget(spinBox);
+		// The center is neutral (100); zero is a separate endpoint.
+		auto positionForValue = [](int value)
+		{
+			if (value <= 0)
+			{
+				return 0;
+			}
+			return value <= 100 ? qRound(1000.0 + 999.0 * std::log(value / 100.0) / std::log(100.0))
+			                    : qRound(1000.0 + 1000.0 * std::log(value / 100.0) / std::log(16.0));
+		};
+		connect(slider, &QSlider::valueChanged, widget, [spinBox](int position)
+		        {
+			        const int value = position == 0 ? 0 : position <= 1000
+			                                                  ? qRound(100.0 * std::pow(100.0, (position - 1000.0) / 999.0))
+			                                                  : qRound(100.0 * std::pow(16.0, (position - 1000.0) / 1000.0));
+			        spinBox->setValue(value); });
+		auto* delegate = const_cast<ccPropertiesTreeDelegate*>(this);
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), widget, [delegate, slider, positionForValue](int value)
+		        {
+			        const QSignalBlocker blocker(slider);
+			        slider->setValue(positionForValue(value));
+			        if (delegate->m_currentObject && delegate->m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+			        {
+				        static_cast<ccPointCloud*>(delegate->m_currentObject)->setXRayIntensity(value);
+				        delegate->updateDisplay();
+			        } });
+		outputWidget = widget;
+	}
+	break;
 	case OBJECT_IMAGE_ALPHA:
 	{
 		QSlider* slider = new QSlider(Qt::Horizontal, parent);
@@ -2108,6 +2154,23 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget* editor, const QModelIndex&
 		}
 		break;
 	}
+	case OBJECT_CLOUD_XRAY_INTENSITY:
+	{
+		auto* slider  = editor->findChild<QSlider*>(QStringLiteral("xRayIntensitySlider"));
+		auto* spinBox = editor->findChild<QSpinBox*>(QStringLiteral("xRayIntensityValue"));
+		auto* cloud   = ccHObjectCaster::ToPointCloud(m_currentObject);
+		if (slider && spinBox && cloud)
+		{
+			const int            value = cloud->xRayIntensity();
+			const QSignalBlocker sliderBlocker(slider);
+			const QSignalBlocker spinBlocker(spinBox);
+			spinBox->setValue(value);
+			slider->setValue(value == 0 ? 0 : value <= 100 ? qRound(1000.0 + 999.0 * std::log(value / 100.0) / std::log(100.0))
+			                                               : qRound(1000.0 + 1000.0 * std::log(value / 100.0) / std::log(16.0)));
+			editor->setEnabled(cloud->isXRayEnabled());
+		}
+		break;
+	}
 	case OBJECT_IMAGE_ALPHA:
 	{
 		QSlider* slider = qobject_cast<QSlider*>(editor);
@@ -2408,6 +2471,10 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem* item)
 		if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			static_cast<ccPointCloud*>(m_currentObject)->setXRayEnabled(item->checkState() == Qt::Checked);
+			if (auto* editor = m_view ? m_view->indexWidget(m_model->index(item->row() + 1, 1)) : nullptr)
+			{
+				editor->setEnabled(item->checkState() == Qt::Checked);
+			}
 			redraw = true;
 		}
 		break;

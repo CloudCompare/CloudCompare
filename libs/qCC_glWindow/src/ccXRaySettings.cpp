@@ -23,6 +23,8 @@
 #include <QColor>
 #include <QSettings>
 #include <QVariant>
+
+// System
 #include <algorithm>
 #include <cmath>
 
@@ -55,7 +57,9 @@ ccXRaySettings ccXRaySettings::Parameters(const ccGLWindowInterface* window)
 	{
 		const QVariant value = window->signalEmitter()->property(OVERRIDE_PROPERTY);
 		if (value.isValid())
+		{
 			return value.value<ccXRaySettings>();
+		}
 	}
 	return GlobalSettings();
 }
@@ -63,9 +67,13 @@ ccXRaySettings ccXRaySettings::Parameters(const ccGLWindowInterface* window)
 void ccXRaySettings::Set(const ccXRaySettings& settings, ccGLWindowInterface* window)
 {
 	if (window)
+	{
 		window->signalEmitter()->setProperty(OVERRIDE_PROPERTY, QVariant::fromValue(settings));
+	}
 	else
+	{
 		GlobalSettings() = settings;
+	}
 }
 
 void ccXRaySettings::ClearOverride(ccGLWindowInterface& window)
@@ -89,7 +97,9 @@ void ccXRaySettings::fromPersistentSettings()
 		{
 			QColor value(settings.value(key, QColor(color.r, color.g, color.b).name()).toString());
 			if (value.isValid())
+			{
 				color = ccColor::FromQColor(value);
+			}
 		};
 		loadColor("color", background.color);
 		loadColor("secondColor", background.secondColor);

@@ -33,10 +33,12 @@ class QCC_DB_LIB_API ccXRayDrawScope
 	ccXRayDrawScope& operator=(const ccXRayDrawScope&) = delete;
 
 	static const ccXRayDrawScope* Current(const ccGLDrawContext& context);
-	double                        exposure() const
+
+	double exposure() const
 	{
 		return m_exposure;
 	}
+
 	bool reverse() const
 	{
 		return m_reverse;

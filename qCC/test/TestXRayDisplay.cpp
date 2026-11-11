@@ -279,11 +279,17 @@ class TestXRayDisplay : public QObject
 	{
 		ccPointCloud cloud;
 		QVERIFY(!cloud.isXRayEnabled());
+		QCOMPARE(cloud.xRayIntensity(), 100);
 		QVERIFY(cloud.reserve(1));
 		cloud.addPoint(CCVector3(0, 0, 0));
 		cloud.setXRayEnabled(true);
+		cloud.setXRayIntensity(325);
 		std::unique_ptr<ccPointCloud> clone(cloud.cloneThis());
 		QVERIFY(clone && clone->isXRayEnabled());
+		QCOMPARE(clone->xRayIntensity(), 325);
+		clone->setXRayIntensity(1601);
+		QCOMPARE(clone->xRayIntensity(), 1600);
+		QCOMPARE(cloud.xRayIntensity(), 325);
 		clone->setXRayEnabled(false);
 		QVERIFY(cloud.isXRayEnabled());
 		QVERIFY(!clone->isXRayEnabled());
@@ -300,6 +306,7 @@ class TestXRayDisplay : public QObject
 		ccPointCloud                         loaded;
 		QVERIFY(loaded.fromFile(file, context));
 		QVERIFY(loaded.isXRayEnabled());
+		QCOMPARE(loaded.xRayIntensity(), 325);
 		QCOMPARE(loaded.size(), cloud.size());
 	}
 
@@ -373,6 +380,14 @@ class TestXRayDisplay : public QObject
 		QVERIFY(center(front).red() > 0);
 		QVERIFY(center(front).green() > 200); // opaque surface remains visible beneath X-ray
 		QVERIFY(front != baseline);
+		xray->setXRayIntensity(50);
+		QVERIFY(center(capture()).red() < center(front).red());
+		xray->setXRayIntensity(200);
+		QVERIFY(center(capture()).red() > center(front).red());
+		xray->setXRayIntensity(0);
+		QCOMPARE(center(capture()).red(), 0);
+		xray->setXRayIntensity(100);
+		QCOMPARE(capture(), front);
 		QVERIFY(window.resetXRayContext());
 		QVERIFY(!window.hasXRayResources());
 		QCOMPARE(capture(), front);
@@ -616,6 +631,14 @@ class TestXRayDisplay : public QObject
 		QCOMPARE(reverseRed.pixelColor(2, 2), QColor(Qt::white));
 		QCOMPARE(redLayer.red(), 255);
 		QVERIFY(redLayer.green() < 255 && redLayer.blue() < 255); // red, never cyan
+		xray->setXRayIntensity(50);
+		QVERIFY(center(capture()).green() > redLayer.green());
+		xray->setXRayIntensity(200);
+		QVERIFY(center(capture()).green() < redLayer.green());
+		xray->setXRayIntensity(0);
+		QCOMPARE(center(capture()), QColor(Qt::white));
+		xray->setXRayIntensity(100);
+		QCOMPARE(capture(), reverseRed);
 		secondCloud->setEnabled(true);
 		secondCloud->setColor(ccColor::Rgb(128, 64, 192));
 		xray->setVisible(false);

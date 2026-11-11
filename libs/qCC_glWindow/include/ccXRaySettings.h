@@ -28,13 +28,14 @@ struct CCGLWINDOW_LIB_API ccXRaySettings
 {
 	struct Background
 	{
-		ccColor::Rgb color;
-		ccColor::Rgb secondColor;
-		bool         gradient = false;
-		bool         operator==(const Background& other) const
+		bool operator==(const Background& other) const
 		{
 			return color == other.color && secondColor == other.secondColor && gradient == other.gradient;
 		}
+
+		ccColor::Rgb color;
+		ccColor::Rgb secondColor;
+		bool         gradient = false;
 	};
 
 	double     exposure = -3.0;

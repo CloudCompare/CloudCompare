@@ -21,37 +21,45 @@
 #include "ccGLWindowInterface.h"
 #include "ccGLWindowSignalEmitter.h"
 
-#include <algorithm>
+// CCFbo
 #include <ccFrameBufferObject.h>
 #include <ccGlFilter.h>
-#include <ccPointCloud.h>
 #include <ccShader.h>
 #include <ccXRayFilterSupport.h>
+
+// qCC_db
+#include <ccPointCloud.h>
+
+// System
+#include <algorithm>
 #include <cmath>
 
-namespace
+// Match the normal traversal: disabled parents hide their descendants, invisible
+// containers do not. This is a CPU flag check, with no extra drawing or allocation.
+static bool HasVisibleXRayCloud(const ccHObject* object, const ccGenericGLDisplay* display)
 {
-	// Match the normal traversal: disabled parents hide their descendants, invisible
-	// containers do not. This is a CPU flag check, with no extra drawing or allocation.
-	bool HasVisibleXRayCloud(const ccHObject* object, const ccGenericGLDisplay* display)
+	if (!object || !object->isEnabled())
 	{
-		if (!object || !object->isEnabled())
-			return false;
-		if (object->isVisible() && object->getDisplay() == display
-		    && object->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			const auto* cloud = static_cast<const ccPointCloud*>(object);
-			if (cloud->isXRayEnabled() && cloud->size() != 0)
-				return true;
-		}
-		for (unsigned i = 0; i < object->getChildrenNumber(); ++i)
-		{
-			if (HasVisibleXRayCloud(object->getChild(i), display))
-				return true;
-		}
 		return false;
 	}
-} // namespace
+	if (object->isVisible() && object->getDisplay() == display
+	    && object->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		const auto* cloud = static_cast<const ccPointCloud*>(object);
+		if (cloud->isXRayEnabled() && cloud->size() != 0)
+		{
+			return true;
+		}
+	}
+	for (unsigned i = 0; i < object->getChildrenNumber(); ++i)
+	{
+		if (HasVisibleXRayCloud(object->getChild(i), display))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 ccXRayRenderer::ccXRayRenderer(ccGLWindowInterface& window)
     : QObject(window.signalEmitter())
@@ -80,11 +88,15 @@ ccXRayRenderer* ccXRayRenderer::Prepare(ccGLWindowInterface& window)
 	if (!requested)
 	{
 		if (renderer)
+		{
 			renderer->release();
+		}
 		return nullptr;
 	}
 	if (!renderer)
+	{
 		renderer = new ccXRayRenderer(window);
+	}
 	renderer->m_settings = ccXRaySettings::Parameters(&window);
 	GLint viewport[4];
 	window.functions()->glGetIntegerv(GL_VIEWPORT, viewport);
@@ -112,7 +124,9 @@ void ccXRayRenderer::Destroy(ccGLWindowInterface& window)
 void ccXRayRenderer::restoreScene()
 {
 	if (m_xRaySceneValid && m_window.m_currentLODState.level > 0 && !m_window.m_stereoModeEnabled)
+	{
 		drawTexture(false);
+	}
 }
 
 ccColor::Rgba ccXRayRenderer::TextColor(const ccGLWindowInterface& window)
@@ -120,7 +134,9 @@ ccColor::Rgba ccXRayRenderer::TextColor(const ccGLWindowInterface& window)
 	const auto& parameters = window.getDisplayParameters();
 	const auto* renderer   = Find(window);
 	if (!renderer || !renderer->m_xRayFbo)
+	{
 		return parameters.textDefaultCol;
+	}
 	const auto& background = renderer->background();
 	auto        luminance  = [](const ccColor::Rgb& color)
 	{
@@ -140,7 +156,9 @@ ccColor::Rgba ccXRayRenderer::TextColor(const ccGLWindowInterface& window)
 		return std::min(ratio(top), ratio(bottom));
 	};
 	if (contrast(luminance(parameters.textDefaultCol)) >= 3.0)
+	{
 		return parameters.textDefaultCol;
+	}
 	return contrast(0.0) >= contrast(1.0) ? ccColor::black : ccColor::white;
 }
 
@@ -159,7 +177,9 @@ void ccXRayRenderer::release()
 bool ccXRayRenderer::init(int w, int h)
 {
 	if (m_xRayUnavailable || w <= 0 || h <= 0)
+	{
 		return false;
+	}
 	auto*                glFunc      = m_window.functions();
 	ccFrameBufferObject* previousFbo = m_window.m_activeFbo;
 	glFunc->glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
@@ -167,25 +187,29 @@ bool ccXRayRenderer::init(int w, int h)
 	bool success = true;
 	if (!m_xRayShader)
 	{
+		static const char* VertexShaderSource =
+		    "#version 120\n"
+		    "void main() { gl_Position = ftransform(); gl_TexCoord[0] = gl_MultiTexCoord0; }\n";
+
+		static const char* FragmentShaderSource =
+		    "#version 120\n"
+		    "uniform sampler2D uColor;\n"
+		    "uniform sampler2D uDepth;\n"
+		    "uniform bool uComposite;\n"
+		    "void main() {\n"
+		    "  vec4 color = texture2D(uColor, gl_TexCoord[0].xy);\n"
+		    "  if (uComposite) {\n"
+		    "    gl_FragColor = vec4(color.rgb, 1.0);\n"
+		    "    gl_FragDepth = gl_FragCoord.z;\n"
+		    "  } else {\n"
+		    "    gl_FragColor = color;\n"
+		    "    gl_FragDepth = texture2D(uDepth, gl_TexCoord[0].xy).r;\n"
+		    "  }\n"
+		    "}\n";
+
 		m_xRayShader = new ccShader();
-		success      = m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                                                        "#version 120\n"
-		                                                     "void main() { gl_Position = ftransform(); gl_TexCoord[0] = gl_MultiTexCoord0; }\n")
-		          && m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Fragment,
-		                                                   "#version 120\n"
-		                                                   "uniform sampler2D uColor;\n"
-		                                                   "uniform sampler2D uDepth;\n"
-		                                                   "uniform bool uComposite;\n"
-		                                                   "void main() {\n"
-		                                                   "  vec4 color = texture2D(uColor, gl_TexCoord[0].xy);\n"
-		                                                   "  if (uComposite) {\n"
-		                                                   "    gl_FragColor = vec4(color.rgb, 1.0);\n"
-		                                                   "    gl_FragDepth = gl_FragCoord.z;\n"
-		                                                   "  } else {\n"
-		                                                   "    gl_FragColor = color;\n"
-		                                                   "    gl_FragDepth = texture2D(uDepth, gl_TexCoord[0].xy).r;\n"
-		                                                   "  }\n"
-		                                                   "}\n")
+		success      = m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Vertex, VertexShaderSource)
+		          && m_xRayShader->addShaderFromSourceCode(QOpenGLShader::Fragment, FragmentShaderSource)
 		          && m_xRayShader->link();
 	}
 	if (success && (!m_xRayFbo || m_xRayFbo->width() != static_cast<unsigned>(w) || m_xRayFbo->height() != static_cast<unsigned>(h)))
@@ -231,7 +255,9 @@ void ccXRayRenderer::drawTexture(bool composite)
 	GLint clipPlaneCount = 0;
 	glFunc->glGetIntegerv(GL_MAX_CLIP_PLANES, &clipPlaneCount);
 	for (GLint plane = 0; plane < clipPlaneCount; ++plane)
+	{
 		glFunc->glDisable(GL_CLIP_PLANE0 + plane);
+	}
 	if (composite)
 	{
 		glFunc->glDisable(GL_DEPTH_TEST);
@@ -239,9 +265,13 @@ void ccXRayRenderer::drawTexture(bool composite)
 		glFunc->glEnable(GL_BLEND);
 		glFunc->glBlendEquation(GL_FUNC_ADD);
 		if (m_settings.reverse)
+		{
 			glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+		}
 		else
+		{
 			glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+		}
 	}
 	else
 	{
@@ -310,9 +340,13 @@ void ccXRayRenderer::draw(CC_DRAW_CONTEXT& context)
 	// Screen accumulates on black; Multiply accumulates on white. The point
 	// shader includes exposure and alpha in the corresponding blend factor.
 	if (m_settings.reverse)
+	{
 		glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+	}
 	else
+	{
 		glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+	}
 
 	// X-ray is recomputed against the latest opaque depth at every LOD update.
 	// It uses a compensated stride while moving and full density at rest, without
@@ -325,9 +359,13 @@ void ccXRayRenderer::draw(CC_DRAW_CONTEXT& context)
 	auto drawClouds                 = [&]()
 	{
 		if (m_window.m_globalDBRoot)
+		{
 			m_window.m_globalDBRoot->draw(xRayContext);
+		}
 		if (m_window.m_winDBRoot)
+		{
 			m_window.m_winDBRoot->draw(xRayContext);
+		}
 	};
 	drawClouds();
 	m_window.bindFBO(previousFbo);

@@ -3437,9 +3437,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	// color-based entity picking
 	bool        entityPickingMode = MACRO_EntityPicking(context);
-	const bool  xRayPass          = (context.drawingFlags & CC_DRAW_XRAY_PASS) && !entityPickingMode;
+	bool        xRayPass          = (context.drawingFlags & CC_DRAW_XRAY_PASS) && !entityPickingMode;
 	const auto* xRayState         = xRayPass ? ccXRayDrawScope::Current(context) : nullptr;
-	const bool  xRay              = xRayState != nullptr;
+	bool        xRayEnabled       = xRayState != nullptr;
 	if (xRayPass)
 	{
 		// X-ray accumulates color/density, without directional surface lighting.
@@ -3661,7 +3661,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// by default, we'll try to use a composite GLSL program (if possible)
 		QSharedPointer<QOpenGLShaderProgram> prog;
-		if ((xRay || false == s_normalLUTTextureFailed)
+		if ((xRayEnabled || false == s_normalLUTTextureFailed)
 		    && (false == s_globalVBOCreationFailed))
 		{
 			int attributes = ccGLSL::ATTR_POS_FLAG; // ccGLSL::ATTR_POS_FLAG == 0
@@ -3685,7 +3685,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				attributes |= ccGLSL::ATTR_PICK_FLAG;
 			}
-			else if (xRay)
+			else if (xRayEnabled)
 			{
 				attributes |= ccGLSL::ATTR_XRAY_FLAG;
 			}
@@ -3759,20 +3759,21 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool  displayDone  = false;
 		bool  useProgram   = (nullptr != prog);
 		float xRayStrength = 0.0f;
-		if (xRay)
+		if (xRayEnabled)
 		{
 			ccGLCameraParameters camera;
 			glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 			glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-			const ccBBox box        = getOwnBB();
-			const double minimum[3] = {box.minCorner().x, box.minCorner().y, box.minCorner().z};
-			const double maximum[3] = {box.maxCorner().x, box.maxCorner().y, box.maxCorner().z};
-			const double areaRatio  = box.isValid()
-			                              ? ccXRay::ProjectedAreaRatio(minimum, maximum, camera.modelViewMat.data(), camera.projectionMat.data())
-			                              : 1.0;
-			xRayStrength            = ccXRay::Strength(areaRatio, xRayState->exposure()) * toDisplay.decimStep;
+			const ccBBox box = getOwnBB();
+			const double minimum[3]{box.minCorner().x, box.minCorner().y, box.minCorner().z};
+			const double maximum[3]{box.maxCorner().x, box.maxCorner().y, box.maxCorner().z};
+			const double areaRatio = box.isValid()
+			                             ? ccXRay::ProjectedAreaRatio(minimum, maximum, camera.modelViewMat.data(), camera.projectionMat.data())
+			                             : 1.0;
+			xRayStrength           = ccXRay::Strength(areaRatio, xRayState->exposure()) * toDisplay.decimStep * (xRayIntensity() / 100.0f);
 		}
-		if (xRay && !useProgram)
+
+		if (xRayEnabled && !useProgram)
 		{
 			// Keep the cloud visible even when its accelerated shader/VBO setup fails.
 			static bool s_warned = false;
@@ -3788,7 +3789,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			for (unsigned j = 0; j < size(); j += toDisplay.decimStep)
 			{
 				if (visTableEnabled && m_pointsVisibility[j] != CCCoreLib::POINT_VISIBLE)
+				{
 					continue;
+				}
 				GLfloat color[4] = {baseColor[0], baseColor[1], baseColor[2], baseColor[3]};
 				if (glParams.showSF)
 				{
@@ -3796,23 +3799,31 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (!rgb)
 					{
 						if (!visTableEnabled)
+						{
 							continue;
+						}
 						rgb = &ccColor::lightGreyRGB;
 					}
 					for (unsigned c = 0; c < 3; ++c)
+					{
 						color[c] = rgb->rgb[c] / 255.0f;
+					}
 					color[3] = 1.0f;
 				}
 				else if (glParams.showColors)
 				{
 					const ccColor::Rgba& rgba = m_rgbaColors->getValue(j);
 					for (unsigned c = 0; c < 4; ++c)
+					{
 						color[c] = rgba.rgba[c] / 255.0f;
+					}
 				}
 				for (unsigned c = 0; c < 3; ++c)
+				{
 					color[c] = xRayState->reverse()
 					               ? 1.0f - std::clamp((1.0f - color[c]) * xRayStrength, 0.0f, 1.0f) * color[3]
 					               : std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
+				}
 				glFunc->glColor4fv(color);
 				ccGL::Vertex3v(glFunc, m_points[j].u);
 			}
@@ -4075,7 +4086,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				assert(prog);
 				prog->bind();
 
-				if (xRay)
+				if (xRayEnabled)
 				{
 					prog->setUniformValue("uXRayStrength", xRayStrength);
 					prog->setUniformValue("uXRayReverse", xRayState->reverse());

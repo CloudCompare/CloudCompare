@@ -305,6 +305,17 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	static const char* FragmentProgMainEndSrc =
 	    "}\n";
 
+	static const char* FragmentProgXRayAttributesSrc =
+	    "uniform float uXRayStrength;\n"
+	    "uniform bool uXRayReverse;\n";
+
+	// Exposure scales the blend contribution, not the source hue.
+	static const char* FragmentProgMainXRaySrc =
+	    "   if (uXRayReverse)\n"
+	    "      gl_FragColor.rgb = vec3(1.0) - clamp((vec3(1.0) - gl_FragColor.rgb) * uXRayStrength, 0.0, 1.0) * gl_FragColor.a;\n"
+	    "   else\n"
+	    "      gl_FragColor.rgb = clamp(gl_FragColor.rgb * uXRayStrength, 0.0, 1.0) * gl_FragColor.a;\n";
+
 	QString vertexProgSrc = VertexProgHeaderSrc;
 	{
 		// add attributes
@@ -388,8 +399,7 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 		fragmentProgSrc += FragmentProgColorAttributesSrc;
 		if (attributes & ATTR_XRAY_FLAG)
 		{
-			fragmentProgSrc += "uniform float uXRayStrength;\n";
-			fragmentProgSrc += "uniform bool uXRayReverse;\n";
+			fragmentProgSrc += FragmentProgXRayAttributesSrc;
 		}
 
 		// add attributes
@@ -428,11 +438,7 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 
 			if (attributes & ATTR_XRAY_FLAG)
 			{
-				// Exposure scales the blend contribution, not the source hue.
-				fragmentProgSrc += "   if (uXRayReverse)\n"
-				                   "      gl_FragColor.rgb = vec3(1.0) - clamp((vec3(1.0) - gl_FragColor.rgb) * uXRayStrength, 0.0, 1.0) * gl_FragColor.a;\n"
-				                   "   else\n"
-				                   "      gl_FragColor.rgb = clamp(gl_FragColor.rgb * uXRayStrength, 0.0, 1.0) * gl_FragColor.a;\n";
+				fragmentProgSrc += FragmentProgMainXRaySrc;
 			}
 			fragmentProgSrc += FragmentProgMainEndSrc;
 		}

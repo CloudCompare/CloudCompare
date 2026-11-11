@@ -338,6 +338,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 		m_ui->buttonWidget->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
+		m_columnSetByUser.clear();
 		return;
 	}
 
@@ -347,6 +348,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 
 	m_headerLine.clear(); // to force re-assignation of columns!
 	m_columnType.clear();
+	m_columnSetByUser.clear();
 
 	updateTable();
 }
@@ -386,6 +388,7 @@ void AsciiOpenDlg::updateTable()
 		{
 			m_ui->tableWidget->clear();
 			m_columnType.clear();
+			m_columnSetByUser.clear();
 			return;
 		}
 		m_stream = new QTextStream(&file);
@@ -423,6 +426,7 @@ void AsciiOpenDlg::updateTable()
 	{
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
+		m_columnSetByUser.clear();
 		m_columnsCount = 0;
 	}
 	m_ui->tableWidget->setRowCount(DISPLAYED_LINES + 1); //+1 for first line shifting
@@ -607,6 +611,7 @@ void AsciiOpenDlg::updateTable()
 		m_averageLineSize = -1.0;
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
+		m_columnSetByUser.clear();
 		return;
 	}
 
@@ -630,6 +635,7 @@ void AsciiOpenDlg::updateTable()
 			m_ui->tableWidget->removeColumn(--m_columnsCount);
 		if (m_columnType.size() > columnsCount)
 			m_columnType.resize(columnsCount, UNKNOWN);
+		m_columnSetByUser.resize(columnsCount, false);
 		for (unsigned i = lineCount + 1; i <= DISPLAYED_LINES; ++i)
 			m_ui->tableWidget->removeRow(i);
 	}
@@ -717,7 +723,8 @@ void AsciiOpenDlg::updateTable()
 				// once we open the file, we will get a %m_columnType with 5 values of "TEXT"
 				// then if we choose to skip the 3 first lines, we get a %valueIsNumber with 5 "true"
 				// but the %m_columnType is still with 5 values of "TEXT" which leads to the failure!
-				m_columnType[i] = UNKNOWN;
+				// (the columns set by the user are not detected again)
+				m_columnType[i] = m_columnSetByUser[i] ? VALID : UNKNOWN;
 			}
 		}
 	}
@@ -742,16 +749,50 @@ void AsciiOpenDlg::updateTable()
 		else if (!hadValidHeader)
 		{
 			m_ui->extractSFNamesFrom1stLineCheckBox->setChecked(true);
-			for (ColumnType& type : m_columnType)
-			{
-				if (type != TEXT)
-					type = UNKNOWN;
-			}
-			// std::fill(m_columnType.begin(), m_columnType.end(), UNKNOWN); //if the header has changed, we force update of all columns!
 		}
 
 		// first with the help of the header (if any)
 		bool labelColumnAssigned = false;
+
+		// the types set by the user are already assigned
+		for (unsigned i = 0; i < columnsCount; i++)
+		{
+			QComboBox* columnHeaderWidget = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
+			if (!m_columnSetByUser[i] || !columnHeaderWidget)
+			{
+				continue;
+			}
+			int type = columnHeaderWidget->currentIndex();
+			if (type >= ASCII_OPEN_DLG_X && type <= ASCII_OPEN_DLG_Z)
+			{
+				assignedXYZFlags |= (1u << (type - ASCII_OPEN_DLG_X));
+			}
+			else if (type >= ASCII_OPEN_DLG_NX && type <= ASCII_OPEN_DLG_NZ)
+			{
+				assignedNormFlags |= (1u << (type - ASCII_OPEN_DLG_NX));
+			}
+			else if (type >= ASCII_OPEN_DLG_R && type <= ASCII_OPEN_DLG_A)
+			{
+				assignedRGBFlags |= (1u << (type - ASCII_OPEN_DLG_R));
+			}
+			else if (type >= ASCII_OPEN_DLG_Rf && type <= ASCII_OPEN_DLG_Af)
+			{
+				assignedRGBFlags |= (1u << (type - ASCII_OPEN_DLG_Rf));
+			}
+			else if (type >= ASCII_OPEN_DLG_QuatX && type <= ASCII_OPEN_DLG_QuatZ)
+			{
+				assignedQuaternionFlags |= (1u << (type - ASCII_OPEN_DLG_QuatX));
+			}
+			else if (type == ASCII_OPEN_DLG_QuatW)
+			{
+				assignedQuaternionFlags |= W_BIT;
+			}
+			else if (type == ASCII_OPEN_DLG_Label)
+			{
+				labelColumnAssigned = true;
+			}
+		}
+
 		if (validHeader)
 		{
 			for (unsigned i = 0; i < columnsCount; i++)
@@ -928,7 +969,7 @@ void AsciiOpenDlg::updateTable()
 			{
 				if (m_columnType[i] == TEXT)
 				{
-					if (!labelColumnAssigned && columnsCount > 1 && approximateTotalLineCount < s_maxLabelCount)
+					if (!m_columnSetByUser[i] && !labelColumnAssigned && columnsCount > 1 && approximateTotalLineCount < s_maxLabelCount)
 					{
 						QComboBox* columnHeaderWidget = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
 						assert(columnHeaderWidget);
@@ -1440,6 +1481,11 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 		// we found the right element
 		if (changedCombo == combo)
 		{
+			if (i < m_columnSetByUser.size())
+			{
+				m_columnSetByUser[i] = true; // this column won't be detected again when the table is refreshed
+			}
+
 			if (index == int(ASCII_OPEN_DLG_X) || index == int(ASCII_OPEN_DLG_NX) || index == int(ASCII_OPEN_DLG_R) || index == int(ASCII_OPEN_DLG_Rf) || index == int(ASCII_OPEN_DLG_QuatW))
 			{
 				// Auto select the next columns type
@@ -1572,6 +1618,8 @@ void AsciiOpenDlg::resetColumnRoles()
 			combo->setCurrentIndex(0);
 		}
 	}
+	// the columns will be detected again when the table is refreshed
+	m_columnSetByUser.assign(m_columnSetByUser.size(), false);
 
 	checkSelectedColumnsValidity();
 }

@@ -17,7 +17,11 @@
 
 #include "../include/DRCFilter.h"
 
+// Local
 #include "../include/SaveDracoFileDlg.h"
+
+// CCCoreLib
+#include <CCGeom.h>
 
 // qCC_db
 #include <ccLog.h>
@@ -25,10 +29,7 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-// CCCoreLib
-#include <CCPlatform.h>
-
-// draco
+// Draco
 #include <draco/compression/decode.h>
 #include <draco/compression/encode.h>
 #include <draco/mesh/mesh.h>
@@ -424,7 +425,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 			for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(normalAttribute->size()); ++i)
 			{
 				draco::Vector3f n;
-				normalAttribute->GetValue(i, &n[0]);
+				normalAttribute->GetValue(i, n.data());
 				ccCloud.addNorm(CCVector3f::fromArray(n.data()));
 			}
 			ccCloud.showNormals(true);
@@ -452,7 +453,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 					std::array<uint8_t, 3> col;
 					for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(colorAttribute->size()); ++i)
 					{
-						colorAttribute->GetValue(i, &col[0]);
+						colorAttribute->GetValue(i, col.data());
 						ccCloud.addColor(ccColor::Rgb(col.data()));
 					}
 				}
@@ -461,7 +462,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 					std::array<uint8_t, 4> col;
 					for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(colorAttribute->size()); ++i)
 					{
-						colorAttribute->GetValue(i, &col[0]);
+						colorAttribute->GetValue(i, col.data());
 						ccCloud.addColor(ccColor::Rgba(col.data()));
 					}
 				}

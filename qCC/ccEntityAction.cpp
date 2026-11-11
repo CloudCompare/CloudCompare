@@ -1575,11 +1575,11 @@ namespace ccEntityAction
 							referenceCloud.addPointIndex(index);
 						}
 					}
-					ccPointCloud* pc = pc->partialClone(&referenceCloud);
-					if (pc)
+					ccPointCloud* clonedCloud = pc->partialClone(&referenceCloud);
+					if (clonedCloud)
 					{
-						pc->setName("class #" + QString::number(pointClass));
-						destObject->addChild(pc);
+						clonedCloud->setName("class #" + QString::number(pointClass));
+						destObject->addChild(clonedCloud);
 					}
 					else
 					{

@@ -13,6 +13,19 @@ target_link_libraries(TestPlyFilter
 
 add_test( NAME TestPlyFilter COMMAND TestPlyFilter )
 
+# ASCII open dialog tests
+add_executable( TestAsciiOpenDlg
+    TestAsciiOpenDlg.cpp
+)
+
+target_link_libraries( TestAsciiOpenDlg
+    PRIVATE
+        QCC_IO_LIB
+        Qt6::Test
+)
+
+add_test( NAME TestAsciiOpenDlg COMMAND TestAsciiOpenDlg )
+
 # File Round Trip tests
 add_executable( TestFileRoundTrip
     TestFileRoundTrip.cpp
@@ -38,6 +51,19 @@ target_link_libraries( TestDepthMapFilter
 )
 
 add_test( NAME TestDepthMapFilter COMMAND TestDepthMapFilter )
+
+# ASCII Filter tests
+add_executable( TestAsciiFilter
+    TestAsciiFilter.cpp
+)
+
+target_link_libraries( TestAsciiFilter
+    PRIVATE
+        QCC_IO_LIB
+        Qt6::Test
+)
+
+add_test( NAME TestAsciiFilter COMMAND TestAsciiFilter )
 
 # Shape files filter tests
 if ( OPTION_USE_SHAPE_LIB )

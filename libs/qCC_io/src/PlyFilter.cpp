@@ -40,6 +40,7 @@
 // System
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #if defined(CC_WINDOWS)
 #include <windows.h>
@@ -663,7 +664,8 @@ static int rgb_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		s_color.rgba[flags & POS_MASK] = static_cast<ColorCompType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
+		// round (instead of truncating), otherwise a color saved as 0.007843 (2/255) would be read back as 1
+		s_color.rgba[flags & POS_MASK] = static_cast<ColorCompType>(std::round(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX));
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:
@@ -713,7 +715,7 @@ static int grey_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		G = static_cast<ColorCompType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
+		G = static_cast<ColorCompType>(std::round(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX));
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:

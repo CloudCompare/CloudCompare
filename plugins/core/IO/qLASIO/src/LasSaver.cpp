@@ -80,7 +80,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 	else if (totalExtraByteSize > 0)
 	{
 		size_t      newNumVlrs = m_laszipHeader.number_of_variable_length_records + 1;
-		laszip_vlr* vlrs       = new laszip_vlr_struct[newNumVlrs];
+		laszip_vlr* vlrs       = new laszip_vlr_struct[newNumVlrs](); // zero-initialized, as the LAS specification requires the unused bytes of a VLR header (reserved, end of the user ID) to be 0
 		// Move already existing vlrs
 		for (size_t i = 0; i < m_laszipHeader.number_of_variable_length_records; i++)
 		{
@@ -88,7 +88,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 		}
 		LasExtraScalarField::InitExtraBytesVlr(vlrs[newNumVlrs - 1], parameters.extraFields);
 
-		delete m_laszipHeader.vlrs;
+		delete[] m_laszipHeader.vlrs;
 		m_laszipHeader.vlrs                              = vlrs;
 		m_laszipHeader.number_of_variable_length_records = static_cast<laszip_U32>(newNumVlrs);
 

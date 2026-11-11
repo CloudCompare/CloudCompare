@@ -15,16 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "E57Filter.h"
-
-#include "FileIO.h"
+#include "../include/E57Filter.h"
 
 // Local
-#include "E57Header.h"
-#include "E57Version.h"
-
-// libE57Format
-#include <E57Format.h>
+#include "../include/E57Header.h"
 
 // qCC_db
 #include <ccCameraSensor.h>
@@ -35,13 +29,21 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
+// qCC_io
+#include <FileIO.h>
+
 // Qt
 #include <QApplication>
 #include <QBuffer>
 #include <QUuid>
 
-// system
+// libE57Format
+#include <E57Format.h>
+#include <E57Version.h>
+
+// System
 #include <cassert>
+#include <memory>
 #include <string>
 
 using colorFieldType = double;
@@ -114,10 +116,8 @@ QString GetStringFromNode(const e57::StructureNode& node, const char* fieldName,
 	{
 		return QString::fromStdString(e57::StringNode(node.get(fieldName)).value());
 	}
-	else
-	{
-		return defaultValue;
-	}
+
+	return defaultValue;
 }
 
 void AddToE57NodeMap(E57NodeMap& nodeMap, const e57::StructureNode& node, const char* fieldName)
@@ -788,7 +788,7 @@ void SaveImage(const ccImage*    image,
 	}
 
 	// Create pose structure for image (if any)
-	const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
+	const ccCameraSensor* sensor = image->getAssociatedSensor();
 	{
 		ccGLMatrixd toSensorCS; // 'Sensor' output coordinate system (no Global Shift applied)
 		toSensorCS.toIdentity();
@@ -969,7 +969,7 @@ void SaveImage(const ccImage*    image,
 
 	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentationNode);
 	images2D.append(imageNode);
-	blob.write((uint8_t*)ba.data(), 0, static_cast<size_t>(imageSize));
+	blob.write(reinterpret_cast<uint8_t*>(ba.data()), 0, static_cast<size_t>(imageSize));
 }
 
 CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
@@ -1052,7 +1052,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 		if (parameters.parentWidget)
 		{
-			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+			progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 			progressDlg->setAutoClose(false);
 		}
 		s_cancelRequestedByUser = false;
@@ -1060,7 +1060,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		// Extension for normals
 		bool hasNormals = false;
 
-		for (auto cloud : scans)
+		for (auto* cloud : scans)
 		{
 			QString scanGUID = GetNewGuid();
 
@@ -1307,17 +1307,15 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
-		else
+
+		try
 		{
-			try
-			{
-				NodeToConsole(s.get(childName));
-			}
-			catch (e57::E57Exception& ex)
-			{
-				ex.report(__FILE__, __LINE__, __FUNCTION__);
-				return false;
-			}
+			NodeToConsole(s.get(childName));
+		}
+		catch (e57::E57Exception& ex)
+		{
+			ex.report(__FILE__, __LINE__, __FUNCTION__);
+			return false;
 		}
 	}
 	else if (node.type() == e57::TypeVector)
@@ -1328,17 +1326,15 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
-		else
+
+		try
 		{
-			try
-			{
-				NodeToConsole(v.get(childName));
-			}
-			catch (e57::E57Exception& ex)
-			{
-				ex.report(__FILE__, __LINE__, __FUNCTION__);
-				return false;
-			}
+			NodeToConsole(v.get(childName));
+		}
+		catch (e57::E57Exception& ex)
+		{
+			ex.report(__FILE__, __LINE__, __FUNCTION__);
+			return false;
 		}
 	}
 	else
@@ -1484,7 +1480,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 		if (proto.get("timeStamp").type() == e57::TypeInteger)
 			header.pointFields.timeMaximum = static_cast<double>(e57::IntegerNode(proto.get("timeStamp")).maximum());
 		else if (proto.get("timeStamp").type() == e57::TypeFloat)
-			header.pointFields.timeMaximum = static_cast<double>(e57::FloatNode(proto.get("timeStamp")).maximum());
+			header.pointFields.timeMaximum = e57::FloatNode(proto.get("timeStamp")).maximum();
 	}
 
 	header.pointFields.intensityField          = proto.isDefined("intensity");
@@ -1812,7 +1808,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				int64_t                   groupCount = groups.childCount(); // total number of groups
 
 				e57::StringNode idElementName(groupingByLine.get("idElementName"));
-				if (idElementName.value().compare("columnIndex") == 0)
+				if (idElementName.value() == "columnIndex")
 				{
 					bColumnIndex = true;
 				}
@@ -2370,7 +2366,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		delete cloud;
 		return {};
 	}
-	else if (realCount < pointCount)
+	if (realCount < pointCount)
 	{
 		if ((realCount + invalidCount) != pointCount)
 		{
@@ -2565,8 +2561,12 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		return {};
 	}
 
-	uint8_t* imageBits = new uint8_t[cameraRepresentation->imageSize];
-	if (!imageBits)
+	std::vector<uint8_t> imageBits;
+	try
+	{
+		imageBits.resize(static_cast<size_t>(cameraRepresentation->imageSize));
+	}
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[E57] Not enough memory to load image!");
 		return {};
@@ -2622,7 +2622,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	{
 		assert(cameraRepresentationNode.isDefined("jpegImage"));
 		e57::BlobNode jpegImage(cameraRepresentationNode.get("jpegImage"));
-		jpegImage.read(imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
+		jpegImage.read(imageBits.data(), 0, imageBits.size());
 		break;
 	}
 	case E57_PNG_IMAGE:
@@ -2630,7 +2630,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		strcpy(imageFormat, "png");
 		assert(cameraRepresentationNode.isDefined("pngImage"));
 		e57::BlobNode pngImage(cameraRepresentationNode.get("pngImage"));
-		pngImage.read((uint8_t*)imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
+		pngImage.read(imageBits.data(), 0, imageBits.size());
 		break;
 	}
 	default:
@@ -2649,18 +2649,15 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 
 	QImage qImage;
-	assert(imageBits);
-	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), imageFormat);
+	assert(!imageBits.empty());
+	bool loadResult = qImage.loadFromData(imageBits.data(), static_cast<int>(imageBits.size()), imageFormat);
 
 	// a bug in some 2.13.alpha versions was causing CC to save JPEG images declared as PNG images :(
 	if (!loadResult && cameraRepresentation->imageType == E57_PNG_IMAGE)
 	{
-		loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), "jpegImage");
+		loadResult = qImage.loadFromData(imageBits.data(), static_cast<int>(imageBits.size()), "jpegImage");
 		ccLog::Warning("[E57] JPG image was wrongly tagged as PNG. You should save this E57 again to fix this...");
 	}
-
-	delete[] imageBits;
-	imageBits = nullptr;
 
 	if (!loadResult)
 	{
@@ -2804,7 +2801,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 			if (parameters.parentWidget)
 			{
-				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+				progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 				progressDlg->setAutoClose(false);
 			}
 
@@ -2904,7 +2901,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 				if (parameters.parentWidget)
 				{
-					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+					progressDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 					progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
 					progressDlg->setInfo(QObject::tr("Images: %1").arg(imageCount));
 					progressDlg->start();

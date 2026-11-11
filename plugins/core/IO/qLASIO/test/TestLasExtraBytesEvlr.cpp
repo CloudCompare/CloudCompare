@@ -1,10 +1,12 @@
 #include <LasDetails.h>
 #include <LasExtraScalarField.h>
 #include <LasSaver.h>
+#include <LasScalarField.h>
 
 // qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 // Qt
 #include <QFileInfo>
@@ -14,6 +16,7 @@
 
 // System
 #include <cstring>
+#include <vector>
 
 // laszip
 #include <laszip/laszip_api.h>
@@ -302,6 +305,61 @@ class TestLasExtraBytesEvlr : public QObject
 			float value = 0.0f;
 			std::memcpy(&value, point->extra_bytes + last.byteOffset, sizeof(float));
 			QCOMPARE(value, fieldCount - 1 + 0.25f * i);
+		}
+
+		laszip_close_reader(reader);
+		laszip_destroy(reader);
+	}
+
+	void scanAngleRankOnly()
+	{
+		// the scan angle rank must not be written in the user data as well
+		const std::vector<float> angles{-10.0f, 5.0f, 20.0f, -30.0f};
+
+		ccPointCloud cloud;
+		QVERIFY(cloud.reserve(static_cast<unsigned>(angles.size())));
+		for (size_t i = 0; i < angles.size(); ++i)
+		{
+			cloud.addPoint(CCVector3(static_cast<PointCoordinateType>(i), 0, 0));
+		}
+		const int sfIndex = cloud.addScalarField(LasNames::ScanAngleRank);
+		QVERIFY(sfIndex >= 0);
+		ccScalarField::Shared sf = cloud.getCCScalarField(sfIndex);
+		for (size_t i = 0; i < angles.size(); ++i)
+		{
+			sf->setValue(static_cast<unsigned>(i), angles[i]);
+		}
+		sf->computeMinAndMax();
+
+		LasSaver::Parameters params;
+		params.versionMinor = 2;
+		params.pointFormat  = 1;
+		params.lasScale     = CCVector3d(0.001, 0.001, 0.001);
+		params.standardFields.emplace_back(LasScalarField::ScanAngleRank, sf);
+
+		QTemporaryDir dir;
+		const QString fileName = dir.filePath("test.las");
+		{
+			LasSaver saver(cloud, params);
+			QCOMPARE(saver.open(fileName), CC_FERR_NO_ERROR);
+			for (size_t i = 0; i < angles.size(); ++i)
+			{
+				QCOMPARE(saver.saveNextPoint(), CC_FERR_NO_ERROR);
+			}
+			QCOMPARE(saver.close(), CC_FERR_NO_ERROR);
+		}
+
+		laszip_POINTER reader{nullptr};
+		QVERIFY(laszip_create(&reader) == 0);
+		laszip_BOOL isCompressed{false};
+		QVERIFY(laszip_open_reader(reader, qUtf8Printable(fileName), &isCompressed) == 0);
+		laszip_point* point{nullptr};
+		laszip_get_point_pointer(reader, &point);
+		for (float angle : angles)
+		{
+			QVERIFY(laszip_read_point(reader) == 0);
+			QCOMPARE(point->scan_angle_rank, static_cast<laszip_I8>(angle));
+			QCOMPARE(point->user_data, static_cast<laszip_U8>(0));
 		}
 
 		laszip_close_reader(reader);

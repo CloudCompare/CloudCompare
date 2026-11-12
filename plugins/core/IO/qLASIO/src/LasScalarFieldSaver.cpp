@@ -107,6 +107,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 			{
 				point.scan_angle_rank = static_cast<laszip_I8>(value);
 			}
+			break;
 		case LasScalarField::UserData:
 			if (field.sf)
 			{

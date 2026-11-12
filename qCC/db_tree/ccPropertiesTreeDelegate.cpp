@@ -477,15 +477,6 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow(ITEM(tr("Colors")), PERSISTENT_EDITOR(OBJECT_COLOR_SOURCE), true);
 	}
 
-	if (_obj->isKindOf(CC_TYPES::POINT_CLOUD))
-	{
-		const auto* cloud = static_cast<const ccPointCloud*>(_obj);
-		auto*       item  = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
-		item->setToolTip(tr("Unlit point display. Adjust Xray settings in Display Settings. Temporarily inactive while EDL is enabled."));
-		appendRow(ITEM(tr("Xray")), item);
-		appendRow(ITEM(tr("Xray intensity")), PERSISTENT_EDITOR(OBJECT_CLOUD_XRAY_INTENSITY), true);
-	}
-
 	// Bounding-box
 	{
 		ccBBox box;
@@ -608,6 +599,15 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	if (_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
 		const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+
+		// x-ray mode
+		{
+			addSeparator(tr("X-ray mode"));
+			auto* item = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
+			item->setToolTip(tr("Unlit point display. Adjust X-ray settings in Display Settings. Temporarily inactive while EDL is enabled."));
+			appendRow(ITEM(tr("X-ray enabled")), item);
+			appendRow(ITEM(tr("Intensity")), PERSISTENT_EDITOR(OBJECT_CLOUD_XRAY_INTENSITY), true);
+		}
 
 		// scan grid(s)
 		size_t gridCount = cloud->gridCount();

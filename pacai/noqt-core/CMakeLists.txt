@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.21)
+project(PacaiCloudCompareCoreAudit LANGUAGES CXX)
+
+option(PACAI_ENABLE_TBB "Build CCCoreLib with oneTBB parallel support" ON)
+set(PACAI_CCCORELIB_SOURCE_DIR "" CACHE PATH "Path to the initialized CCCoreLib submodule")
+
+if(NOT PACAI_CCCORELIB_SOURCE_DIR)
+    message(FATAL_ERROR
+        "Set PACAI_CCCORELIB_SOURCE_DIR to libs/qCC_db/extern/CCCoreLib")
+endif()
+
+if(NOT EXISTS "${PACAI_CCCORELIB_SOURCE_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+        "CCCoreLib CMakeLists.txt not found at: ${PACAI_CCCORELIB_SOURCE_DIR}. "
+        "Initialize the CCCoreLib submodule first.")
+endif()
+
+# Enforce the product policy before adding the upstream project.
+set(CCCORELIB_USE_QT_CONCURRENT OFF CACHE BOOL
+    "Pacai forbids QtConcurrent" FORCE)
+set(CCCORELIB_USE_CGAL OFF CACHE BOOL
+    "CGAL is not part of the initial core isolation POC" FORCE)
+
+if(PACAI_ENABLE_TBB)
+    find_package(TBB 2022.0.0 COMPONENTS tbb CONFIG REQUIRED)
+    set(CCCORELIB_USE_TBB ON CACHE BOOL
+        "Use oneTBB instead of QtConcurrent" FORCE)
+else()
+    set(CCCORELIB_USE_TBB OFF CACHE BOOL
+        "Serial no-Qt isolation build" FORCE)
+endif()
+
+add_subdirectory("${PACAI_CCCORELIB_SOURCE_DIR}"
+                 "${CMAKE_BINARY_DIR}/cccorelib")
+
+if(CCCORELIB_USE_QT_CONCURRENT)
+    message(FATAL_ERROR "Pacai policy violation: CCCORELIB_USE_QT_CONCURRENT is ON")
+endif()
+
+if(NOT TARGET CCCoreLib)
+    message(FATAL_ERROR "Expected upstream target CCCoreLib was not created")
+endif()
+
+message(STATUS "Pacai no-Qt CCCoreLib audit target configured")
+message(STATUS "CCCORELIB_USE_QT_CONCURRENT=${CCCORELIB_USE_QT_CONCURRENT}")
+message(STATUS "CCCORELIB_USE_TBB=${CCCORELIB_USE_TBB}")

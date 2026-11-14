@@ -524,10 +524,10 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	bool isXRayEnabled() const;
 	//! Sets whether X-ray display is enabled or not.
 	void setXRayEnabled(bool enabled);
-	//! X-ray contribution, where 100 preserves the default appearance.
-	int xRayIntensity() const;
-	//! Sets the X-ray contribution, where 100 preserves the default appearance.
-	void setXRayIntensity(int value);
+	//! Returns the X-ray exposure override (or NaN if none).
+	double xRayExposureOverride() const;
+	//! Sets the X-ray exposure override (NaN to disable).
+	void setXRayExposureOverride(double value);
 
   public: // other methods
 	//! Returns the cloud gravity center

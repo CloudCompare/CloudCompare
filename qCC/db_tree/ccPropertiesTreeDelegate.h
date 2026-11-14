@@ -115,7 +115,7 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 		OBJECT_CLOUD_DRAW_NORMALS,
 		OBJECT_CLOUD_USE_LOD,
 		OBJECT_CLOUD_XRAY,
-		OBJECT_CLOUD_XRAY_INTENSITY,
+		OBJECT_CLOUD_XRAY_EXPOSURE,
 	};
 
 	//! Default constructor

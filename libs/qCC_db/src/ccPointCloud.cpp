@@ -55,9 +55,9 @@
 #include <memory>
 #include <queue>
 
-static const char s_deviationSFName[]       = "Deviation";
-static const char s_xRayEnabledMetaData[]   = "CloudCompare.XRay.Enabled";
-static const char s_xRayIntensityMetaData[] = "CloudCompare.XRay.Intensity";
+static const char s_deviationSFName[]              = "Deviation";
+static const char s_xRayEnabledMetaData[]          = "CloudCompare.XRay.Enabled";
+static const char s_xRayExposureOverrideMetaData[] = "CloudCompare.XRay.ExposureOverride";
 
 // 'Draw normals' shader program
 static QSharedPointer<QOpenGLShaderProgram> s_programDrawNormals;
@@ -3773,8 +3773,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				                                               camera.projectionMat);
 			}
 
-			xRayStrength = ccXRayExposure::Strength(areaRatio, xRayState->exposure());
-			xRayStrength *= toDisplay.decimStep * (xRayIntensity() / 100.0f);
+			double exposure         = xRayState->exposure();
+			double exposureOverride = xRayExposureOverride();
+			if (!std::isnan(exposureOverride))
+			{
+				exposure = exposureOverride;
+			}
+			xRayStrength = toDisplay.decimStep * ccXRayExposure::Strength(areaRatio, exposure);
 		}
 
 		if (xRayEnabled && !useProgram)
@@ -7718,22 +7723,27 @@ void ccPointCloud::setXRayEnabled(bool enabled)
 		removeMetaData(s_xRayEnabledMetaData);
 }
 
-int ccPointCloud::xRayIntensity() const
+double ccPointCloud::xRayExposureOverride() const
 {
-	bool valid = false;
-	int  value = getMetaData(s_xRayIntensityMetaData).toInt(&valid);
-	return valid ? std::max(0, std::min(1600, value)) : 100;
+	bool   valid = false;
+	double value = 0.0;
+
+	if (hasMetaData(s_xRayExposureOverrideMetaData))
+	{
+		value = getMetaData(s_xRayExposureOverrideMetaData).toDouble(&valid);
+	}
+
+	return valid ? value : std::numeric_limits<double>::quiet_NaN();
 }
 
-void ccPointCloud::setXRayIntensity(int value)
+void ccPointCloud::setXRayExposureOverride(double value)
 {
-	value = std::max(0, std::min(1600, value));
-	if (value == 100)
+	if (std::isnan(value))
 	{
-		removeMetaData(s_xRayIntensityMetaData);
+		removeMetaData(s_xRayExposureOverrideMetaData);
 	}
 	else
 	{
-		setMetaData(s_xRayIntensityMetaData, value);
+		setMetaData(s_xRayExposureOverrideMetaData, value);
 	}
 }

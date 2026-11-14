@@ -284,17 +284,17 @@ class TestXRayDisplay : public QObject
 	{
 		ccPointCloud cloud;
 		QVERIFY(!cloud.isXRayEnabled());
-		QCOMPARE(cloud.xRayIntensity(), 100);
+		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
 		QVERIFY(cloud.reserve(1));
 		cloud.addPoint(CCVector3(0, 0, 0));
 		cloud.setXRayEnabled(true);
-		cloud.setXRayIntensity(325);
+		cloud.setXRayExposureOverride(7.1);
 		std::unique_ptr<ccPointCloud> clone(cloud.cloneThis());
 		QVERIFY(clone && clone->isXRayEnabled());
-		QCOMPARE(clone->xRayIntensity(), 325);
-		clone->setXRayIntensity(1601);
-		QCOMPARE(clone->xRayIntensity(), 1600);
-		QCOMPARE(cloud.xRayIntensity(), 325);
+		QCOMPARE(clone->xRayExposureOverride(), 7.1);
+		clone->setXRayExposureOverride(-3.2);
+		QCOMPARE(clone->xRayExposureOverride(), -3.2);
+		QCOMPARE(cloud.xRayExposureOverride(), 7.1);
 		clone->setXRayEnabled(false);
 		QVERIFY(cloud.isXRayEnabled());
 		QVERIFY(!clone->isXRayEnabled());
@@ -311,7 +311,7 @@ class TestXRayDisplay : public QObject
 		ccPointCloud                         loaded;
 		QVERIFY(loaded.fromFile(file, context));
 		QVERIFY(loaded.isXRayEnabled());
-		QCOMPARE(loaded.xRayIntensity(), 325);
+		QCOMPARE(loaded.xRayExposureOverride(), 7.1);
 		QCOMPARE(loaded.size(), cloud.size());
 	}
 
@@ -385,13 +385,13 @@ class TestXRayDisplay : public QObject
 		QVERIFY(center(front).red() > 0);
 		QVERIFY(center(front).green() > 200); // opaque surface remains visible beneath X-ray
 		QVERIFY(front != baseline);
-		xray->setXRayIntensity(50);
+		xray->setXRayExposureOverride(-4.0);
 		QVERIFY(center(capture()).red() < center(front).red());
-		xray->setXRayIntensity(200);
+		xray->setXRayExposureOverride(0.0);
 		QVERIFY(center(capture()).red() > center(front).red());
-		xray->setXRayIntensity(0);
+		xray->setXRayExposureOverride(-8.0);
 		QCOMPARE(center(capture()).red(), 0);
-		xray->setXRayIntensity(100);
+		xray->setXRayExposureOverride(std::numeric_limits<double>::quiet_NaN());
 		QCOMPARE(capture(), front);
 		QVERIFY(window.resetXRayContext());
 		QVERIFY(!window.hasXRayResources());
@@ -636,13 +636,13 @@ class TestXRayDisplay : public QObject
 		QCOMPARE(reverseRed.pixelColor(2, 2), Qt::white);
 		QCOMPARE(redLayer.red(), 255);
 		QVERIFY(redLayer.green() < 255 && redLayer.blue() < 255); // red, never cyan
-		xray->setXRayIntensity(50);
+		xray->setXRayExposureOverride(-4.0);
 		QVERIFY(center(capture()).green() > redLayer.green());
-		xray->setXRayIntensity(200);
+		xray->setXRayExposureOverride(0.0);
 		QVERIFY(center(capture()).green() < redLayer.green());
-		xray->setXRayIntensity(0);
+		xray->setXRayExposureOverride(-8.0);
 		QCOMPARE(center(capture()), Qt::white);
-		xray->setXRayIntensity(100);
+		xray->setXRayExposureOverride(std::numeric_limits<double>::quiet_NaN());
 		QCOMPARE(capture(), reverseRed);
 		secondCloud->setEnabled(true);
 		secondCloud->setColor(ccColor::Rgb(128, 64, 192));

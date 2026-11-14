@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#pragma once
-
 #include "qCC_db.h"
+
 struct ccGLDrawContext;
 class ccGenericGLDisplay;
 class QOpenGLContext;
@@ -27,27 +28,34 @@ class QOpenGLContext;
 class QCC_DB_LIB_API ccXRayDrawScope
 {
   public:
+	//! Constructor
 	ccXRayDrawScope(const ccGLDrawContext& context, double exposure, bool reverse);
+	//! Destructor
 	~ccXRayDrawScope();
+
+	// Deleted copy constructor and assignment operator to prevent copying
 	ccXRayDrawScope(const ccXRayDrawScope&)            = delete;
 	ccXRayDrawScope& operator=(const ccXRayDrawScope&) = delete;
 
+	//! Returns the current scope for the given context, or nullptr if none is active.
 	static const ccXRayDrawScope* Current(const ccGLDrawContext& context);
 
+	//! Returns the exposure value for the current scope.
 	double exposure() const
 	{
 		return m_exposure;
 	}
 
+	//! Returns the reverse flag for the current scope.
 	bool reverse() const
 	{
 		return m_reverse;
 	}
 
-  private:
-	const ccGenericGLDisplay* m_display;
-	const QOpenGLContext*     m_glContext;
-	double                    m_exposure;
-	bool                      m_reverse;
-	const ccXRayDrawScope*    m_previous;
+  protected:                               // members
+	const ccGenericGLDisplay* m_display;   //!< The display for which this scope is active; nullptr if none.
+	const QOpenGLContext*     m_glContext; //!< The OpenGL context for which this scope is active; nullptr if none.
+	double                    m_exposure;  //!< The exposure value for the current scope.
+	bool                      m_reverse;   //!< The reverse flag for the current scope.
+	const ccXRayDrawScope*    m_previous;  //!< The previous scope in the stack; nullptr if none.
 };

@@ -17,13 +17,13 @@
 
 #include "ccXRayRenderer.h"
 
-#include "ccGLUtils.h"
-#include "ccGLWindowInterface.h"
-#include "ccGLWindowSignalEmitter.h"
+#include "..\include\ccGLUtils.h"
+#include "..\include\ccGLWindowInterface.h"
+#include "..\include\ccGLWindowSignalEmitter.h"
 
 // CCFbo
 #include <ccFrameBufferObject.h>
-#include <ccGlFilter.h>
+#include <ccGLFilter.h>
 #include <ccShader.h>
 #include <ccXRayFilterSupport.h>
 

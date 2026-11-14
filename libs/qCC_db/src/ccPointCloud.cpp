@@ -48,9 +48,6 @@
 
 // Qt
 #include <QCoreApplication>
-#include <QElapsedTimer>
-#include <QOpenGLShaderProgram>
-#include <QSettings>
 
 // System
 #include <algorithm>
@@ -58,7 +55,9 @@
 #include <memory>
 #include <queue>
 
-static const char s_deviationSFName[] = "Deviation";
+static const char s_deviationSFName[]       = "Deviation";
+static const char s_xRayEnabledMetaData[]   = "CloudCompare.XRay.Enabled";
+static const char s_xRayIntensityMetaData[] = "CloudCompare.XRay.Intensity";
 
 // 'Draw normals' shader program
 static QSharedPointer<QOpenGLShaderProgram> s_programDrawNormals;
@@ -3764,13 +3763,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			ccGLCameraParameters camera;
 			glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 			glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-			const ccBBox box = getOwnBB();
-			const double minimum[3]{box.minCorner().x, box.minCorner().y, box.minCorner().z};
-			const double maximum[3]{box.maxCorner().x, box.maxCorner().y, box.maxCorner().z};
-			const double areaRatio = box.isValid()
-			                             ? ccXRay::ProjectedAreaRatio(minimum, maximum, camera.modelViewMat.data(), camera.projectionMat.data())
-			                             : 1.0;
-			xRayStrength           = ccXRay::Strength(areaRatio, xRayState->exposure()) * toDisplay.decimStep * (xRayIntensity() / 100.0f);
+			double       areaRatio = 1.0;
+			const ccBBox box       = getOwnBB();
+			if (box.isValid())
+			{
+				areaRatio = ccXRayExposure::ProjectedAreaRatio(box.minCorner(),
+				                                               box.maxCorner(),
+				                                               camera.modelViewMat,
+				                                               camera.projectionMat);
+			}
+
+			xRayStrength = ccXRayExposure::Strength(areaRatio, xRayState->exposure());
+			xRayStrength *= toDisplay.decimStep * (xRayIntensity() / 100.0f);
 		}
 
 		if (xRayEnabled && !useProgram)
@@ -7696,5 +7700,40 @@ void ccPointCloud::Grid::updateMinAndMaxValidIndexes()
 			// empty grid!
 			minValidIndex = 0;
 		}
+	}
+}
+
+bool ccPointCloud::isXRayEnabled() const
+{
+	// Metadata preserves BIN compatibility and cloning.
+	return getMetaData(s_xRayEnabledMetaData).toBool();
+}
+
+void ccPointCloud::setXRayEnabled(bool enabled)
+{
+	// Metadata preserves BIN compatibility and cloning.
+	if (enabled)
+		setMetaData(s_xRayEnabledMetaData, true);
+	else
+		removeMetaData(s_xRayEnabledMetaData);
+}
+
+int ccPointCloud::xRayIntensity() const
+{
+	bool valid = false;
+	int  value = getMetaData(s_xRayIntensityMetaData).toInt(&valid);
+	return valid ? std::max(0, std::min(1600, value)) : 100;
+}
+
+void ccPointCloud::setXRayIntensity(int value)
+{
+	value = std::max(0, std::min(1600, value));
+	if (value == 100)
+	{
+		removeMetaData(s_xRayIntensityMetaData);
+	}
+	else
+	{
+		setMetaData(s_xRayIntensityMetaData, value);
 	}
 }

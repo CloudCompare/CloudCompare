@@ -15,14 +15,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccXRaySettings.h"
+#include "..\include\ccXRaySettings.h"
 
-#include "ccGLWindowInterface.h"
-#include "ccGLWindowSignalEmitter.h"
+// Local
+#include "..\include\ccGLWindowInterface.h"
+#include "..\include\ccGLWindowSignalEmitter.h"
 
-#include <QColor>
+// Qt
 #include <QSettings>
-#include <QVariant>
 
 // System
 #include <algorithm>
@@ -47,8 +47,10 @@ namespace
 
 bool ccXRaySettings::operator==(const ccXRaySettings& other) const
 {
-	return exposure == other.exposure && reverse == other.reverse
-	       && background == other.background && reverseBackground == other.reverseBackground;
+	return exposure == other.exposure
+	       && reverse == other.reverse
+	       && background == other.background
+	       && reverseBackground == other.reverseBackground;
 }
 
 ccXRaySettings ccXRaySettings::Parameters(const ccGLWindowInterface* window)
@@ -95,10 +97,10 @@ void ccXRaySettings::fromPersistentSettings()
 		settings.beginGroup(group);
 		auto loadColor = [&](const QString& key, ccColor::Rgb& color)
 		{
-			QColor value(settings.value(key, QColor(color.r, color.g, color.b).name()).toString());
+			QColor value(settings.value(key, ccColor::ToQColor(color).name()).toString());
 			if (value.isValid())
 			{
-				color = ccColor::FromQColor(value);
+				color = ccColor::ToRgb(value);
 			}
 		};
 		loadColor("color", background.color);
@@ -120,8 +122,8 @@ void ccXRaySettings::toPersistentSettings() const
 	auto saveBackground = [&](const QString& group, const Background& background)
 	{
 		settings.beginGroup(group);
-		settings.setValue("color", QColor(background.color.r, background.color.g, background.color.b).name());
-		settings.setValue("secondColor", QColor(background.secondColor.r, background.secondColor.g, background.secondColor.b).name());
+		settings.setValue("color", ccColor::ToQColor(background.color).name());
+		settings.setValue("secondColor", ccColor::ToQColor(background.secondColor).name());
 		settings.setValue("gradient", background.gradient);
 		settings.endGroup();
 	};

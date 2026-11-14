@@ -29,7 +29,6 @@
 #include <ccApplicationBase.h>
 #include <ccDisplaySettingsDlg.h>
 #include <ccEDLFilter.h>
-#include <ccFrameBufferObject.h>
 #include <ccGLWindow.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
@@ -47,11 +46,13 @@ class XRayTestWindow : public ccGLWindow
 	    : ccGLWindow(nullptr, nullptr, true)
 	{
 	}
+
 	bool hasXRayResources() const
 	{
 		const auto* renderer = ccXRayRenderer::Find(*this);
 		return renderer && renderer->hasResources();
 	}
+
 	ccColor::Rgba overlayColor() const
 	{
 		return ccXRayRenderer::TextColor(*this);
@@ -70,7 +71,9 @@ class XRayTestWindow : public ccGLWindow
 	{
 		doMakeCurrent();
 		if (!m_fbo && !initFBO(glWidth(), glHeight()))
+		{
 			return {};
+		}
 		auto* previousFbo = m_activeFbo;
 		bindFBO(m_fbo);
 		auto*           gl = functions();
@@ -95,7 +98,9 @@ class XRayTestWindow : public ccGLWindow
 		gl->glReadPixels(0, 0, glWidth(), glHeight(), GL_RGBA, GL_UNSIGNED_BYTE, result.bits());
 		const GLenum error = gl->glGetError();
 		if (error != GL_NO_ERROR)
+		{
 			qWarning() << "LOD readback error:" << error;
+		}
 		bindFBO(previousFbo);
 		m_currentLODState = LODState();
 		return result.mirrored();
@@ -415,7 +420,7 @@ class TestXRayDisplay : public QObject
 			secondView.doMakeCurrent();
 			const QImage secondImage = secondView.renderToImage(1, false, false, true);
 			QVERIFY(!secondImage.isNull());
-			QCOMPARE(secondImage.pixelColor(2, 2), QColor(Qt::white));
+			QCOMPARE(secondImage.pixelColor(2, 2), Qt::white);
 			QVERIFY(secondView.hasXRayResources());
 			QCOMPARE(capture(), front);
 			secondView.setSceneDB(nullptr);
@@ -532,12 +537,12 @@ class TestXRayDisplay : public QObject
 		ccClipPlane clip;
 		clip.equation = Tuple4Tpl<double>(0, 0, 1, -0.25);
 		QVERIFY(xray->addClipPlanes(clip));
-		QCOMPARE(center(capture()), QColor(Qt::green));
+		QCOMPARE(center(capture()), Qt::green);
 		xray->removeAllClipPlanes();
 		QCOMPARE(capture(), front);
 		QVERIFY(xray->resetVisibilityArray());
 		xray->getTheVisibilityArray()[144] = CCCoreLib::POINT_HIDDEN;
-		QCOMPARE(center(capture()), QColor(Qt::green));
+		QCOMPARE(center(capture()), Qt::green);
 		xray->unallocateVisibilityArray();
 		QCOMPARE(capture(), front);
 		const int scalarIndex = xray->addScalarField("Xray filtering test");
@@ -551,7 +556,7 @@ class TestXRayDisplay : public QObject
 		auto displayedSF = xray->getCurrentDisplayedScalarField();
 		displayedSF->setMaxDisplayed(0.5);
 		displayedSF->showNaNValuesInGrey(false);
-		QCOMPARE(center(capture()), QColor(Qt::green));
+		QCOMPARE(center(capture()), Qt::green);
 		xray->showSF(false);
 		xray->deleteScalarField(scalarIndex);
 		QCOMPARE(capture(), front);
@@ -628,7 +633,7 @@ class TestXRayDisplay : public QObject
 		const QImage reverseRed = capture();
 		QVERIFY(window.overlayColor() == ccColor::black);
 		const QColor redLayer = center(reverseRed);
-		QCOMPARE(reverseRed.pixelColor(2, 2), QColor(Qt::white));
+		QCOMPARE(reverseRed.pixelColor(2, 2), Qt::white);
 		QCOMPARE(redLayer.red(), 255);
 		QVERIFY(redLayer.green() < 255 && redLayer.blue() < 255); // red, never cyan
 		xray->setXRayIntensity(50);
@@ -636,7 +641,7 @@ class TestXRayDisplay : public QObject
 		xray->setXRayIntensity(200);
 		QVERIFY(center(capture()).green() < redLayer.green());
 		xray->setXRayIntensity(0);
-		QCOMPARE(center(capture()), QColor(Qt::white));
+		QCOMPARE(center(capture()), Qt::white);
 		xray->setXRayIntensity(100);
 		QCOMPARE(capture(), reverseRed);
 		secondCloud->setEnabled(true);
@@ -694,7 +699,7 @@ class TestXRayDisplay : public QObject
 		QCOMPARE(capture(), reverseFlat); // independent profiles survive mode switches
 		opaque->setVisible(true);
 		opaque->setGLTransformation(transform);
-		QCOMPARE(center(capture()), QColor(Qt::green)); // opaque foreground still occludes
+		QCOMPARE(center(capture()), Qt::green); // opaque foreground still occludes
 		opaque->resetGLTransformation();
 		window.setGlFilter(new ccEDLFilter());
 		const QImage reverseEDL = capture();

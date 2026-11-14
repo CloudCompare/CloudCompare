@@ -1,8 +1,6 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
-		${CMAKE_CURRENT_LIST_DIR}/ccXRaySettingsEditor.h
-		${CMAKE_CURRENT_LIST_DIR}/ccXRaySettingsEditor.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ccApplicationBase.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ccCameraParamEditDlg.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ccDisplaySettingsDlg.cpp
@@ -11,4 +9,6 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccPluginManager.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ccStereoModeDlg.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ccTranslationManager.cpp
+		${CMAKE_CURRENT_LIST_DIR}/ccXRaySettingsEditor.h
+		${CMAKE_CURRENT_LIST_DIR}/ccXRaySettingsEditor.cpp
 )

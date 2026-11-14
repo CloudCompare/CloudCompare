@@ -17,10 +17,9 @@
 
 #include "../include/ccDisplaySettingsDlg.h"
 
-#include "ccXRaySettingsEditor.h"
-
 // Local
 #include "../include/ccApplicationBase.h"
+#include "ccXRaySettingsEditor.h"
 
 // Ui
 #include <ui_displaySettingsDlg.h>
@@ -35,7 +34,6 @@
 // Qt
 #include <QColorDialog>
 #include <QSettings>
-#include <QStyle>
 #include <QStyleFactory>
 
 // System

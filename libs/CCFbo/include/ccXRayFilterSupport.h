@@ -19,10 +19,14 @@
 #include "CCFbo.h"
 
 //! Optional interface for filters incompatible with X-ray compositing.
-//! Existing filters need not implement it; ccGlFilter's layout and vtable stay unchanged.
+/** \note Existing filters need not implement it; ccGlFilter's layout and vtable stay unchanged.
+ **/
 class CCFBO_LIB_API ccXRayFilterSupport
 {
   public:
+	//! Destructor
 	virtual ~ccXRayFilterSupport();
+
+	//! Whether the filter supports X-ray compositing.
 	virtual bool supportsXRay() const = 0;
 };

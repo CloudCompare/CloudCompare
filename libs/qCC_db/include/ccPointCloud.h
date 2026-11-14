@@ -81,41 +81,6 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Default destructor
 	~ccPointCloud() override;
 
-	//! Per-cloud X-ray display flag. Metadata preserves BIN compatibility and cloning.
-	bool isXRayEnabled() const
-	{
-		return getMetaData(QStringLiteral("CloudCompare.XRay.Enabled")).toBool();
-	}
-
-	void setXRayEnabled(bool enabled)
-	{
-		if (enabled)
-			setMetaData(QStringLiteral("CloudCompare.XRay.Enabled"), true);
-		else
-			removeMetaData(QStringLiteral("CloudCompare.XRay.Enabled"));
-	}
-
-	//! X-ray contribution, where 100 preserves the default appearance.
-	int xRayIntensity() const
-	{
-		bool valid = false;
-		int  value = getMetaData(QStringLiteral("CloudCompare.XRay.Intensity")).toInt(&valid);
-		return valid ? std::max(0, std::min(1600, value)) : 100;
-	}
-
-	void setXRayIntensity(int value)
-	{
-		value = std::max(0, std::min(1600, value));
-		if (value == 100)
-		{
-			removeMetaData(QStringLiteral("CloudCompare.XRay.Intensity"));
-		}
-		else
-		{
-			setMetaData(QStringLiteral("CloudCompare.XRay.Intensity"), value);
-		}
-	}
-
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override
 	{
@@ -553,6 +518,16 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 
 	//! Clears all associated FWF data
 	void clearFWFData();
+
+  public: // X-ray rendering
+	//! Returns whether X-ray display is enabled or not.
+	bool isXRayEnabled() const;
+	//! Sets whether X-ray display is enabled or not.
+	void setXRayEnabled(bool enabled);
+	//! X-ray contribution, where 100 preserves the default appearance.
+	int xRayIntensity() const;
+	//! Sets the X-ray contribution, where 100 preserves the default appearance.
+	void setXRayIntensity(int value);
 
   public: // other methods
 	//! Returns the cloud gravity center

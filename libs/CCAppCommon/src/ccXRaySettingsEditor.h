@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#pragma once
-
-#include <QObject>
+// qCC_glWindow
 #include <ccXRaySettings.h>
+
+// Qt
+#include <QObject>
 
 class ccDisplaySettingsDlg;
 namespace Ui
@@ -30,11 +33,14 @@ namespace Ui
 class ccXRaySettingsEditor : public QObject
 {
   public:
+	//! Constructor
 	ccXRaySettingsEditor(ccDisplaySettingsDlg& dialog, Ui::DisplaySettingsDlg& ui);
 
-  private:
-	void                    refreshXRay();
-	void                    previewXRay();
+  protected: // methods
+	void refreshXRay();
+	void previewXRay();
+
+  protected: // members
 	ccDisplaySettingsDlg&   m_dialog;
 	Ui::DisplaySettingsDlg& m_ui;
 	ccXRaySettings          m_parameters;

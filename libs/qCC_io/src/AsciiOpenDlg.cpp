@@ -115,6 +115,9 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
     , m_averageLineSize(-1.0)
     , m_stream(nullptr)
     , m_columnsCount(0)
+    , m_confirmWideFile(false)
+    , m_wideFileAnswered(false)
+    , m_wideFileAccepted(false)
 {
 	m_ui->setupUi(this);
 
@@ -145,10 +148,11 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 
 AsciiOpenDlg::~AsciiOpenDlg() = default;
 
-bool AsciiOpenDlg::setInput(const QString& filename, QTextStream* stream /*=nullptr*/)
+bool AsciiOpenDlg::setInput(const QString& filename, QTextStream* stream /*=nullptr*/, bool confirmWideFile /*=false*/)
 {
-	m_filename = filename;
-	m_stream   = stream;
+	m_filename        = filename;
+	m_stream          = stream;
+	m_confirmWideFile = confirmWideFile;
 
 	// update title
 	m_ui->lineEditFileName->setText(m_filename);
@@ -303,9 +307,10 @@ static bool CouldBeLabel(const QString& colHeader)
 	return colHeader.contains("LABEL") || colHeader.contains("NAME");
 }
 
-static const unsigned MAX_COLUMNS          = 512; // maximum number of columns that can be handled
-static const unsigned LINES_READ_FOR_STATS = 200; // number of lines read for stats
-static const unsigned DISPLAYED_LINES      = 20;  // number of displayed lines
+static const unsigned MAX_COLUMNS          = 8192; // maximum number of columns that can be handled
+static const unsigned CONFIRM_COLUMNS      = 512;  // above this number of columns, the user is asked first (see setInput)
+static const unsigned LINES_READ_FOR_STATS = 200;  // number of lines read for stats
+static const unsigned DISPLAYED_LINES      = 20;   // number of displayed lines
 
 static unsigned X_BIT     = 1;
 static unsigned Y_BIT     = 2;
@@ -435,7 +440,8 @@ void AsciiOpenDlg::updateTable()
 	unsigned totalChars    = 0; // total read characters (for stats)
 	unsigned columnsCount  = 0; // max columns count per line
 	unsigned commentLines  = 0; // number of comments line skipped
-	unsigned maxPartsCount = 0; // max columns count per line, before it's clamped to MAX_COLUMNS
+	unsigned maxPartsCount = 0; // max columns count per line, before it's clamped to columnsLimit
+	unsigned columnsLimit  = (m_wideFileAnswered && !m_wideFileAccepted ? CONFIRM_COLUMNS : MAX_COLUMNS);
 
 	std::vector<bool> valueIsNumber;   // identifies columns with numbers only [mandatory]
 	std::vector<bool> valueIsBelowOne; // identifies columns with values between -1 and 1 only
@@ -468,7 +474,29 @@ void AsciiOpenDlg::updateTable()
 				unsigned rawPartsCount = static_cast<unsigned>(parts.size());
 				maxPartsCount          = std::max(rawPartsCount, maxPartsCount);
 
-				unsigned partsCount              = std::min(MAX_COLUMNS, rawPartsCount);
+				// ask the user before creating the widgets for a lot of columns (except if a layout
+				// with more than 512 columns was already applied, see 'Apply' / 'Apply all')
+				if (rawPartsCount > CONFIRM_COLUMNS
+				    && m_confirmWideFile
+				    && !m_wideFileAnswered
+				    && !(s_asciiOpenContext && s_asciiOpenContext->sequence.size() > CONFIRM_COLUMNS))
+				{
+					m_wideFileAnswered = true;
+					m_wideFileAccepted = (QMessageBox::question(this,
+					                                            tr("Many columns"),
+					                                            tr("This file seems to have %1 columns. Do you really expect more than %2 columns?\nCreating them all may take a while.")
+					                                                .arg(rawPartsCount)
+					                                                .arg(CONFIRM_COLUMNS),
+					                                            QMessageBox::Yes | QMessageBox::No,
+					                                            QMessageBox::No)
+					                      == QMessageBox::Yes);
+					if (!m_wideFileAccepted)
+					{
+						columnsLimit = CONFIRM_COLUMNS;
+					}
+				}
+
+				unsigned partsCount              = std::min(columnsLimit, rawPartsCount);
 				bool     columnCountHasIncreased = (partsCount > columnsCount);
 
 				// do we need to add one or several new columns?
@@ -593,12 +621,12 @@ void AsciiOpenDlg::updateTable()
 	}
 
 	// warn the user if some columns can't be handled (and would be silently ignored otherwise)
-	if (maxPartsCount > MAX_COLUMNS)
+	if (maxPartsCount > columnsLimit)
 	{
 		QString warning = tr("This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.")
 		                      .arg(maxPartsCount)
-		                      .arg(MAX_COLUMNS)
-		                      .arg(maxPartsCount - MAX_COLUMNS);
+		                      .arg(columnsLimit)
+		                      .arg(maxPartsCount - columnsLimit);
 
 		m_ui->columnsTruncatedLabel->setText(warning);
 		m_ui->columnsTruncatedLabel->setVisible(true);

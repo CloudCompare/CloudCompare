@@ -410,6 +410,8 @@ Improvements:
 		- the column types set by hand are now kept after changing the number of lines to skip, or when a header line appeared.
 		- CC now warns the user when a file has more columns than it can handle (only the first 512 columns are loaded,
 			the other ones were previously ignored silently)
+		- files with up to 8192 columns can now be loaded (instead of 512). Above 512 columns, the user is first asked to confirm
+			(creating all the columns in the dialog may take a while). Command line mode loads them without asking.
 
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same

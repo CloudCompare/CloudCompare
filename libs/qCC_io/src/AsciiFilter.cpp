@@ -572,7 +572,7 @@ CC_FILE_ERROR AsciiFilter::loadStream(QTextStream&    stream,
 		// lines to skip set from the command line (-SKIP option)
 		openDialog.setSkippedLines(s_defaultSkippedLineCount);
 	}
-	if (openDialog.setInput(filenameOrTitle, &stream))
+	if (openDialog.setInput(filenameOrTitle, &stream, parameters.alwaysDisplayLoadDialog))
 	{
 		// if we should use the previous sequence ('Apply all')
 		forceDialogDisplay = false;

@@ -279,28 +279,20 @@ void ccColorFromScalarDlg::updateColormaps()
 			}
 
 			// overwrite first colourmap with hue rainbow
-			int hue;
 			m_colors[0]->clear();
 
 			ccColor::Rgb col = ccColor::Convert::hsv2rgb(360.0f, 1.0f, 1.0f);
-			m_colors[0]->insert(ccColorScaleElement(1.0, QColor(col.r, col.g, col.b, 255)));
+			m_colors[0]->insert(ccColorScaleElement(1.0, ccColor::ToQColor(col)));
 			for (unsigned i = 0; i < 360; i += 2)
 			{
 				// calculate hue value
-				if (reversed[0])
-				{
-					hue = 360 - i;
-				}
-				else
-				{
-					hue = i;
-				}
+				unsigned hue = (reversed[0] ? 360 - i : i);
 
 				// calculate colour
-				col = ccColor::Convert::hsv2rgb(hue, 1.0f, 1.0f);
+				col = ccColor::Convert::hsv2rgb(static_cast<float>(hue), 1.0f, 1.0f);
 
 				// add stop
-				m_colors[0]->insert(ccColorScaleElement(static_cast<double>(i) / 360.0, QColor(col.r, col.g, col.b, 255)));
+				m_colors[0]->insert(ccColorScaleElement(i / 360.0, ccColor::ToQColor(col)));
 			}
 			m_colors[0]->update();
 		}
@@ -579,9 +571,8 @@ void ccColorFromScalarDlg::onApply()
 						col[i] = static_cast<int>(255.0 * (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]));
 					}
 
-					// trim to range 0 - 255
-					col[i] = std::max(col[i], 0);
-					col[i] = std::min(col[i], 255);
+					// clamp to range 0 - 255
+					col[i] = std::clamp(col[i], 0, 255);
 
 					// flip?
 					if (reversed[i] && !fixed[i])
@@ -589,7 +580,11 @@ void ccColorFromScalarDlg::onApply()
 						col[i] = 255 - col[i];
 					}
 				}
-				m_cloud->setPointColor(p, ccColor::FromQColora(QColor(col[0], col[1], col[2], col[3])));
+				ccColor::Rgba ccColor(static_cast<ColorCompType>(col[0]),
+				                      static_cast<ColorCompType>(col[1]),
+				                      static_cast<ColorCompType>(col[2]),
+				                      static_cast<ColorCompType>(col[3]));
+				m_cloud->setPointColor(p, ccColor);
 			}
 		}
 		else // map scalar values to HSV (and then to RGB)

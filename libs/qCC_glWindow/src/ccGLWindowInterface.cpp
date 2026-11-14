@@ -2421,7 +2421,7 @@ void ccGLWindowInterface::startOpenGLPicking(const PickingParameters& params)
 		{
 			for (int i = 0; i < xWidth; ++i, ++_pickedPixels)
 			{
-				// testImage.setPixelColor(i, yWidth - 1 - j, QColor(_pickedPixels->r, _pickedPixels->g, _pickedPixels->b));
+				// testImage.setPixelColor(i, yWidth - 1 - j, ccColor::ToQColor(*_pickedPixels));
 				if (_pickedPixels->r != 0 || _pickedPixels->g != 0 || _pickedPixels->b != 0)
 				{
 					if (params.mode == ENTITY_RECT_PICKING)

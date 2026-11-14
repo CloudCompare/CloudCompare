@@ -23,7 +23,6 @@
 
 namespace ccColor
 {
-
 	Rgb Generator::Random(bool lightOnly)
 	{
 		std::random_device                      rd;           // non-deterministic generator

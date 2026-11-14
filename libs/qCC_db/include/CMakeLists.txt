@@ -1,9 +1,6 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
-		${CMAKE_CURRENT_LIST_DIR}/ccXRayDrawScope.h
-	    ${CMAKE_CURRENT_LIST_DIR}/ccWaveform.h
-		${CMAKE_CURRENT_LIST_DIR}/ccXRayExposure.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DLabel.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DViewportLabel.h
 		${CMAKE_CURRENT_LIST_DIR}/cc2DViewportObject.h
@@ -57,7 +54,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccKdTree.h
 		${CMAKE_CURRENT_LIST_DIR}/ccLog.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMaterial.h
-	    ${CMAKE_CURRENT_LIST_DIR}/ccMaterialDB.h
+		${CMAKE_CURRENT_LIST_DIR}/ccMaterialDB.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMaterialSet.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMesh.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMeshGroup.h
@@ -85,6 +82,9 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccSubMesh.h
 		${CMAKE_CURRENT_LIST_DIR}/ccTorus.h
 		${CMAKE_CURRENT_LIST_DIR}/ccViewportParameters.h
+		${CMAKE_CURRENT_LIST_DIR}/ccWaveform.h
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayDrawScope.h
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayExposure.h
 		${CMAKE_CURRENT_LIST_DIR}/qCC_db.h
 )
 

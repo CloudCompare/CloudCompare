@@ -48,6 +48,7 @@
 
 // Qt
 #include <QCoreApplication>
+#include <QElapsedTimer>
 
 // System
 #include <algorithm>
@@ -3792,8 +3793,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				s_warned = true;
 			}
 			glFunc->glUseProgram(0);
-			GLfloat baseColor[4];
-			glFunc->glGetFloatv(GL_CURRENT_COLOR, baseColor);
+			ccColor::Rgbaf baseColor;
+			glFunc->glGetFloatv(GL_CURRENT_COLOR, baseColor.rgba);
 			glFunc->glBegin(GL_POINTS);
 			for (unsigned j = 0; j < size(); j += toDisplay.decimStep)
 			{
@@ -3801,7 +3802,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					continue;
 				}
-				GLfloat color[4] = {baseColor[0], baseColor[1], baseColor[2], baseColor[3]};
+				ccColor::Rgbaf color = baseColor;
 				if (glParams.showSF)
 				{
 					const ccColor::Rgb* rgb = m_currentDisplayedScalarField->getValueColor(j);
@@ -3813,27 +3814,21 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						rgb = &ccColor::lightGreyRGB;
 					}
-					for (unsigned c = 0; c < 3; ++c)
-					{
-						color[c] = rgb->rgb[c] / 255.0f;
-					}
-					color[3] = 1.0f;
+					color = ccColor::ToRgbaf(*rgb);
 				}
 				else if (glParams.showColors)
 				{
 					const ccColor::Rgba& rgba = m_rgbaColors->getValue(j);
-					for (unsigned c = 0; c < 4; ++c)
-					{
-						color[c] = rgba.rgba[c] / 255.0f;
-					}
+					color                     = ccColor::ToRgbaf(rgba);
 				}
+
 				for (unsigned c = 0; c < 3; ++c)
 				{
-					color[c] = xRayState->reverse()
-					               ? 1.0f - std::clamp((1.0f - color[c]) * xRayStrength, 0.0f, 1.0f) * color[3]
-					               : std::clamp(color[c] * xRayStrength, 0.0f, 1.0f) * color[3];
+					color.rgba[c] = xRayState->reverse()
+					                    ? 1.0f - std::clamp((1.0f - color.rgba[c]) * xRayStrength, 0.0f, 1.0f) * color.a
+					                    : std::clamp(color.rgba[c] * xRayStrength, 0.0f, 1.0f) * color.a;
 				}
-				glFunc->glColor4fv(color);
+				glFunc->glColor4fv(color.rgba);
 				ccGL::Vertex3v(glFunc, m_points[j].u);
 			}
 			glFunc->glEnd();

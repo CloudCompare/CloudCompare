@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "..\include\ccXRayDrawScope.h"
+#include "../include/ccXRayDrawScope.h"
 
 // Local
-#include "..\include\ccGLDrawContext.h"
+#include "../include/ccGLDrawContext.h"
 
 // System
 #include <cassert>

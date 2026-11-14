@@ -744,8 +744,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool drawGeometry = true;
 	if (draw3D && (xRayEnabled || xRayPass) && !MACRO_EntityPicking(context))
 	{
-		const bool xRayCloud = isKindOf(CC_TYPES::POINT_CLOUD)
-		                       && static_cast<const ccPointCloud*>(this)->isXRayEnabled();
+		bool xRayCloud = isKindOf(CC_TYPES::POINT_CLOUD)
+		                 && static_cast<const ccPointCloud*>(this)->isXRayEnabled();
 		drawGeometry = (xRayCloud == xRayPass);
 	}
 

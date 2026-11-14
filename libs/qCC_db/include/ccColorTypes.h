@@ -356,12 +356,38 @@ namespace ccColor
 		            static_cast<unsigned char>(qColor.alpha()));
 	}
 
+	//! Conversion from Rgb to Rgbaf
+	inline Rgbf ToRgbf(const Rgb& color)
+	{
+		return Rgbf(color.r / 255.0f,
+		            color.g / 255.0f,
+		            color.b / 255.0f);
+	}
+
 	//! Conversion from QColor (floating point) to Rgbf
 	inline Rgbf ToRgbf(const QColor& qColor)
 	{
 		return Rgbf(qColor.redF(),
 		            qColor.greenF(),
 		            qColor.blueF());
+	}
+
+	//! Conversion from Rgb to Rgbaf
+	inline Rgbaf ToRgbaf(const Rgb& color)
+	{
+		return Rgbaf(color.r / 255.0f,
+		             color.g / 255.0f,
+		             color.b / 255.0f,
+		             1.0f);
+	}
+
+	//! Conversion from Rgba to Rgbaf
+	inline Rgbaf ToRgbaf(const Rgba& color)
+	{
+		return Rgbaf(color.r / 255.0f,
+		             color.g / 255.0f,
+		             color.b / 255.0f,
+		             color.a / 255.0f);
 	}
 
 	//! Conversion from QColor'a' (floating point) to Rgbaf

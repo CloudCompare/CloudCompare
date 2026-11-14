@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "..\include\ccXRaySettings.h"
+#include "../include/ccXRaySettings.h"
 
 // Local
-#include "..\include\ccGLWindowInterface.h"
-#include "..\include\ccGLWindowSignalEmitter.h"
+#include "../include/ccGLWindowInterface.h"
+#include "../include/ccGLWindowSignalEmitter.h"
 
 // Qt
 #include <QSettings>

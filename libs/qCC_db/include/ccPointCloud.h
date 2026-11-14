@@ -29,9 +29,6 @@
 // Qt
 #include <QOpenGLBuffer>
 
-// System
-#include <algorithm>
-
 #ifdef _MSC_VER
 // To get rid of the warnings about dominant inheritance
 #pragma warning(disable : 4250)
@@ -39,7 +36,6 @@
 
 class ccPolyline;
 class ccMesh;
-class QOpenGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 

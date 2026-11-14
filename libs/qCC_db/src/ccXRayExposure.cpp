@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "..\include\ccXRayExposure.h"
+#include "../include/ccXRayExposure.h"
 
 double ccXRayExposure::ProjectedAreaRatio(const CCVector3d&  minimum,
                                           const CCVector3d&  maximum,

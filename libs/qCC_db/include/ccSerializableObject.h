@@ -182,7 +182,7 @@ class ccSerializableObject
 	**/
 	static void TruncatedFileWarning(const QString& description)
 	{
-		ccLog::Warning(QString("File seems to be truncated: some %1 are missing (set to 0)").arg(description));
+		ccLog::Warning(QObject::tr("File seems to be truncated: some %1 are missing (set to 0)").arg(description));
 	}
 };
 

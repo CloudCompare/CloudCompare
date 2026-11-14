@@ -5490,13 +5490,13 @@ Version 1.4 is recommended for compatibility with all software packages.</source
 &lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"&gt;
-&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
+&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;基于 SfM 摄影测量的三维不确定性地形变化检测：用于地面控制和直接地理配准测量的精度图&lt;/span&gt;&lt;/p&gt;
 &lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href="http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract"&gt;&lt;span style=" font-size:8pt; text-decoration: underline; color:#0000ff;"&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=" font-size:8pt;"&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"&gt;
-&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
+&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;基于 SfM 摄影测量的三维不确定性地形变化检测：用于地面控制和直接地理配准测量的精度图&lt;/span&gt;&lt;/p&gt;
 &lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href="http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract"&gt;&lt;span style=" font-size:8pt; text-decoration: underline; color:#0000ff;"&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=" font-size:8pt;"&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -15241,12 +15241,11 @@ piecewise constant functions on general weighted graphs. SIAM Journal on
 Imaging Sciences. 2017, 10.4, 1724-1766.`
 
 </source>
-        <translation>***Treeiso *plugin (v2)**
+        <translation>***Treeiso 单木分离插件（v2）***
 
-`A graph-based tree point cloud isolator (assuming ground points have already
-been removed)`
+`基于图结构的单木点云分离工具（使用前应先移除地面点）`
 
-`Reference`
+`参考文献`
 
 `Xi, Z.; Hopkinson, C. 3D Graph-Based Individual-Tree Isolation (Treeiso) from
 Terrestrial Laser Scanning Point Clouds. Remote Sens. 2022, 14, 6116.

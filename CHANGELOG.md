@@ -272,6 +272,9 @@ Improvements:
 
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+		- slightly smarter auto-fill of the fields to reproduce the previous loading pattern. If 'apply all' was used when loading multiple
+			PLY files at once, even the SF selection will be restored. Else, only the properties selection will be restored, and all available
+			scalar fields will be added. This also fixes an issue when duplicate fields could be populated under certain conditions.
 		- at saving time, CC will not change the internal name of scalar fields that were already present in the input PLY file
 
 	- PCD format:

@@ -175,6 +175,15 @@ class ccSerializableObject
 		ccLog::Error("File seems to be corrupted");
 		return false;
 	}
+
+	//! Sends a custom warning message (truncated file)
+	/** Shortcut for warning the user that the file ends before all the data could be read.
+	    The loading goes on, but the missing values are left to zero.
+	**/
+	static void TruncatedFileWarning(const QString& description)
+	{
+		ccLog::Warning(QString("File seems to be truncated: some %1 are missing (set to 0)").arg(description));
+	}
 };
 
 //! Serialization helpers
@@ -325,9 +334,16 @@ class ccSerializationHelper
 				while (byteCount > 0)
 				{
 					qint64 chunkSize = std::min(MaxElementPerChunk, byteCount);
-					if (in.read(dest, chunkSize) < 0)
+					qint64 readBytes = in.read(dest, chunkSize);
+					if (readBytes < 0)
 					{
 						return ccSerializableObject::ReadError();
+					}
+					if (readBytes < chunkSize)
+					{
+						// read() returns fewer bytes (and not -1) if the file is truncated
+						ccSerializableObject::TruncatedFileWarning(verboseDescription);
+						break;
 					}
 					byteCount -= chunkSize;
 					dest += chunkSize;
@@ -389,32 +405,38 @@ class ccSerializationHelper
 			if (_autoOffset)
 			{
 				// read the first element
-				if (in.read((char*)dummyArray, elementSize) >= 0)
-				{
-					for (unsigned k = 0; k < N; ++k)
-					{
-						*_autoOffset = dummyArray[k];
-						*_data++     = 0;
-					}
-				}
-				else
+				qint64 readBytes = in.read((char*)dummyArray, elementSize);
+				if (readBytes < 0)
 				{
 					return ccSerializableObject::ReadError();
+				}
+				if (readBytes < static_cast<qint64>(elementSize))
+				{
+					ccSerializableObject::TruncatedFileWarning(verboseDescription);
+					return true;
+				}
+				for (unsigned k = 0; k < N; ++k)
+				{
+					*_autoOffset = dummyArray[k];
+					*_data++     = 0;
 				}
 
 				// read the next elements
 				for (unsigned i = 1; i < elementCount; ++i)
 				{
-					if (in.read((char*)dummyArray, elementSize) >= 0)
-					{
-						for (unsigned k = 0; k < N; ++k)
-						{
-							*_data++ = static_cast<ComponentType>(dummyArray[k] - _autoOffset[k]);
-						}
-					}
-					else
+					readBytes = in.read((char*)dummyArray, elementSize);
+					if (readBytes < 0)
 					{
 						return ccSerializableObject::ReadError();
+					}
+					if (readBytes < static_cast<qint64>(elementSize))
+					{
+						ccSerializableObject::TruncatedFileWarning(verboseDescription);
+						break;
+					}
+					for (unsigned k = 0; k < N; ++k)
+					{
+						*_data++ = static_cast<ComponentType>(dummyArray[k] - _autoOffset[k]);
 					}
 				}
 			}
@@ -423,16 +445,19 @@ class ccSerializationHelper
 				// no automatic offset
 				for (unsigned i = 0; i < elementCount; ++i)
 				{
-					if (in.read((char*)dummyArray, sizeof(FileComponentType) * N) >= 0)
-					{
-						for (unsigned k = 0; k < N; ++k)
-						{
-							*_data++ = static_cast<ComponentType>(dummyArray[k]);
-						}
-					}
-					else
+					qint64 readBytes = in.read((char*)dummyArray, elementSize);
+					if (readBytes < 0)
 					{
 						return ccSerializableObject::ReadError();
+					}
+					if (readBytes < static_cast<qint64>(elementSize))
+					{
+						ccSerializableObject::TruncatedFileWarning(verboseDescription);
+						break;
+					}
+					for (unsigned k = 0; k < N; ++k)
+					{
+						*_data++ = static_cast<ComponentType>(dummyArray[k]);
 					}
 				}
 			}

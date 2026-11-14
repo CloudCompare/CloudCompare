@@ -1,0 +1,129 @@
+name: Windows package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows-package:
+    name: Windows x64 package
+    runs-on: windows-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          architecture: x64
+          auto-activate: false
+          activate-environment: CloudCompareDev
+          environment-file: .ci/conda-win.yml
+          channels: conda-forge
+          conda-remove-defaults: "true"
+
+      - name: Configure MSVC console
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set MSVC environment
+        shell: pwsh
+        run: |
+          "CXX=cl.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "CC=cl.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Configure CMake
+        shell: bash -l {0}
+        run: |
+          export CONDA_LIB_DIR="$CONDA_PREFIX/Library"
+          export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
+
+          cmake \
+            -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install" \
+            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
+            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
+            -DOPTION_SUPPORT_3DMOUSE_WITH_HIDAPI=ON \
+            -DPLUGIN_EXAMPLE_GL=ON \
+            -DPLUGIN_EXAMPLE_IO=ON \
+            -DPLUGIN_EXAMPLE_STANDARD=ON \
+            -DPLUGIN_GL_QEDL=ON \
+            -DPLUGIN_GL_QSSAO=ON \
+            -DPLUGIN_IO_QADDITIONAL=ON \
+            -DPLUGIN_IO_QCORE=ON \
+            -DPLUGIN_IO_QE57=ON \
+            -DPLUGIN_IO_QPHOTOSCAN=ON \
+            -DPLUGIN_IO_QLAS=ON \
+            -DPLUGIN_IO_QRDB=ON \
+            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
+            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
+            -DPLUGIN_STANDARD_3DFIN=ON \
+            -DPLUGIN_STANDARD_QANIMATION=ON \
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
+            -DPLUGIN_STANDARD_QBROOM=ON \
+            -DPLUGIN_STANDARD_QCANUPO=ON \
+            -DPLUGIN_STANDARD_QCOMPASS=ON \
+            -DPLUGIN_STANDARD_QCSF=ON \
+            -DPLUGIN_STANDARD_QFACETS=ON \
+            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON \
+            -DPLUGIN_STANDARD_QHPR=ON \
+            -DPLUGIN_STANDARD_QM3C2=ON \
+            -DPLUGIN_STANDARD_QPCV=ON \
+            -DPLUGIN_STANDARD_QPOISSON_RECON=OFF \
+            -DPLUGIN_STANDARD_QSRA=ON \
+            -DPLUGIN_STANDARD_QRANSAC_SD=ON \
+            -DPLUGIN_STANDARD_QPCL=OFF \
+            -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
+            -DPLUGIN_STANDARD_QVOXFALL=ON \
+            .
+
+      - name: Build and install
+        shell: pwsh
+        run: |
+          cmake --build build --parallel
+          cmake --install build
+
+      - name: Prepare release package
+        id: package
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $version = $env:GITHUB_REF_NAME
+            $releaseTag = $env:GITHUB_REF_NAME
+          } else {
+            $version = "windows-$((Get-Date).ToUniversalTime().ToString('yyyyMMdd'))-${env:GITHUB_RUN_NUMBER}"
+            $releaseTag = "windows-${env:GITHUB_RUN_NUMBER}"
+          }
+
+          $archive = "CloudCompare-$version-Windows-x64.zip"
+          Compress-Archive -Path "$env:GITHUB_WORKSPACE\install\*" -DestinationPath "$env:GITHUB_WORKSPACE\$archive" -CompressionLevel Optimal
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "archive=$archive" >> $env:GITHUB_OUTPUT
+          "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
+
+      - name: Compute checksum
+        shell: pwsh
+        run: |
+          $hash = Get-FileHash "${{ github.workspace }}\${{ steps.package.outputs.archive }}" -Algorithm SHA256
+          $hash.Hash | Out-File "${{ github.workspace }}\${{ steps.package.outputs.archive }}.sha256"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.package.outputs.release_tag }}
+          name: CloudCompare ${{ steps.package.outputs.version }} (Windows x64)
+          files: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.archive }}.sha256
+          generate_release_notes: true

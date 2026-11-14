@@ -1,6 +1,7 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayFilterSupport.h
 		${CMAKE_CURRENT_LIST_DIR}/ccBilateralFilter.h
 		${CMAKE_CURRENT_LIST_DIR}/CCFbo.h
 		${CMAKE_CURRENT_LIST_DIR}/ccFrameBufferObject.h

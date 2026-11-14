@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh" sourcelanguage="en">
+<TS version="2.1" language="zh_CN" sourcelanguage="en">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -177,7 +177,7 @@
     </message>
     <message>
         <source> kbps</source>
-        <translation type="unfinished"></translation>
+        <translation> kbps</translation>
     </message>
     <message>
         <source> sec.</source>
@@ -370,7 +370,7 @@ The higher the better the quality (but the bigger the file)</source>
     </message>
     <message>
         <source>I</source>
-        <translation type="unfinished"></translation>
+        <translation>I</translation>
     </message>
     <message>
         <source>Inits the matrix from dip/dip direction values
@@ -380,11 +380,11 @@ The higher the better the quality (but the bigger the file)</source>
     </message>
     <message>
         <source>J</source>
-        <translation type="unfinished"></translation>
+        <translation>J</translation>
     </message>
     <message>
         <source>K</source>
-        <translation type="unfinished"></translation>
+        <translation>K</translation>
     </message>
     <message>
         <source>Load matrix from ascii file</source>
@@ -861,7 +861,7 @@ Otherwise labels are shown in 3D.</source>
     </message>
     <message>
         <source>Broom</source>
-        <translation type="unfinished"></translation>
+        <translation>布鲁姆滤波</translation>
     </message>
     <message>
         <source>Broom dimensions</source>
@@ -869,7 +869,7 @@ Otherwise labels are shown in 3D.</source>
     </message>
     <message>
         <source>CEA Broom Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>CEA 布鲁姆滤波工具</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -960,7 +960,7 @@ Otherwise labels are shown in 3D.</source>
     <name>BundlerImportDlg</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -972,7 +972,15 @@ p, li { white-space: pre-wrap; }
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
 &lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;1 0 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;0 1 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Approximate number of vertices for the final mesh</source>
@@ -1501,7 +1509,7 @@ p, li { white-space: pre-wrap; }
     <name>CanupoClassifDialog</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -1664,7 +1672,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Inp</source>
-        <translation type="unfinished"></translation>
+        <translation>输入</translation>
     </message>
     <message>
         <source>Input scales as a list of values (separated by a space character)</source>
@@ -1877,7 +1885,7 @@ Output facet normals may be randomly oriented
     <name>Classify3DMASCDialog</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>3DMASC Classify</source>
@@ -1928,7 +1936,7 @@ Output facet normals may be randomly oriented
     <name>ClassifyDisclaimerDialog</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -1998,7 +2006,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>q3DMASC_classify</source>
-        <translation type="unfinished"></translation>
+        <translation>q3DMASC 分类</translation>
     </message>
     <message>
         <source>qCANUPO (disclaimer)</source>
@@ -2301,7 +2309,7 @@ by repeating the process along one or several dimensions</source>
     </message>
     <message>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <source>Red</source>
@@ -2387,7 +2395,7 @@ by repeating the process along one or several dimensions</source>
     </message>
     <message>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <source>Red</source>
@@ -2595,7 +2603,7 @@ to help advanced users setting the general parameters</source>
     <name>ConfusionMatrix</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>Form</source>
@@ -2610,11 +2618,11 @@ to help advanced users setting the general parameters</source>
     <name>CorkDialog</name>
     <message>
         <source>A</source>
-        <translation type="unfinished"></translation>
+        <translation>A</translation>
     </message>
     <message>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation>B</translation>
     </message>
     <message>
         <source>Difference
@@ -2671,23 +2679,23 @@ A+B</translation>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>32651</source>
-        <translation type="unfinished"></translation>
+        <translation>32651</translation>
     </message>
     <message>
         <source>465</source>
-        <translation type="unfinished"></translation>
+        <translation>465</translation>
     </message>
     <message>
         <source>&lt;a href="https://www.cloudcompare.org/doc/wiki"&gt;see documentation&lt;/a&gt;</source>
@@ -2759,7 +2767,7 @@ A+B</translation>
     </message>
     <message>
         <source>Inp</source>
-        <translation type="unfinished"></translation>
+        <translation>输入</translation>
     </message>
     <message>
         <source>Input scales as a list of values (separated by a space character)</source>
@@ -2837,7 +2845,7 @@ but should ideally be smaller (e.g. a subsampled version of cloud #1)</source>
     </message>
     <message>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <source>Random Trees</source>
@@ -2987,7 +2995,7 @@ same class labels as the trained classes</source>
     </message>
     <message>
         <source>k</source>
-        <translation type="unfinished"></translation>
+        <translation>k</translation>
     </message>
     <message>
         <source>k-fold Crossvalidation</source>
@@ -3209,7 +3217,7 @@ The bigger the more accurate the map will be
     </message>
     <message>
         <source> m.</source>
-        <translation type="unfinished"></translation>
+        <translation> 米</translation>
     </message>
     <message>
         <source>2D distance map (Surface of Revolution)</source>
@@ -3269,7 +3277,7 @@ The bigger the more accurate the map will be
     </message>
     <message>
         <source>DXF</source>
-        <translation type="unfinished"></translation>
+        <translation>DXF</translation>
     </message>
     <message>
         <source>Display</source>
@@ -3329,7 +3337,7 @@ The bigger the more accurate the map will be
     </message>
     <message>
         <source>Map</source>
-        <translation type="unfinished"></translation>
+        <translation>地图</translation>
     </message>
     <message>
         <source>Map angles unit</source>
@@ -3501,7 +3509,7 @@ The bigger the more accurate the map will be
     </message>
     <message>
         <source>m.</source>
-        <translation type="unfinished"></translation>
+        <translation>米</translation>
     </message>
     <message>
         <source>maximum value</source>
@@ -3708,7 +3716,7 @@ The bigger the more accurate the map will be
     </message>
     <message>
         <source>ExtraScalarFieldCard</source>
-        <translation type="unfinished"></translation>
+        <translation>附加标量字段卡片</translation>
     </message>
     <message>
         <source>Name</source>
@@ -3892,7 +3900,7 @@ the other with the points falling outside.</source>
     <name>FitSphereDialog</name>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
 </context>
 <context>
@@ -3906,7 +3914,7 @@ the other with the points falling outside.</source>
     <name>G3PointDialog</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -4000,7 +4008,7 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>G3Point</source>
-        <translation type="unfinished"></translation>
+        <translation>G3Point</translation>
     </message>
     <message>
         <source>Get borders</source>
@@ -4072,11 +4080,11 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>Wolman</source>
-        <translation type="unfinished"></translation>
+        <translation>Wolman</translation>
     </message>
     <message>
         <source>kNN</source>
-        <translation type="unfinished"></translation>
+        <translation>k 近邻</translation>
     </message>
     <message>
         <source>steepest slope</source>
@@ -4098,7 +4106,7 @@ li.checked::marker { content: "\2612"; }
     <name>G3PointPlots</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>G3Point plots</source>
@@ -4109,7 +4117,7 @@ li.checked::marker { content: "\2612"; }
     <name>GBLSensorProjectDialog</name>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Angular steps</source>
@@ -4200,27 +4208,27 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>(L1 * L2 * L3)^(1/3)</source>
-        <translation type="unfinished"></translation>
+        <translation>(L1 × L2 × L3)^(1/3)</translation>
     </message>
     <message>
         <source>(L1 - L2)/L1</source>
-        <translation type="unfinished"></translation>
+        <translation>(L1 - L2)/L1</translation>
     </message>
     <message>
         <source>(L1 - L3)/L1</source>
-        <translation type="unfinished"></translation>
+        <translation>(L1 - L3)/L1</translation>
     </message>
     <message>
         <source>(L2 - L3)/L1</source>
-        <translation type="unfinished"></translation>
+        <translation>(L2 - L3)/L1</translation>
     </message>
     <message>
         <source>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</source>
-        <translation type="unfinished"></translation>
+        <translation>-(L1·ln(L1) + L2·ln(L2) + L3·ln(L3))</translation>
     </message>
     <message>
         <source>1 - |Z.N|</source>
-        <translation type="unfinished"></translation>
+        <translation>1 - |Z·N|</translation>
     </message>
     <message>
         <source>1st eigenvalue</source>
@@ -4280,23 +4288,23 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>L1 + L2 + L3</source>
-        <translation type="unfinished"></translation>
+        <translation>L1 + L2 + L3</translation>
     </message>
     <message>
         <source>L1 / (L1 + L2 + L3)</source>
-        <translation type="unfinished"></translation>
+        <translation>L1 / (L1 + L2 + L3)</translation>
     </message>
     <message>
         <source>L2 / (L1 + L2 + L3)</source>
-        <translation type="unfinished"></translation>
+        <translation>L2 / (L1 + L2 + L3)</translation>
     </message>
     <message>
         <source>L3 / (L1 + L2 + L3)</source>
-        <translation type="unfinished"></translation>
+        <translation>L3 / (L1 + L2 + L3)</translation>
     </message>
     <message>
         <source>L3 / L1</source>
-        <translation type="unfinished"></translation>
+        <translation>L3 / L1</translation>
     </message>
     <message>
         <source>Linearity</source>
@@ -4340,11 +4348,11 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>PCA1</source>
-        <translation type="unfinished"></translation>
+        <translation>PCA1</translation>
     </message>
     <message>
         <source>PCA2</source>
-        <translation type="unfinished"></translation>
+        <translation>PCA2</translation>
     </message>
     <message>
         <source>Planarity</source>
@@ -4384,15 +4392,15 @@ li.checked::marker { content: "\2612"; }
     </message>
     <message>
         <source>X=</source>
-        <translation type="unfinished"></translation>
+        <translation>X=</translation>
     </message>
     <message>
         <source>Y=</source>
-        <translation type="unfinished"></translation>
+        <translation>Y=</translation>
     </message>
     <message>
         <source>Z=</source>
-        <translation type="unfinished"></translation>
+        <translation>Z=</translation>
     </message>
 </context>
 <context>
@@ -4526,11 +4534,11 @@ coordinate system (on disk)</source>
     </message>
     <message>
         <source>diagonal = 321313</source>
-        <translation type="unfinished"></translation>
+        <translation>对角线 = 321313</translation>
     </message>
     <message>
         <source>diagonal = 3213132123.3215</source>
-        <translation type="unfinished"></translation>
+        <translation>对角线 = 3213132123.3215</translation>
     </message>
     <message>
         <source>shift/scale information is stored and used to restore the original coordinates at export time</source>
@@ -4584,7 +4592,7 @@ Note: the diagonal is not tested at loading time.</source>
     <name>GraphicalSegmentationDlg</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>Activate polyline selection</source>
@@ -4672,7 +4680,7 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <source>in</source>
-        <translation type="unfinished"></translation>
+        <translation>内</translation>
     </message>
     <message>
         <source>load/save segmentation polyline</source>
@@ -4692,18 +4700,18 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <source>raz</source>
-        <translation type="unfinished"></translation>
+        <translation>清零</translation>
     </message>
 </context>
 <context>
     <name>GraphicalSegmentationOptionsDlg</name>
     <message>
         <source>.remaining</source>
-        <translation type="unfinished"></translation>
+        <translation>.剩余</translation>
     </message>
     <message>
         <source>.segmented</source>
-        <translation type="unfinished"></translation>
+        <translation>.已分割</translation>
     </message>
     <message>
         <source>Additional Suffix</source>
@@ -4805,7 +4813,7 @@ Note: the diagonal is not tested at loading time.</source>
     <name>HPRDialog</name>
     <message>
         <source>HPR</source>
-        <translation type="unfinished"></translation>
+        <translation>隐藏点去除（HPR）</translation>
     </message>
     <message>
         <source>Level</source>
@@ -5056,7 +5064,7 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <source>sigma</source>
-        <translation type="unfinished"></translation>
+        <translation>σ</translation>
     </message>
 </context>
 <context>
@@ -5141,14 +5149,14 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <source>kNN</source>
-        <translation type="unfinished"></translation>
+        <translation>k 近邻</translation>
     </message>
 </context>
 <context>
     <name>LASOpenDialog</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>Apply</source>
@@ -5160,7 +5168,7 @@ Note: the diagonal is not tested at loading time.</source>
     </message>
     <message>
         <source>COPC</source>
-        <translation type="unfinished"></translation>
+        <translation>云优化点云（COPC）</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -5270,39 +5278,39 @@ It will be saved as multiple tiles on the disk.</source>
     </message>
     <message>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation>X：</translation>
     </message>
     <message>
         <source>XY</source>
-        <translation type="unfinished"></translation>
+        <translation>XY</translation>
     </message>
     <message>
         <source>XZ</source>
-        <translation type="unfinished"></translation>
+        <translation>XZ</translation>
     </message>
     <message>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Y</translation>
     </message>
     <message>
         <source>Y:</source>
-        <translation type="unfinished"></translation>
+        <translation>Y：</translation>
     </message>
     <message>
         <source>YZ</source>
-        <translation type="unfinished"></translation>
+        <translation>YZ</translation>
     </message>
     <message>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <source>Z:</source>
-        <translation type="unfinished"></translation>
+        <translation>Z：</translation>
     </message>
     <message>
         <source>select all</source>
@@ -5333,11 +5341,11 @@ It will be saved as multiple tiles on the disk.</source>
     </message>
     <message>
         <source>(0 ; 0 ; 0)</source>
-        <translation type="unfinished"></translation>
+        <translation>(0 ; 0 ; 0)</translation>
     </message>
     <message>
         <source>(0,0,0)</source>
-        <translation type="unfinished"></translation>
+        <translation>(0, 0, 0)</translation>
     </message>
     <message>
         <source>Add</source>
@@ -5399,7 +5407,7 @@ Version 1.4 is recommended for compatibility with all software packages.</source
     </message>
     <message>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <source>Save RGB information (a point format that supports RGB must be selected)</source>
@@ -5484,7 +5492,12 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"&gt;
 &lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
 &lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href="http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract"&gt;&lt;span style=" font-size:8pt; text-decoration: underline; color:#0000ff;"&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=" font-size:8pt;"&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"&gt;
+&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:10pt; font-weight:600;"&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
+&lt;p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;span style=" font-size:8pt;"&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href="http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract"&gt;&lt;span style=" font-size:8pt; text-decoration: underline; color:#0000ff;"&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=" font-size:8pt;"&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Adds one scalar field (point count per core point)</source>
@@ -5676,15 +5689,15 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Sigma(x)</source>
-        <translation type="unfinished"></translation>
+        <translation>Σ(x)</translation>
     </message>
     <message>
         <source>Sigma(y)</source>
-        <translation type="unfinished"></translation>
+        <translation>Σ(y)</translation>
     </message>
     <message>
         <source>Sigma(z)</source>
-        <translation type="unfinished"></translation>
+        <translation>Σ(z)</translation>
     </message>
     <message>
         <source>Slower but it guarantees that all the cylinder will be explored</source>
@@ -5937,7 +5950,7 @@ Parameter</source>
     </message>
     <message>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <translation>+</translation>
     </message>
     <message>
         <source>2.5D quadric</source>
@@ -5965,11 +5978,11 @@ Parameter</source>
     </message>
     <message>
         <source>=</source>
-        <translation type="unfinished"></translation>
+        <translation>=</translation>
     </message>
     <message>
         <source>A</source>
-        <translation type="unfinished"></translation>
+        <translation>A</translation>
     </message>
     <message>
         <source>About</source>
@@ -6041,11 +6054,11 @@ Parameter</source>
     </message>
     <message>
         <source>Alt+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+C</translation>
     </message>
     <message>
         <source>Alt+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+P</translation>
     </message>
     <message>
         <source>Always visible</source>
@@ -6153,7 +6166,7 @@ Parameter</source>
     </message>
     <message>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation>B</translation>
     </message>
     <message>
         <source>Back View</source>
@@ -6193,7 +6206,7 @@ Parameter</source>
     </message>
     <message>
         <source>C</source>
-        <translation type="unfinished"></translation>
+        <translation>C</translation>
     </message>
     <message>
         <source>CNE Test</source>
@@ -6309,7 +6322,7 @@ Parameter</source>
     </message>
     <message>
         <source>CloudCompare</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare</translation>
     </message>
     <message>
         <source>CloudCompare started!</source>
@@ -6599,39 +6612,39 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>Ctrl+D</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+D</translation>
     </message>
     <message>
         <source>Ctrl+F3</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F3</translation>
     </message>
     <message>
         <source>Ctrl+F4</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F4</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <source>Ctrl+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+P</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Ctrl+Shift+S</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+S</translation>
     </message>
     <message>
         <source>Ctrl+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+T</translation>
     </message>
     <message>
         <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+V</translation>
     </message>
     <message>
         <source>Curvature</source>
@@ -6655,7 +6668,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation>D</translation>
     </message>
     <message>
         <source>DB Tree</source>
@@ -6663,7 +6676,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>Del</source>
-        <translation type="unfinished"></translation>
+        <translation>删除</translation>
     </message>
     <message>
         <source>Delaunay 2.5D (XY plane)</source>
@@ -6781,7 +6794,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>E</source>
-        <translation type="unfinished"></translation>
+        <translation>E</translation>
     </message>
     <message>
         <source>Edit</source>
@@ -6937,47 +6950,47 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
         <source>F10</source>
-        <translation type="unfinished"></translation>
+        <translation>F10</translation>
     </message>
     <message>
         <source>F11</source>
-        <translation type="unfinished"></translation>
+        <translation>F11</translation>
     </message>
     <message>
         <source>F12</source>
-        <translation type="unfinished"></translation>
+        <translation>F12</translation>
     </message>
     <message>
         <source>F3</source>
-        <translation type="unfinished"></translation>
+        <translation>F3</translation>
     </message>
     <message>
         <source>F4</source>
-        <translation type="unfinished"></translation>
+        <translation>F4</translation>
     </message>
     <message>
         <source>F5</source>
-        <translation type="unfinished"></translation>
+        <translation>F5</translation>
     </message>
     <message>
         <source>F6</source>
-        <translation type="unfinished"></translation>
+        <translation>F6</translation>
     </message>
     <message>
         <source>F7</source>
-        <translation type="unfinished"></translation>
+        <translation>F7</translation>
     </message>
     <message>
         <source>F8</source>
-        <translation type="unfinished"></translation>
+        <translation>F8</translation>
     </message>
     <message>
         <source>F9</source>
-        <translation type="unfinished"></translation>
+        <translation>F9</translation>
     </message>
     <message>
         <source>Failed to allocate memory for output scalar field!</source>
@@ -7249,7 +7262,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>K-Means</source>
-        <translation type="unfinished"></translation>
+        <translation>K 均值</translation>
     </message>
     <message>
         <source>Keep old normals?</source>
@@ -7257,7 +7270,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>L</source>
-        <translation type="unfinished"></translation>
+        <translation>L</translation>
     </message>
     <message>
         <source>Label Connected Comp.</source>
@@ -7315,7 +7328,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>M</source>
-        <translation type="unfinished"></translation>
+        <translation>M</translation>
     </message>
     <message>
         <source>Main</source>
@@ -7453,7 +7466,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>N</source>
-        <translation type="unfinished"></translation>
+        <translation>N</translation>
     </message>
     <message>
         <source>Ne&amp;xt</source>
@@ -7625,7 +7638,7 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>P</source>
-        <translation type="unfinished"></translation>
+        <translation>P</translation>
     </message>
     <message>
         <source>Paste from ASCII/text data stored in the clipboard</source>
@@ -7869,11 +7882,11 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>S</source>
-        <translation type="unfinished"></translation>
+        <translation>S</translation>
     </message>
     <message>
         <source>SF</source>
-        <translation type="unfinished"></translation>
+        <translation>标量场</translation>
     </message>
     <message>
         <source>SF arithmetic</source>
@@ -8201,15 +8214,15 @@ Do you want to use this other tool instead?</source>
     </message>
     <message>
         <source>Shift+C</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+C</translation>
     </message>
     <message>
         <source>Shift+Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+↓</translation>
     </message>
     <message>
         <source>Shift+P</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+P</translation>
     </message>
     <message>
         <source>Shift+Up</source>
@@ -8367,11 +8380,11 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <source>T</source>
-        <translation type="unfinished"></translation>
+        <translation>T</translation>
     </message>
     <message>
         <source>TLS/GBL</source>
-        <translation type="unfinished"></translation>
+        <translation>地面激光扫描（TLS）/地基激光扫描（GBL）</translation>
     </message>
     <message>
         <source>Terrestrial Laser Sensor = Ground Based Lidar</source>
@@ -8547,7 +8560,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <source>V</source>
-        <translation type="unfinished"></translation>
+        <translation>V</translation>
     </message>
     <message>
         <source>View</source>
@@ -8595,7 +8608,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <source>Yes, don't ask again</source>
@@ -8607,7 +8620,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
     <message>
         <source>Zoom &amp; Center</source>
@@ -9158,11 +9171,11 @@ Should be used after one of the previous methods!</source>
     <name>MeshBooleanDialog</name>
     <message>
         <source>A</source>
-        <translation type="unfinished"></translation>
+        <translation>A</translation>
     </message>
     <message>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation>B</translation>
     </message>
     <message>
         <source>Difference
@@ -9408,7 +9421,7 @@ A+B</translation>
     <name>OpenLASFileDialog</name>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>…</translation>
     </message>
     <message>
         <source>Apply</source>
@@ -9562,7 +9575,7 @@ It will be saved as multiple tiles on the disk.</source>
     </message>
     <message>
         <source>x</source>
-        <translation type="unfinished"></translation>
+        <translation>x</translation>
     </message>
 </context>
 <context>
@@ -9669,7 +9682,7 @@ may not handle filenames with local characters properly</source>
     </message>
     <message>
         <source>ShadeVis</source>
-        <translation type="unfinished"></translation>
+        <translation>阴影可视化</translation>
     </message>
     <message>
         <source>Use cloud normals as light rays</source>
@@ -9917,11 +9930,11 @@ may not handle filenames with local characters properly</source>
     </message>
     <message>
         <source>A</source>
-        <translation type="unfinished"></translation>
+        <translation>A</translation>
     </message>
     <message>
         <source>D</source>
-        <translation type="unfinished"></translation>
+        <translation>D</translation>
     </message>
     <message>
         <source>Define a rectangular 2D label</source>
@@ -9929,11 +9942,11 @@ may not handle filenames with local characters properly</source>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>I</source>
-        <translation type="unfinished"></translation>
+        <translation>I</translation>
     </message>
     <message>
         <source>Points Properties</source>
@@ -9941,7 +9954,7 @@ may not handle filenames with local characters properly</source>
     </message>
     <message>
         <source>S</source>
-        <translation type="unfinished"></translation>
+        <translation>S</translation>
     </message>
     <message>
         <source>Save current label (added to cloud children)</source>
@@ -10075,7 +10088,7 @@ may not handle filenames with local characters properly</source>
     </message>
     <message>
         <source>Snout mode</source>
-        <translation type="unfinished"></translation>
+        <translation>鼻端模式</translation>
     </message>
     <message>
         <source>Sphere</source>
@@ -10202,7 +10215,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Mortar maps</source>
-        <translation type="unfinished"></translation>
+        <translation>砂浆分布图</translation>
     </message>
     <message>
         <source>Operations</source>
@@ -10245,7 +10258,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>	%1 : %2</source>
-        <translation type="unfinished"></translation>
+        <translation>	%1 : %2</translation>
     </message>
     <message>
         <source>	'Use active SF' disabled. Falling back to constant spacing.</source>
@@ -10381,7 +10394,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>	[%1] %2</source>
-        <translation type="unfinished"></translation>
+        <translation>	[%1] %2</translation>
     </message>
     <message>
         <source>	[%4 - %5] Applied Transformation {%1,%2,%3}</source>
@@ -10431,7 +10444,7 @@ Missing parameter: Directory after "-%1 %2"</source>
     </message>
     <message>
         <source> (#%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>（#%2）</translation>
     </message>
     <message>
         <source> (poly %1)</source>
@@ -10451,27 +10464,27 @@ Missing parameter: Directory after "-%1 %2"</source>
     </message>
     <message>
         <source>%1%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1%2</translation>
     </message>
     <message>
         <source>%1/%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1/%2</translation>
     </message>
     <message>
         <source>%1/%2_BEST_FIT_PLANE_INFO</source>
-        <translation type="unfinished"></translation>
+        <translation>%1/%2_最佳拟合平面信息</translation>
     </message>
     <message>
         <source>%1/%2_REGISTRATION_MATRIX</source>
-        <translation type="unfinished"></translation>
+        <translation>%1/%2_配准矩阵</translation>
     </message>
     <message>
         <source>%1_CURVATURE_KERNEL_%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1_曲率核_%2</translation>
     </message>
     <message>
         <source>%1_FEATURE_KERNEL_%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1_特征核_%2</translation>
     </message>
     <message>
         <source>(ASCII) STL file</source>
@@ -10479,31 +10492,31 @@ Missing parameter: Directory after "-%1 %2"</source>
     </message>
     <message>
         <source>.%1_feature(%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>.%1_特征(%2)</translation>
     </message>
     <message>
         <source>.OctreeNormal</source>
-        <translation type="unfinished"></translation>
+        <translation>.八叉树法线</translation>
     </message>
     <message>
         <source>.clean</source>
-        <translation type="unfinished"></translation>
+        <translation>.清理</translation>
     </message>
     <message>
         <source>.cropped</source>
-        <translation type="unfinished"></translation>
+        <translation>.裁剪</translation>
     </message>
     <message>
         <source>.subsampled</source>
-        <translation type="unfinished"></translation>
+        <translation>.降采样</translation>
     </message>
     <message>
         <source>.txt</source>
-        <translation type="unfinished"></translation>
+        <translation>.txt</translation>
     </message>
     <message>
         <source>.vertices</source>
-        <translation type="unfinished"></translation>
+        <translation>.顶点</translation>
     </message>
     <message>
         <source>1st order moment</source>
@@ -10607,11 +10620,11 @@ Missing parameter: Directory after "-%1 %2"</source>
     </message>
     <message>
         <source>COLOR_BANDING_%1_%2</source>
-        <translation type="unfinished"></translation>
+        <translation>颜色分带_%1_%2</translation>
     </message>
     <message>
         <source>COLOR_LEVELS_%1_%2_%3</source>
-        <translation type="unfinished"></translation>
+        <translation>颜色级别_%1_%2_%3</translation>
     </message>
     <message>
         <source>Cameras: %1
@@ -10977,7 +10990,7 @@ Points: </source>
     </message>
     <message>
         <source>ExtractCCs</source>
-        <translation type="unfinished"></translation>
+        <translation>提取连通分量</translation>
     </message>
     <message>
         <source>FBX format: %1</source>
@@ -11511,7 +11524,7 @@ Cells: %2 x %3</source>
     </message>
     <message>
         <source>MOMENT_KERNEL_%2</source>
-        <translation type="unfinished"></translation>
+        <translation>矩核_%2</translation>
     </message>
     <message>
         <source>Match B.B. centers</source>
@@ -12113,7 +12126,7 @@ Grid: %2 x %3</source>
     </message>
     <message>
         <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
-        <translation type="unfinished"></translation>
+        <translation>八叉树层级_%1_降采样</translation>
     </message>
     <message>
         <source>Octree computation on cloud '%1' failed!</source>
@@ -12301,7 +12314,7 @@ Cloud: %2 points</source>
     </message>
     <message>
         <source>RANSAC</source>
-        <translation type="unfinished"></translation>
+        <translation>RANSAC</translation>
     </message>
     <message>
         <source>RGB convert to SF</source>
@@ -12321,7 +12334,7 @@ Cloud: %2 points</source>
     </message>
     <message>
         <source>ROUGHNESS_KERNEL_%2</source>
-        <translation type="unfinished"></translation>
+        <translation>粗糙度核_%2</translation>
     </message>
     <message>
         <source>Read E57 file</source>
@@ -12667,7 +12680,7 @@ Source points: %2</source>
     </message>
     <message>
         <source>V = %2</source>
-        <translation type="unfinished"></translation>
+        <translation>V = %2</translation>
     </message>
     <message>
         <source>Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance). Can't apply the current command on them.</source>
@@ -12751,7 +12764,7 @@ Source points: %2</source>
     </message>
     <message>
         <source>[DEST_IS_FIRST]</source>
-        <translation type="unfinished"></translation>
+        <translation>[目标对象在前]</translation>
     </message>
     <message>
         <source>[Distribution fitting] %1</source>
@@ -12903,79 +12916,79 @@ Source points: %2</source>
     </message>
     <message>
         <source>_%1</source>
-        <translation type="unfinished"></translation>
+        <translation>_%1</translation>
     </message>
     <message>
         <source>_%1_TO_SF</source>
-        <translation type="unfinished"></translation>
+        <translation>_%1_转为标量场</translation>
     </message>
     <message>
         <source>_CLOUD_%1(%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>_点云_%1(%2)</translation>
     </message>
     <message>
         <source>_COMPONENT_%1</source>
-        <translation type="unfinished"></translation>
+        <translation>_分量_%1</translation>
     </message>
     <message>
         <source>_DENOISED</source>
-        <translation type="unfinished"></translation>
+        <translation>_去噪</translation>
     </message>
     <message>
         <source>_FILTERED_[%1_%2]</source>
-        <translation type="unfinished"></translation>
+        <translation>_滤波_[%1_%2]</translation>
     </message>
     <message>
         <source>_FLIPPED_TRIANGLES</source>
-        <translation type="unfinished"></translation>
+        <translation>_已翻转三角形</translation>
     </message>
     <message>
         <source>_HORIZ</source>
-        <translation type="unfinished"></translation>
+        <translation>_水平</translation>
     </message>
     <message>
         <source>_M3C2</source>
-        <translation type="unfinished"></translation>
+        <translation>_M3C2</translation>
     </message>
     <message>
         <source>_MAX_DIST_%1</source>
-        <translation type="unfinished"></translation>
+        <translation>_最大距离_%1</translation>
     </message>
     <message>
         <source>_MERGED</source>
-        <translation type="unfinished"></translation>
+        <translation>_已合并</translation>
     </message>
     <message>
         <source>_NORMS_REORIENTED</source>
-        <translation type="unfinished"></translation>
+        <translation>_法线已重定向</translation>
     </message>
     <message>
         <source>_REGISTERED</source>
-        <translation type="unfinished"></translation>
+        <translation>_已配准</translation>
     </message>
     <message>
         <source>_REMOVED_DUPLICATE_POINTS</source>
-        <translation type="unfinished"></translation>
+        <translation>_已移除重复点</translation>
     </message>
     <message>
         <source>_SAMPLED_POINTS</source>
-        <translation type="unfinished"></translation>
+        <translation>_采样点</translation>
     </message>
     <message>
         <source>_SF_TO_COORD_%1</source>
-        <translation type="unfinished"></translation>
+        <translation>_标量场转坐标_%1</translation>
     </message>
     <message>
         <source>_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6</source>
-        <translation type="unfinished"></translation>
+        <translation>_从_%1_%2_%3_平移至_%4_%5_%6</translation>
     </message>
     <message>
         <source>_SOR</source>
-        <translation type="unfinished"></translation>
+        <translation>_统计离群点滤波</translation>
     </message>
     <message>
         <source>_STAT_TEST_%1</source>
-        <translation type="unfinished"></translation>
+        <translation>_统计检验_%1</translation>
     </message>
     <message>
         <source>bad argument (internal)</source>
@@ -13155,7 +13168,7 @@ Source points: %2</source>
     <name>QuantiDialog</name>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>Colors available :</source>
@@ -13329,7 +13342,7 @@ Source points: %2</source>
     </message>
     <message>
         <source>°</source>
-        <translation type="unfinished"></translation>
+        <translation>°</translation>
     </message>
 </context>
 <context>
@@ -13371,7 +13384,7 @@ Source points: %2</source>
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Per-cell height computation method:&lt;ul&gt;
@@ -13814,7 +13827,7 @@ applied to the height values</source>
     </message>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -14212,7 +14225,7 @@ the cloud from sinking under the mesh surface.</source>
     <name>SSAODialog</name>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Bilateral filter</source>
@@ -14278,7 +14291,7 @@ but the more accuracy will be lost)</source>
     </message>
     <message>
         <source>(0,0,0)</source>
-        <translation type="unfinished"></translation>
+        <translation>(0, 0, 0)</translation>
     </message>
     <message>
         <source>Choose the output LAS/LAZ scale/resolution:</source>
@@ -14327,7 +14340,7 @@ but the more accuracy will be lost)</source>
     <name>SaveMascaretFileDlg</name>
     <message>
         <source>B (bathy)</source>
-        <translation type="unfinished"></translation>
+        <translation>B（水深）</translation>
     </message>
     <message>
         <source>Bed type</source>
@@ -14347,7 +14360,7 @@ but the more accuracy will be lost)</source>
     </message>
     <message>
         <source>T (topo)</source>
-        <translation type="unfinished"></translation>
+        <translation>T（地形）</translation>
     </message>
 </context>
 <context>
@@ -14663,15 +14676,15 @@ Warning: may not be compatible with Mascaret export.</source>
     </message>
     <message>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <source>Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Y</translation>
     </message>
     <message>
         <source>Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z</translation>
     </message>
 </context>
 <context>
@@ -14774,19 +14787,19 @@ mean distance estimation</source>
     </message>
     <message>
         <source>p(Chi2)</source>
-        <translation type="unfinished"></translation>
+        <translation>p(卡方)</translation>
     </message>
     <message>
         <source>param1</source>
-        <translation type="unfinished"></translation>
+        <translation>参数1</translation>
     </message>
     <message>
         <source>param2</source>
-        <translation type="unfinished"></translation>
+        <translation>参数2</translation>
     </message>
     <message>
         <source>param3</source>
-        <translation type="unfinished"></translation>
+        <translation>参数3</translation>
     </message>
 </context>
 <context>
@@ -14946,7 +14959,7 @@ mean distance estimation</source>
     <name>TracePolyLineDlg</name>
     <message>
         <source>C</source>
-        <translation type="unfinished"></translation>
+        <translation>C</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -14993,7 +15006,7 @@ mean distance estimation</source>
     <name>Train3DMASCDialog</name>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked : &lt;/p&gt;&lt;p&gt;* A directory is created near the parameter file, with name 3dmasc_yyyymmdd_HHhMM.&lt;/p&gt;&lt;p&gt;* A file 3dmasc_yyyymmdd_HHhMM.txt is created in this directory. &lt;/p&gt;&lt;p&gt;* Each time you train the classifier, the feature list and the classifier are stored and an entry is created in the trace file to save the overall accuracy.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -15120,7 +15133,7 @@ mean distance estimation</source>
     <name>TrainDisclaimerDialog</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -15202,7 +15215,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>q3DMASC_train</source>
-        <translation type="unfinished"></translation>
+        <translation>q3DMASC 训练</translation>
     </message>
     <message>
         <source>qCANUPO (disclaimer)</source>
@@ -15228,7 +15241,22 @@ piecewise constant functions on general weighted graphs. SIAM Journal on
 Imaging Sciences. 2017, 10.4, 1724-1766.`
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>***Treeiso *plugin (v2)**
+
+`A graph-based tree point cloud isolator (assuming ground points have already
+been removed)`
+
+`Reference`
+
+`Xi, Z.; Hopkinson, C. 3D Graph-Based Individual-Tree Isolation (Treeiso) from
+Terrestrial Laser Scanning Point Clouds. Remote Sens. 2022, 14, 6116.
+https://doi.org/10.3390/rs14236116`
+
+`Landrieu, Loic, and Guillaume Obozinski. Cut pursuit: Fast algorithms to learn
+piecewise constant functions on general weighted graphs. SIAM Journal on
+Imaging Sciences. 2017, 10.4, 1724-1766.`
+
+</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
@@ -15766,7 +15794,7 @@ You should fill the empty cells...</source>
     <name>ccCloudLayersDlg</name>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Are you sure you want to delete this record(s)?</source>
@@ -15965,7 +15993,7 @@ You should fill the empty cells...</source>
     <name>ccDrawNormalsWidget</name>
     <message>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <source>Normal length</source>
@@ -16465,7 +16493,11 @@ sigma 取 +inf 时使用整个标量范围</translation>
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
 &lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;style type="text/css"&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>About Plugins</source>
@@ -16517,7 +16549,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>🔍</source>
-        <translation type="unfinished"></translation>
+        <translation>🔍</translation>
     </message>
 </context>
 <context>
@@ -16978,7 +17010,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>RMS</source>
-        <translation type="unfinished"></translation>
+        <translation>均方根（RMS）</translation>
     </message>
     <message>
         <source>Radius</source>
@@ -17381,11 +17413,11 @@ Number of points: %2</source>
     </message>
     <message>
         <source>Ctrl+Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Z</translation>
     </message>
     <message>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <source>Exit ccCompass plugin. Thanks for visiting :)</source>
@@ -17472,7 +17504,7 @@ Number of points: %2</source>
     </message>
     <message>
         <source>Map</source>
-        <translation type="unfinished"></translation>
+        <translation>地图</translation>
     </message>
     <message>
         <source>No Selection</source>
@@ -17705,7 +17737,7 @@ At least 2 viewports must be selected.</source>
     </message>
     <message>
         <source>Composite = (R+ G+ B) / 3</source>
-        <translation type="unfinished"></translation>
+        <translation>合成值 = (R + G + B) / 3</translation>
     </message>
     <message>
         <source>G Channel</source>

@@ -156,6 +156,13 @@ LasSaver::~LasSaver() noexcept
 {
 	close();
 
+	// the VLRs and their data belong to this saver (laszip_set_header makes its own copy)
+	for (laszip_U32 i = 0; i < m_laszipHeader.number_of_variable_length_records; ++i)
+	{
+		delete[] m_laszipHeader.vlrs[i].data;
+	}
+	delete[] m_laszipHeader.vlrs;
+
 	if (m_originallySelectedScalarField != -1)
 	{
 		m_cloudToSave.setCurrentDisplayedScalarField(m_originallySelectedScalarField);

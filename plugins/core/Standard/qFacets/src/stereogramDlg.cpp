@@ -372,10 +372,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 				//set family color
 				ccColor::Rgb col;
 				FacetsClassifier::GenerateSubfamilyColor(col, 90.0, dipDir_deg + 0.5 * m_angularStep_deg, 0, 1);
-				brush.setColor(QColor(	static_cast<int>(col.r),
-										static_cast<int>(col.g),
-										static_cast<int>(col.b),
-										255));
+				brush.setColor(ccColor::ToQColor(col));
 				painter.setBrush(brush);
 
 				int angle_start = static_cast<int>((360.0 - dipDir_deg - m_angularStep_deg + 90.0) * 16.0); //see QPainter::drawPie
@@ -473,10 +470,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 					const ccColor::Rgb* col = m_densityColorScale->getColorByRelativePos(relPos, m_densityColorScaleSteps);
 					if (col)
 					{
-						brush.setColor(QColor(	static_cast<int>(col->r),
-												static_cast<int>(col->g),
-												static_cast<int>(col->b),
-												255));
+						brush.setColor(ccColor::ToQColor(*col));
 					}
 					else
 					{

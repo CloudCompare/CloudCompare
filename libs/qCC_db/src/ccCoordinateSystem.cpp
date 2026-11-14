@@ -137,7 +137,7 @@ ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
 		zxPlaneMat = *transMat * zxPlaneMat;
 	}
 	ccPlane* zxPlane = new ccPlane(m_DisplayScale, m_DisplayScale, &zxPlaneMat);
-	zxPlane->setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0.0f, 0.7f, 1.0f)));
+	zxPlane->setColor(ccColor::Rgb(0, 179, 255));
 	return zxPlane;
 }
 

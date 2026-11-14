@@ -1329,50 +1329,71 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			pod.propertiesEdit->setText(QString::number(listProperties.size() + stdProperties.size() + singleProperties.size()));
 			pod.textureCountEdit->setText(QString::number(textureFileNames.size()));
 
-			// we fill all combo-boxes with all items
+			// we fill all the combo-boxes with all the matching items
 			pod.setDefaultComboItems(stdPropsText);
 			pod.setListComboItems(listPropsText);
 			pod.setSingleComboItems(singlePropsText);
 
-			// try to restore previous context (if any)
-			bool hasAPreviousContext = false;
-			if (!pod.restorePreviousContext(hasAPreviousContext))
+			if (parameters.sessionStart)
 			{
-				if (hasAPreviousContext)
+				// make sure the 'Apply All' flag is reset on a new session start
+				PlyOpenDlg::ResetApplyAll();
+			}
+
+			bool shouldApplyAll = pod.shouldApplyAll();
+
+			// try to restore the previous context (if any)
+			std::set<QString> restoredProps;
+			bool              fullyRestored = pod.restorePreviousContext(restoredProps, /*restoreSFs=*/shouldApplyAll); // we only restore the SF selection if 'Apply All' has been chosen by the user previously
+
+			if (shouldApplyAll && !fullyRestored)
+			{
+				ccLog::Warning("[PLY] Differences detected with the previous file, cannot silently apply the previous configuration.");
+				PlyOpenDlg::ResetApplyAll();
+			}
+
+			if (!fullyRestored || !shouldApplyAll) // we may have new properties to assign
+			{
+				auto updateComboBoxIfZero = [restoredProps](QComboBox* comboBox, int newIndex)
 				{
-					ccLog::Warning("[PLY] Too many differences with the previous file, we reset the dialog.");
-				}
+					if (comboBox
+					    && comboBox->currentIndex() == 0
+					    && restoredProps.find(comboBox->itemText(newIndex)) == restoredProps.end() // make sure the new index is not already used
+					)
+					{
+						comboBox->setCurrentIndex(newIndex);
+					}
+				};
 
 				// Set default/guessed element
-				pod.xComboBox->setCurrentIndex(xIndex);
-				pod.yComboBox->setCurrentIndex(yIndex);
-				pod.zComboBox->setCurrentIndex(zIndex);
+				updateComboBoxIfZero(pod.xComboBox, xIndex);
+				updateComboBoxIfZero(pod.yComboBox, yIndex);
+				updateComboBoxIfZero(pod.zComboBox, zIndex);
 
-				pod.rComboBox->setCurrentIndex(rIndex);
-				pod.gComboBox->setCurrentIndex(gIndex);
-				pod.bComboBox->setCurrentIndex(bIndex);
+				updateComboBoxIfZero(pod.rComboBox, rIndex);
+				updateComboBoxIfZero(pod.gComboBox, gIndex);
+				updateComboBoxIfZero(pod.bComboBox, bIndex);
 
-				pod.iComboBox->setCurrentIndex(iIndex);
+				updateComboBoxIfZero(pod.iComboBox, iIndex);
 
+				updateComboBoxIfZero(pod.nxComboBox, nxIndex);
+				updateComboBoxIfZero(pod.nyComboBox, nyIndex);
+				updateComboBoxIfZero(pod.nzComboBox, nzIndex);
+
+				updateComboBoxIfZero(pod.facesComboBox, facesIndex);
+				updateComboBoxIfZero(pod.textCoordsComboBox, texCoordsIndex);
+				updateComboBoxIfZero(pod.texIndexComboBox, texNumberIndex);
+			}
+
+			if (!shouldApplyAll)
+			{
+				// add all SFs on a new session start
+				// or more generally if 'Apply All' was
+				// not chosen by the user
 				for (int sfPropIndex : sfPropIndexes)
 				{
 					pod.addSFComboBox(sfPropIndex);
 				}
-
-				pod.nxComboBox->setCurrentIndex(nxIndex);
-				pod.nyComboBox->setCurrentIndex(nyIndex);
-				pod.nzComboBox->setCurrentIndex(nzIndex);
-
-				pod.facesComboBox->setCurrentIndex(facesIndex);
-				pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
-				pod.texIndexComboBox->setCurrentIndex(texNumberIndex);
-			}
-
-			if (parameters.sessionStart)
-			{
-				// we do this AFTER calling restorePreviousContext because it may still be good that the previous
-				// configuration is restored even though the user needs to confirm it
-				PlyOpenDlg::ResetApplyAll();
 			}
 
 			// We show the dialog (or we try to skip it ;)
@@ -1403,11 +1424,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 			// get (non null) SF properties
 			sfPropIndexes.clear();
-			{
-				for (const auto* sfCombo : pod.m_sfCombos)
-					if (sfCombo->currentIndex() > 0)
-						sfPropIndexes.push_back(sfCombo->currentIndex());
-			}
+			pod.getSFPropIndexes(sfPropIndexes);
 		}
 	}
 

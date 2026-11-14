@@ -291,8 +291,8 @@ namespace ccColor
 		}
 	};
 
-	//! Conversion from Rgbf
-	inline Rgb FromRgbfToRgb(const Rgbf& color)
+	//! Conversion from Rgbf to Rgb
+	inline Rgb ToRgb(const Rgbf& color)
 	{
 		return Rgb(static_cast<ColorCompType>(color.r * MAX),
 		           static_cast<ColorCompType>(color.g * MAX),
@@ -300,21 +300,37 @@ namespace ccColor
 	}
 
 	//! Conversion from Rgbaf to Rgb
-	inline Rgb FromRgbafToRgb(const Rgbaf& color)
+	inline Rgb ToRgb(const Rgbaf& color)
 	{
 		return Rgb(static_cast<ColorCompType>(color.r * MAX),
 		           static_cast<ColorCompType>(color.g * MAX),
 		           static_cast<ColorCompType>(color.b * MAX));
 	}
 
+	//! Conversion from QRgb to Rgb
+	inline Rgb ToRgb(QRgb qColor)
+	{
+		return Rgb(static_cast<unsigned char>(qRed(qColor)),
+		           static_cast<unsigned char>(qGreen(qColor)),
+		           static_cast<unsigned char>(qBlue(qColor)));
+	}
+
+	//! Conversion from QColor to Rgb
+	inline Rgb ToRgb(const QColor& qColor)
+	{
+		return Rgb(static_cast<unsigned char>(qColor.red()),
+		           static_cast<unsigned char>(qColor.green()),
+		           static_cast<unsigned char>(qColor.blue()));
+	}
+
 	//! Conversion from Rgb to Rgba
-	inline Rgba FromRgbToRgba(const Rgb& color)
+	inline Rgba ToRgba(const Rgb& color)
 	{
 		return {color, MAX};
 	}
 
 	//! Conversion from Rgbaf to Rgba
-	inline Rgba FromRgbafToRgba(const Rgbaf& color)
+	inline Rgba ToRgba(const Rgbaf& color)
 	{
 		return Rgba(static_cast<ColorCompType>(color.r * MAX),
 		            static_cast<ColorCompType>(color.g * MAX),
@@ -322,16 +338,8 @@ namespace ccColor
 		            static_cast<ColorCompType>(color.a * MAX));
 	}
 
-	//! Conversion from QRgb
-	inline Rgb FromQRgb(QRgb qColor)
-	{
-		return Rgb(static_cast<unsigned char>(qRed(qColor)),
-		           static_cast<unsigned char>(qGreen(qColor)),
-		           static_cast<unsigned char>(qBlue(qColor)));
-	}
-
-	//! Conversion from QRgb'a'
-	inline Rgba FromQRgba(QRgb qColor)
+	//! Conversion from QRgb'a' to Rgba
+	inline Rgba ToRgba(QRgb qColor)
 	{
 		return Rgba(static_cast<unsigned char>(qRed(qColor)),
 		            static_cast<unsigned char>(qGreen(qColor)),
@@ -339,16 +347,8 @@ namespace ccColor
 		            static_cast<unsigned char>(qAlpha(qColor)));
 	}
 
-	//! Conversion from QColor
-	inline Rgb FromQColor(const QColor& qColor)
-	{
-		return Rgb(static_cast<unsigned char>(qColor.red()),
-		           static_cast<unsigned char>(qColor.green()),
-		           static_cast<unsigned char>(qColor.blue()));
-	}
-
-	//! Conversion from QColor'a'
-	inline Rgba FromQColora(const QColor& qColor)
+	//! Conversion from QColor'a' to Rgba
+	inline Rgba ToRgba(const QColor& qColor)
 	{
 		return Rgba(static_cast<unsigned char>(qColor.red()),
 		            static_cast<unsigned char>(qColor.green()),
@@ -356,20 +356,45 @@ namespace ccColor
 		            static_cast<unsigned char>(qColor.alpha()));
 	}
 
-	//! Conversion from QColor (floating point)
-	inline Rgbf FromQColorf(const QColor& qColor)
+	//! Conversion from QColor (floating point) to Rgbf
+	inline Rgbf ToRgbf(const QColor& qColor)
 	{
 		return Rgbf(qColor.redF(),
 		            qColor.greenF(),
 		            qColor.blueF());
 	}
 
-	//! Conversion from QColor'a' (floating point)
-	inline Rgbaf FromQColoraf(const QColor& qColor)
+	//! Conversion from QColor'a' (floating point) to Rgbaf
+	inline Rgbaf ToRgbaf(const QColor& qColor)
 	{
 		return Rgbaf(qColor.redF(),
 		             qColor.greenF(),
 		             qColor.blueF(),
 		             qColor.alphaF());
 	}
+
+	//! Conversion from Rgb to QColor
+	inline QColor ToQColor(const Rgb& color)
+	{
+		return QColor::fromRgb(color.r, color.g, color.b);
+	}
+
+	//! Conversion from Rgba to QColor
+	inline QColor ToQColor(const Rgba& color)
+	{
+		return QColor::fromRgb(color.r, color.g, color.b, color.a);
+	}
+
+	//! Conversion from Rgbf to QColor
+	inline QColor ToQColor(const Rgbf& color)
+	{
+		return QColor::fromRgbF(color.r, color.g, color.b);
+	}
+
+	//! Conversion from Rgbaf to QColor
+	inline QColor ToQColor(const Rgbaf& color)
+	{
+		return QColor::fromRgbF(color.r, color.g, color.b, color.a);
+	}
+
 }; // namespace ccColor

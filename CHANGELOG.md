@@ -153,6 +153,10 @@ New features:
 		- can be used to segment a cloud into piecewise constant regions, based on one or several scalar field
 		- based on the paper "Parallel Cut Pursuit for Minimization of the Graph Total Variation" (Raguet et al., 2019)
 
+	- New 'X-ray' rendering mode for point clouds
+		- new sets of global parameters to control the X-ray effect (exposure, background colors, etc.) in the Display Settings dialog
+		- new per-cloud parameters to control the X-ray effect (enable/disable, exposure override) in the cloud properties dialog
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

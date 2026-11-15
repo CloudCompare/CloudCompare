@@ -728,7 +728,9 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud /*=nullptr*/, bool
 
 	result->setVisible(isVisible());
 	if (!destCloud)
+	{
 		result->setDisplay(getDisplay());
+	}
 
 	result->append(this, 0, ignoreChildren); // there was (virtually) no point before
 
@@ -3761,6 +3763,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		float xRayStrength = 0.0f;
 		if (xRayEnabled)
 		{
+			if (xRayState->reverse())
+			{
+				glFunc->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+			}
+			else
+			{
+				glFunc->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+			}
+
 			ccGLCameraParameters camera;
 			glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 			glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
@@ -7728,7 +7739,7 @@ double ccPointCloud::xRayExposureOverride() const
 		value = getMetaData(s_xRayExposureOverrideMetaData).toDouble(&valid);
 	}
 
-	return valid ? value : std::numeric_limits<double>::quiet_NaN();
+	return valid && std::isfinite(value) ? value : std::numeric_limits<double>::quiet_NaN();
 }
 
 void ccPointCloud::setXRayExposureOverride(double value)

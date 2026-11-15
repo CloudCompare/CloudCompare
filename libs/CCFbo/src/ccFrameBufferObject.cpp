@@ -160,13 +160,14 @@ bool ccFrameBufferObject::initColor(GLint  internalformat /*=GL_RGBA*/,
 	m_glFunc.glTexImage2D(target, 0, internalformat, m_width, m_height, 0, format, type, nullptr);
 	m_glFunc.glBindTexture(target, 0);
 
-	m_glFunc.glPopAttrib();
+	m_glFunc.glPopAttrib(); // GL_ENABLE_BIT
 
 	if (attachColor(texID, true, target))
 	{
 		return true;
 	}
 	m_glFunc.glDeleteTextures(1, &texID);
+
 	return false;
 }
 
@@ -249,13 +250,14 @@ bool ccFrameBufferObject::initDepth(GLint  wrapParam /*=GL_CLAMP_TO_BORDER*/,
 	m_glFunc.glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 	m_glFunc.glBindTexture(target, 0);
 
-	m_glFunc.glPopAttrib();
+	m_glFunc.glPopAttrib(); // GL_ENABLE_BIT
 
 	if (attachDepth(texID, true, target))
 	{
 		return true;
 	}
 	m_glFunc.glDeleteTextures(1, &texID);
+
 	return false;
 }
 

@@ -84,6 +84,8 @@ class CCGLWINDOW_LIB_API ccXRayRenderer : public QObject
 	void release();
 	//! Draws the X-ray effect for the given context, optionally compositing with the original scene.
 	void drawTexture(bool composite);
+	//! Draws the clouds in the current scene, using the current context.
+	void drawClouds(ccGLDrawContext& context);
 
   protected: // members
 	ccGLWindowInterface& m_window;

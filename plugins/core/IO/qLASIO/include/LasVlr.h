@@ -32,6 +32,7 @@ struct LasVlr
 	LasVlr() = default;
 	explicit LasVlr(const laszip_header& header);
 	LasVlr(const LasVlr& rhs);
+	~LasVlr();
 
 	LasVlr& operator=(LasVlr rhs);
 
@@ -85,7 +86,7 @@ struct LasVlr
 			arch >> v.record_length_after_header;
 			arch.readRawData((char*)v.description, 32 * sizeof(laszip_CHAR));
 			{
-				v.data = new laszip_U8[v.record_length_after_header]; // TODO: potential memory leak
+				v.data = new laszip_U8[v.record_length_after_header]; // released by ~LasVlr
 				arch.readRawData((char*)v.data, v.record_length_after_header);
 			}
 			// arch >> QByteArray((const char*)v.data, v.record_length_after_header);

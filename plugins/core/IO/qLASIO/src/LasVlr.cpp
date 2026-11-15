@@ -70,6 +70,15 @@ LasVlr::LasVlr(const LasVlr& rhs)
 	}
 }
 
+LasVlr::~LasVlr()
+{
+	// the VLR data buffers belong to this object (allocated by CloneVlrInto or operator>>)
+	for (laszip_vlr_struct& vlr : vlrs)
+	{
+		delete[] vlr.data;
+	}
+}
+
 void LasVlr::Swap(LasVlr& lhs, LasVlr& rhs) noexcept
 {
 	std::swap(lhs.vlrs, rhs.vlrs);

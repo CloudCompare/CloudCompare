@@ -288,13 +288,13 @@ class TestXRayDisplay : public QObject
 		QVERIFY(cloud.reserve(1));
 		cloud.addPoint(CCVector3(0, 0, 0));
 		cloud.setXRayEnabled(true);
-		cloud.setXRayExposureOverride(7.1);
+		cloud.setXRayExposureOverride(-1.3);
 		std::unique_ptr<ccPointCloud> clone(cloud.cloneThis());
 		QVERIFY(clone && clone->isXRayEnabled());
-		QCOMPARE(clone->xRayExposureOverride(), 7.1);
-		clone->setXRayExposureOverride(-3.2);
-		QCOMPARE(clone->xRayExposureOverride(), -3.2);
-		QCOMPARE(cloud.xRayExposureOverride(), 7.1);
+		QCOMPARE(clone->xRayExposureOverride(), -1.3);
+		clone->setXRayExposureOverride(2.7);
+		QCOMPARE(clone->xRayExposureOverride(), 2.7);
+		QCOMPARE(cloud.xRayExposureOverride(), -1.3);
 		clone->setXRayEnabled(false);
 		QVERIFY(cloud.isXRayEnabled());
 		QVERIFY(!clone->isXRayEnabled());
@@ -311,7 +311,7 @@ class TestXRayDisplay : public QObject
 		ccPointCloud                         loaded;
 		QVERIFY(loaded.fromFile(file, context));
 		QVERIFY(loaded.isXRayEnabled());
-		QCOMPARE(loaded.xRayExposureOverride(), 7.1);
+		QCOMPARE(loaded.xRayExposureOverride(), -1.3);
 		QCOMPARE(loaded.size(), cloud.size());
 	}
 
@@ -385,9 +385,9 @@ class TestXRayDisplay : public QObject
 		QVERIFY(center(front).red() > 0);
 		QVERIFY(center(front).green() > 200); // opaque surface remains visible beneath X-ray
 		QVERIFY(front != baseline);
-		xray->setXRayExposureOverride(-4.0);
+		xray->setXRayExposureOverride(1.0);
 		QVERIFY(center(capture()).red() < center(front).red());
-		xray->setXRayExposureOverride(0.0);
+		xray->setXRayExposureOverride(3.0);
 		QVERIFY(center(capture()).red() > center(front).red());
 		xray->setXRayExposureOverride(-8.0);
 		QCOMPARE(center(capture()).red(), 0);
@@ -636,9 +636,9 @@ class TestXRayDisplay : public QObject
 		QCOMPARE(reverseRed.pixelColor(2, 2), Qt::white);
 		QCOMPARE(redLayer.red(), 255);
 		QVERIFY(redLayer.green() < 255 && redLayer.blue() < 255); // red, never cyan
-		xray->setXRayExposureOverride(-4.0);
+		xray->setXRayExposureOverride(1.0);
 		QVERIFY(center(capture()).green() > redLayer.green());
-		xray->setXRayExposureOverride(0.0);
+		xray->setXRayExposureOverride(3.0);
 		QVERIFY(center(capture()).green() < redLayer.green());
 		xray->setXRayExposureOverride(-8.0);
 		QCOMPARE(center(capture()), Qt::white);

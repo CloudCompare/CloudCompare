@@ -6,6 +6,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccFrameBufferObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGlFilter.h
 		${CMAKE_CURRENT_LIST_DIR}/ccShader.h
+		${CMAKE_CURRENT_LIST_DIR}/ccXRayFilterSupport.h
 )
 
 target_include_directories( ${PROJECT_NAME}

@@ -1,6 +1,7 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccXRaySettings.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLUtils.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLWindow.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLWindowInterface.h

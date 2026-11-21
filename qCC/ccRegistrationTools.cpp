@@ -37,6 +37,7 @@
 
 // Qt
 #include <QElapsedTimer>
+#include <QMessageBox>
 
 //! Default number of points sampled on the 'data' mesh (if any)
 static const unsigned s_defaultSampledPointsOnDataMesh = 50000;
@@ -52,7 +53,8 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
                               const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
                               bool                                               useDataSFAsWeights /*=false*/,
                               bool                                               useModelSFAsWeights /*=false*/,
-                              QWidget*                                           parent /*=nullptr*/)
+                              QWidget*                                           parent /*=nullptr*/,
+                              bool                                               askToKeepOnCancel /*=false*/)
 {
 	QElapsedTimer timer;
 	timer.start();
@@ -287,6 +289,27 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	                                                   finalPointCount,
 	                                                   static_cast<CCCoreLib::GenericProgressCallback*>(progressDlg.get()));
 
+	qint64 duration_ms = timer.elapsed(); // measured before the popup: the time spent waiting for the user must not be counted
+
+	// after a cancel, 'transform' holds the ICP steps up to the last measured RMS (finalRMS), if at least one step was measured
+	if (askToKeepOnCancel
+	    && result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR
+	    && progressDlg
+	    && progressDlg->wasCanceled()
+	    && transform.R.isValid())
+	{
+		QMessageBox::StandardButton answer = QMessageBox::question(parent,
+		                                                           QObject::tr("Registration"),
+		                                                           QObject::tr("Registration canceled.\nKeep the pose of the last measured step (RMS = %1)?\nChoose 'No' to go back to the pose from before the registration.").arg(finalRMS),
+		                                                           QMessageBox::Yes | QMessageBox::No,
+		                                                           QMessageBox::No);
+		if (answer == QMessageBox::Yes)
+		{
+			ccLog::Warning("[ICP] Registration canceled by the user: the pose of the last measured step is kept");
+			result = CCCoreLib::ICPRegistrationTools::ICP_APPLY_TRANSFO;
+		}
+	}
+
 	if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 	{
 		if (progressDlg && progressDlg->wasCanceled())
@@ -296,7 +319,6 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	}
 	else
 	{
-		qint64 duration_ms = timer.elapsed();
 		ccLog::Print(QObject::tr("[ICP] Registration done in %1 sec").arg(duration_ms / 1000.0, 0, 'f', 3));
 
 		if (result == CCCoreLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)

@@ -4076,7 +4076,8 @@ void MainWindow::doActionRegister()
 	                             parameters,
 	                             useDataSFAsWeights,
 	                             useModelSFAsWeights,
-	                             this))
+	                             this,
+	                             true))
 	{
 		QString rmsString           = tr("Final RMS*: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
 		QString rmsDisclaimerString = tr("(* RMS is potentially weighted, depending on the selected options)");

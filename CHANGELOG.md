@@ -399,6 +399,7 @@ Improvements:
 
 	- ICP
 		- new option to define/restrict the scaling range if 'adjust scale' is enabled
+		- when the Fine registration (ICP) tool is canceled after at least one ICP step has been measured, a popup now asks whether to keep the pose of the last measured step (its RMS is shown) or to go back to the pose from before the registration
 
 	- Cross Section (clipping box) tool
 		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)

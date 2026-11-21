@@ -208,9 +208,10 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 	//! Sets the input filename or text stream
 	/** \param filename filename
 	    \param stream text stream
+	    \param confirmWideFile whether the user should be asked before more than 512 columns are created (not on the command line)
 	    \return whether a previous context was saved or not and it can be safely applied again to this file
 	**/
-	bool setInput(const QString& filename, QTextStream* stream = nullptr);
+	bool setInput(const QString& filename, QTextStream* stream = nullptr, bool confirmWideFile = false);
 
 	//! ASCII open sequence item
 	struct SequenceItem
@@ -345,4 +346,11 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 	std::vector<bool> m_columnSetByUser;
 
 	unsigned m_columnsCount;
+
+	//! Whether the user should be asked before more than 512 columns are created
+	bool m_confirmWideFile;
+	//! Whether the user has already been asked (the question is only asked once per dialog)
+	bool m_wideFileAnswered;
+	//! Whether the user has accepted to create more than 512 columns
+	bool m_wideFileAccepted;
 };

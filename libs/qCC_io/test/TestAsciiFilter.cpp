@@ -25,6 +25,34 @@ static QByteArray CreateContent(const QByteArray& lineEnding)
 	return content;
 }
 
+static constexpr unsigned WidePointCount = 4;
+
+//! Returns the value of a column in a wide ASCII file (non-integer and above 1, so that no column is detected as a color or a normal)
+static double WideValue(unsigned row, unsigned column)
+{
+	return 1000.0 * (row + 1) + column + 0.5;
+}
+
+//! Returns the content of a wide ASCII file: a header line ('X Y Z' then scalar field names), then one point per line
+static QByteArray CreateWideContent(unsigned columnCount)
+{
+	QByteArray content = "//X Y Z";
+	for (unsigned j = 3; j < columnCount; ++j)
+	{
+		content += " f" + QByteArray::number(j);
+	}
+	content += '\n';
+	for (unsigned i = 0; i < WidePointCount; ++i)
+	{
+		for (unsigned j = 0; j < columnCount; ++j)
+		{
+			content += (j == 0 ? "" : " ") + QByteArray::number(WideValue(i, j));
+		}
+		content += '\n';
+	}
+	return content;
+}
+
 // Loads the same points with each line ending style, from a file and from memory
 // (legacy Mac files use a lone CR)
 class TestAsciiFilter : public QObject
@@ -90,6 +118,49 @@ class TestAsciiFilter : public QObject
 			QCOMPARE(P->x, static_cast<PointCoordinateType>(1.5 + i));
 			QCOMPARE(P->y, static_cast<PointCoordinateType>(10.0 + i));
 			QCOMPARE(P->z, static_cast<PointCoordinateType>(-1.0 - 2.25 * i));
+		}
+	}
+
+	// Loads a file with many columns without the dialog (as the command line does): every column is kept
+	void wideFile_data()
+	{
+		QTest::addColumn<unsigned>("columnCount");
+
+		QTest::newRow("512 columns") << 512u;
+		QTest::newRow("600 columns") << 600u;
+	}
+
+	void wideFile()
+	{
+		QFETCH(unsigned, columnCount);
+
+		AsciiFilter                  filter;
+		ccHObject                    container;
+		FileIOFilter::LoadParameters loadParams;
+		CCVector3d                   shift(0, 0, 0);
+		bool                         shiftEnabled = false;
+		loadParams.alwaysDisplayLoadDialog        = false;
+		loadParams.shiftHandlingMode              = ccGlobalShiftManager::Mode::NO_DIALOG;
+		loadParams._coordinatesShiftEnabled       = &shiftEnabled;
+		loadParams._coordinatesShift              = &shift;
+		QCOMPARE(filter.loadAsciiData(CreateWideContent(columnCount), "data", container, loadParams), CC_FERR_NO_ERROR);
+
+		ccHObject::Container clouds;
+		container.filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+		QCOMPARE(clouds.size(), static_cast<size_t>(1));
+		ccPointCloud* cloud = static_cast<ccPointCloud*>(clouds.front());
+
+		QCOMPARE(cloud->size(), WidePointCount);
+		QCOMPARE(cloud->getNumberOfScalarFields(), columnCount - 3);
+
+		// the last column
+		const unsigned lastColumn = columnCount - 1;
+		int            sfIndex    = cloud->getScalarFieldIndexByName("f" + std::to_string(lastColumn));
+		QVERIFY(sfIndex >= 0);
+		CCCoreLib::ScalarField::Shared sf = cloud->getScalarField(sfIndex);
+		for (unsigned i = 0; i < WidePointCount; ++i)
+		{
+			QCOMPARE(sf->getValue(i), static_cast<ScalarType>(WideValue(i, lastColumn)));
 		}
 	}
 };

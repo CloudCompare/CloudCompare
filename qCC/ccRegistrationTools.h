@@ -33,6 +33,7 @@ class ccRegistrationTools
   public:
 	//! Applies ICP registration on two entities
 	/** \warning Automatically samples points on meshes if necessary (see code for magic numbers ;)
+	    \param askToKeepOnCancel if the user cancels after at least one ICP step has been measured, asks whether to keep the pose of the last measured step (needs a parent widget)
 	 **/
 	static bool ICP(ccHObject*                                         data,
 	                ccHObject*                                         model,
@@ -43,5 +44,6 @@ class ccRegistrationTools
 	                const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
 	                bool                                               useDataSFAsWeights  = false,
 	                bool                                               useModelSFAsWeights = false,
-	                QWidget*                                           parent              = nullptr);
+	                QWidget*                                           parent              = nullptr,
+	                bool                                               askToKeepOnCancel   = false);
 };

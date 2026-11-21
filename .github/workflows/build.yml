@@ -46,6 +46,10 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
 
+      - name: Verify macOS bundle identifiers
+        shell: bash -l {0}
+        run: python .ci/verify_macos_bundle_identifiers.py .
+
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1

@@ -498,6 +498,7 @@ Bug fixes:
 	- LAS 1.4 files: only the first 341 extra fields could be saved. The others are now saved too, described by an Extra Bytes EVLR.
 	- LAS files: the unused bytes of the Extra Bytes VLR header (the 'reserved' field and the end of the user ID) were saved uninitialized, while the LAS specification requires them to be 0
 	- LAS files: the copy of the VLRs (including the Extra Bytes VLR) made when saving a file was never released
+	- ccViewer: the default OpenGL surface format was set a second time, after the application was created, replacing the one set at startup. It is now set once, as in CloudCompare.
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

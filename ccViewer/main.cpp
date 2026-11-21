@@ -20,7 +20,6 @@
 // Qt
 #include <QDir>
 #include <QOpenGLContext>
-#include <QSurfaceFormat>
 
 // Local
 #include "ccviewerlog.h"
@@ -74,12 +73,6 @@ int main(int argc, char* argv[])
 #endif
 
 	QDir::setCurrent(workingDir.absolutePath());
-
-	QSurfaceFormat format;
-	format.setRenderableType(QSurfaceFormat::OpenGL);
-	format.setVersion(2, 1);
-	format.setProfile(QSurfaceFormat::CoreProfile);
-	QSurfaceFormat::setDefaultFormat(format);
 
 	// Create a temporary context to check OpenGL support
 	QOpenGLContext context;

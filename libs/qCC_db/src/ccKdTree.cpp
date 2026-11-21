@@ -171,19 +171,25 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 bool ccKdTree::convertCellIndexToSF()
 {
 	if (!m_associatedGenericCloud || !m_associatedGenericCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
 		return false;
+	}
 
 	// get leaves
 	std::vector<Leaf*> leaves;
 	if (!getLeaves(leaves) || leaves.empty())
+	{
 		return false;
+	}
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
 
 	const char c_defaultSFName[] = "Kd-tree indexes";
 	int        sfIdx             = pc->getScalarFieldIndexByName(c_defaultSFName);
 	if (sfIdx < 0)
+	{
 		sfIdx = pc->addScalarField(c_defaultSFName);
+	}
 	if (sfIdx < 0)
 	{
 		ccLog::Error("Not enough memory!");
@@ -194,11 +200,13 @@ bool ccKdTree::convertCellIndexToSF()
 	// for each cell
 	for (size_t i = 0; i < leaves.size(); ++i)
 	{
-		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
+		auto* subset = leaves[i]->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)
+			{
 				subset->setPointScalarValue(j, (ScalarType)i);
+			}
 		}
 	}
 
@@ -221,13 +229,15 @@ bool ccKdTree::convertCellIndexToRandomColor()
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
 	if (!pc->resizeTheRGBTable())
+	{
 		return false;
+	}
 
 	// for each cell
 	for (const auto& leaf : leaves)
 	{
-		ccColor::Rgba              col(ccColor::Generator::Random(), ccColor::MAX);
-		CCCoreLib::ReferenceCloud* subset = leaf->points;
+		ccColor::Rgba col(ccColor::Generator::Random(), ccColor::MAX);
+		auto*         subset = leaf->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)

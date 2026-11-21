@@ -19,6 +19,7 @@
 
 // Local
 #include "../include/ccGenericPointCloud.h"
+#include "../include/ccNormalVectors.h"
 #include "../include/ccPointCloud.h"
 #include "../include/ccProgressDialog.h"
 #include "../include/ccScalarField.h"
@@ -2003,6 +2004,35 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		{
 			auto sf = cloudGrid->getCCScalarField(k);
 			sf->resizeSafe(cloudGrid->size(), true, CCCoreLib::NAN_VALUE);
+		}
+
+		// the points added for the filled empty cells have no normal yet: we give them the
+		// raster 'up' direction (a normals array shorter than the points would make any later
+		// per-point access throw, e.g. when cloning, segmenting or saving the cloud - see #2542)
+		if (cloudGrid->hasNormals() && cloudGrid->normals()->currentSize() < cloudGrid->size())
+		{
+			CCVector3 upDir(0, 0, 0);
+			upDir.u[outZ]                      = 1;
+			const CompressedNormType normIndex = ccNormalVectors::GetNormIndex(upDir);
+			if (!cloudGrid->normals()->resizeSafe(cloudGrid->size(), true, &normIndex))
+			{
+				ccLog::Warning("[Rasterize] Not enough memory to extend the normals");
+				cloudGrid->unallocateNorms();
+			}
+		}
+
+		// same thing for the waveforms (the new points get an empty one)
+		if (cloudGrid->hasFWF() && cloudGrid->waveforms().size() < cloudGrid->size())
+		{
+			try
+			{
+				cloudGrid->waveforms().resize(cloudGrid->size(), ccWaveform(0));
+			}
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Warning("[Rasterize] Not enough memory to extend the waveforms");
+				cloudGrid->clearFWFData();
+			}
 		}
 	}
 

@@ -62,7 +62,8 @@ cmd = [
 	# We want build in the .build directory
 	"-B.build",
 	"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-	"-DCMAKE_BUILD_TYPE=Release",
+	"-DCMAKE_BUILD_TYPE={{ build_type }}",
+	"-DBUILD_TESTING={{ with_tests }}",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DBUILD_SHARED_LIBS=OFF",
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX",

@@ -138,22 +138,33 @@ class TestXRayDisplay : public QObject
                                                     { ++updates; });
 		QVERIFY(!reset->icon().isNull());
 		QVERIFY(!reset->toolTip().isEmpty());
+		QVERIFY(reset->isEnabled());
 		reset->click();
+		QVERIFY(!reset->isEnabled());
 		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
 		QCOMPARE(spin.text(), QString("Default"));
 		QCOMPARE(slider.value(), -20);
 		QCOMPARE(updates, 1);
 		settings.exposure = 1.5;
 		ccXRaySettings::Set(settings);
-		reset->click();
-		QCOMPARE(slider.value(), 15);
+		QVERIFY(!reset->isEnabled());
 		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
 		cloud.setXRayExposureOverride(4);
 		spin.setValue(4);
+		updateXRayExposureResetButton(reset, &cloud);
+		QVERIFY(reset->isEnabled());
 		reset->click();
+		QVERIFY(!reset->isEnabled());
 		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
 		QCOMPARE(spin.value(), spin.minimum());
 		QCOMPARE(slider.value(), 15);
+		cloud.setXRayExposureOverride(1.5); // Equal to the global value, but still an override.
+		updateXRayExposureResetButton(reset, &cloud);
+		QVERIFY(reset->isEnabled());
+		reset->click();
+		QVERIFY(!reset->isEnabled());
+		updateXRayExposureResetButton(reset, nullptr);
+		QVERIFY(!reset->isEnabled());
 		ccXRaySettings::Set(previous);
 	}
 

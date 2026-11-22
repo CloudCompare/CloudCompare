@@ -16,11 +16,13 @@
 // ##########################################################################
 
 #include "../../libs/qCC_glWindow/src/ccXRayRenderer.h"
+#include "../db_tree/ccXRayExposureResetButton.h"
 
 #include <QApplication>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QSettings>
+#include <QSlider>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <QToolBox>
@@ -111,6 +113,49 @@ class TestXRayDisplay : public QObject
 {
 	Q_OBJECT
   private Q_SLOTS:
+	void exposureResetButton()
+	{
+		const auto     previous = ccXRaySettings::Parameters();
+		ccXRaySettings settings;
+		settings.exposure = -2;
+		ccXRaySettings::Set(settings);
+		ccPointCloud cloud;
+		cloud.setXRayEnabled(true);
+		cloud.setXRayExposureOverride(-2);
+		QWidget        parent;
+		QDoubleSpinBox spin(&parent);
+		QSlider        slider(&parent);
+		spin.setRange(-8.1, 8);
+		spin.setDecimals(1);
+		spin.setSpecialValueText("Default");
+		spin.setValue(-2);
+		slider.setRange(-81, 80);
+		slider.setValue(-20);
+		int   updates = 0;
+		auto* reset   = createXRayExposureResetButton(&spin, &slider, &parent, [&]
+                                                    { return &cloud; },
+                                                    [&]
+                                                    { ++updates; });
+		QVERIFY(!reset->icon().isNull());
+		QVERIFY(!reset->toolTip().isEmpty());
+		reset->click();
+		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
+		QCOMPARE(spin.text(), QString("Default"));
+		QCOMPARE(slider.value(), -20);
+		QCOMPARE(updates, 1);
+		settings.exposure = 1.5;
+		ccXRaySettings::Set(settings);
+		reset->click();
+		QCOMPARE(slider.value(), 15);
+		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
+		cloud.setXRayExposureOverride(4);
+		spin.setValue(4);
+		reset->click();
+		QVERIFY(std::isnan(cloud.xRayExposureOverride()));
+		QCOMPARE(spin.value(), spin.minimum());
+		QCOMPARE(slider.value(), 15);
+		ccXRaySettings::Set(previous);
+	}
 
 	void scopedDrawState()
 	{

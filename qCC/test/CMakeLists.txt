@@ -35,6 +35,7 @@ add_test(NAME TestXRayExposure COMMAND TestXRayExposure)
 add_executable(TestXRayDisplay
     TestXRayDisplay.cpp
     ../../plugins/core/GL/qEDL/src/ccEDLFilter.cpp
+    ../icons.qrc
 )
 
 target_include_directories(TestXRayDisplay

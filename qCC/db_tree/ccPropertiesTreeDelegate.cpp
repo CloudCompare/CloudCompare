@@ -16,6 +16,7 @@
 // ##########################################################################
 
 #include "ccPropertiesTreeDelegate.h"
+#include "ccXRayExposureResetButton.h"
 
 // Local
 #include "mainwindow.h"
@@ -1541,6 +1542,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget*                    pare
 		spinBox->setValue(spinBox->minimum());
 		layout->addWidget(slider, 1);
 		layout->addWidget(spinBox);
+		layout->addWidget(createXRayExposureResetButton(spinBox, slider, widget,
+		                                               [this] { return ccHObjectCaster::ToPointCloud(m_currentObject); },
+		                                               [this] { const_cast<ccPropertiesTreeDelegate*>(this)->updateDisplay(); }));
 
 		connect(slider, &QSlider::valueChanged, widget, [spinBox](int position)
 		        {

@@ -255,6 +255,15 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 			resize(size());
 	}
 
+	//! Makes sure that the colors, normals, scalar fields and waveforms have one value per point
+	/** Arrays of the wrong size should not happen, but they make CC crash later (e.g. when
+	    cloning or segmenting the cloud). The missing values are set to white colors, (0,0,0)
+	    normals, NaN scalar values or empty waveforms, and the extra values are removed.
+	    A warning is issued for each fixed array.
+	    \return whether all the arrays already had the right size
+	**/
+	bool fixPerPointArraySizes();
+
   public:
 	//! Returns a shared pointer to the scalar field at the given index
 	/** Shortcut to getScalarField() but returns a ccScalarField shared pointer instead of a CCCoreLib::ScalarField pointer.

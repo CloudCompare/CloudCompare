@@ -77,7 +77,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 
 	// inherited from DgmOctree
 	void clear() override;
-	int  build(CCCoreLib::GenericProgressCallback* progressCb = nullptr);
+	int  build(CCCoreLib::GenericProgressCallback* progressCb = nullptr) override;
 	int  build(const CCVector3&                    octreeMin,
 	           const CCVector3&                    octreeMax,
 	           const CCVector3*                    pointsMinFilter = nullptr,

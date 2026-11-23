@@ -741,167 +741,178 @@ Otherwise labels are shown in 3D.</source>
 <context>
     <name>AsciiOpenDlg</name>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="161"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="160"/>
         <source>Ignore</source>
         <translation type="unfinished">무시</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="162"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="161"/>
         <source>coord. X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="163"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="162"/>
         <source>coord. Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="164"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="163"/>
         <source>coord. Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="165"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="164"/>
         <source>Nx</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="166"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="165"/>
         <source>Ny</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="167"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="166"/>
         <source>Nz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="168"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="167"/>
         <source>Red (0-255)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="169"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="168"/>
         <source>Green (0-255)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="170"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="169"/>
         <source>Blue (0-255)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="171"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="170"/>
         <source>Alpha (0-255)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="172"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="171"/>
         <source>Red.float (0-1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="173"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="172"/>
         <source>Green.float (0-1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="174"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="173"/>
         <source>Blue.float (0-1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="175"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="174"/>
         <source>Alpha.float (0-1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="176"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="175"/>
         <source>Grey</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="177"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="176"/>
         <source>RGBAi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="178"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="177"/>
         <source>RGBAf</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="179"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="178"/>
         <source>Label</source>
         <translation type="unfinished">라벨</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="180"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="179"/>
         <source>Quaternion W</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="181"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="180"/>
         <source>Quaternion X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="182"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="181"/>
         <source>Quaternion Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="183"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="182"/>
         <source>Quaternion Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="184"/>
+        <location filename="../../libs/qCC_io/include/AsciiOpenDlg.h" line="183"/>
         <source>Scalar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="340"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="342"/>
         <source>Enter a valid character!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="349"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="352"/>
         <source>(ASCII code: %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="586"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="486"/>
+        <source>Many columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="487"/>
+        <source>This file seems to have %1 columns. Do you really expect more than %2 columns?
+Creating them all may take a while.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="612"/>
         <source>Header: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="593"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="619"/>
         <source>+ %1 comment line(s) skipped</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="600"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="626"/>
         <source>This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1147"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1210"/>
         <source>&apos;%1&apos; defined at least twice!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1159"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1222"/>
         <source>At least 2 vertex coordinates must be defined!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1170"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1233"/>
         <source>Incomplete quaternion definition! (4 components expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1184"/>
+        <location filename="../../libs/qCC_io/src/AsciiOpenDlg.cpp" line="1247"/>
         <source>Error</source>
         <translation type="unfinished">에러</translation>
     </message>
@@ -2532,7 +2543,7 @@ Output facet normals may be randomly oriented
         <translation>완료시 속성유지</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/qClassify3DMASCDialog.cpp" line="109"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/qClassify3DMASCDialog.cpp" line="108"/>
         <source>Trainer file</source>
         <translation>트레이너 파일</translation>
     </message>
@@ -2641,123 +2652,128 @@ p, li { white-space: pre-wrap; }
         <translation>익터랙터 보기/숨기기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="84"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="68"/>
+        <source>Invert</source>
+        <translation type="unfinished">반전</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="97"/>
         <source>Restore the last clipping box used with this cloud</source>
         <translation>이 클라우드에 사용된 최근 클리핑박스 복원</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="101"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="104"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="114"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="117"/>
         <source>Reset</source>
         <translation>리셋</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="121"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="124"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="134"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="137"/>
         <source>Close</source>
         <translation>닫기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="143"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="156"/>
         <source>Box thickness</source>
         <translation>박스두께</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="215"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="228"/>
         <source>advanced</source>
         <translation>고급</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="242"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="255"/>
         <source>Envelope/Contour</source>
         <translation>Envelope/Contour</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="266"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="269"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="279"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="282"/>
         <source>Extracts the envelope (concave hull) or contours as polylines</source>
         <translation>envelope (concave hull) 또는 contours를 폴리라인으로 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="286"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="289"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="299"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="302"/>
         <source>Removes the last extracted envelope or contours</source>
         <translation>최근 추출된 envelope 또는 contours 제거</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="303"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="316"/>
         <source>Slices</source>
         <translation>슬라이스</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="327"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="330"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="340"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="343"/>
         <source>Export selection as new entities</source>
         <translation>단면을 신규 엔티티로 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="341"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="354"/>
         <source>Export multiple slices, envelopes or contours
 by repeating the process along one or several dimensions</source>
         <translation>1개 이상 차원에 따라 프로세싱을 반복하여
 멀티 슬라이스,envelopes 또는 contours 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="408"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="411"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="421"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="424"/>
         <source>Set &apos;left&apos; view</source>
         <translation>&apos;좌측&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="422"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="425"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="435"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="438"/>
         <source>Set &apos;right&apos; view</source>
         <translation>&apos;우측&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="436"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="439"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="449"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="452"/>
         <source>Set &apos;front&apos; view</source>
         <translation>&apos;전면&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="450"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="453"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="463"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="466"/>
         <source>Set &apos;back&apos; view</source>
         <translation>&apos;후면&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="464"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="467"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="477"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="480"/>
         <source>Set &apos;down&apos; view</source>
         <translation>&apos;하단&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="478"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="481"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="491"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="494"/>
         <source>Set &apos;up&apos; view</source>
         <translation>&apos;상단&apos;뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="514"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="527"/>
         <source>Shift box</source>
         <translation>박스이격</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="557"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="579"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="570"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="592"/>
         <source>Shift box along its X dimension</source>
         <translation>X축을 따라 박스 이격</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="601"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="623"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="614"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="636"/>
         <source>Shift box along its Y dimension</source>
         <translation>Y축을 따라 박스 이격</translation>
     </message>
     <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="645"/>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="667"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="658"/>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="680"/>
         <source>Shift box along its Z dimension</source>
         <translation>Z축을 따라 박스 이격</translation>
     </message>
@@ -3326,32 +3342,32 @@ to help advanced users setting the general parameters</source>
 <context>
     <name>ComponentType</name>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1259"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1243"/>
         <source>Array</source>
         <translation>배열</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1262"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1246"/>
         <source>Name</source>
         <translation>이름</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1262"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1246"/>
         <source>undefined</source>
         <translation>미설정</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1265"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1249"/>
         <source>Elements</source>
         <translation>요소</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1268"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1252"/>
         <source>Capacity</source>
         <translation>용량</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1271"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1255"/>
         <source>Memory</source>
         <translation>메모리</translation>
     </message>
@@ -3397,18 +3413,18 @@ to help advanced users setting the general parameters</source>
 <context>
     <name>ConfusionMatrix</name>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/confusionmatrix.ui" line="14"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/confusionMatrix.ui" line="14"/>
         <source>Form</source>
         <translation>폼</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/confusionmatrix.ui" line="55"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/confusionmatrix.ui" line="82"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/confusionMatrix.ui" line="55"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/confusionMatrix.ui" line="82"/>
         <source>-</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/confusionmatrix.ui" line="67"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/confusionMatrix.ui" line="67"/>
         <source>Overall accuracy</source>
         <translation>전체 정확도</translation>
     </message>
@@ -3479,6 +3495,75 @@ A n B</translation>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="161"/>
         <source>Image courtesy of Autodesk(r)</source>
         <translation>Autodesk 이미지 제공</translation>
+    </message>
+</context>
+<context>
+    <name>CutPursuitDialog</name>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="20"/>
+        <source>Cut Pursuit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="32"/>
+        <source>Max number of nearest neighbors search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="35"/>
+        <source>KNN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="64"/>
+        <source>Max search distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="67"/>
+        <source>KNN radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="96"/>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="99"/>
+        <source>Regularization</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="131"/>
+        <source>Spatial influence in loss</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="134"/>
+        <source>Spatial weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="166"/>
+        <source>Points cutoff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="169"/>
+        <source>Cutoff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="200"/>
+        <source>Available features</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="213"/>
+        <source>Select which features to consider for partition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/cutPursuitDlg.ui" line="233"/>
+        <source>average colors (warning: overwrites existing ones)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4754,82 +4839,82 @@ The bigger the more accurate the map will be
 <context>
     <name>ExtraScalarFieldCard</name>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="20"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="20"/>
         <source>ExtraScalarFieldCard</source>
         <translation>ExtraScalarFieldCard</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="65"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="65"/>
         <source>Name</source>
         <translation>이름</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="81"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="81"/>
         <source>Data Type</source>
         <translation>데이터종류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="91"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="91"/>
         <source>Scalar Field(s)</source>
         <translation>스칼라필드</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="149"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="149"/>
         <source>Unlock Modification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="156"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="156"/>
         <source>Advanced Options</source>
         <translation>고급옵션</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="166"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="166"/>
         <source>Remove</source>
         <translation>제거</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="202"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="202"/>
         <source>Description</source>
         <translation>설명</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="217"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="217"/>
         <source>Array-Like</source>
         <translation>유사배열</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="225"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="225"/>
         <source>1 Dimension</source>
         <translation>1 차원</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="238"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="238"/>
         <source>2 Dimensions</source>
         <translation>2 차원</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="248"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="248"/>
         <source>3 Dimensions</source>
         <translation>3 차원</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="260"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="260"/>
         <source>Scaled</source>
         <translation>스케일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="270"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="270"/>
         <source>Scaling Options</source>
         <translation>스케일 옵션</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="278"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="278"/>
         <source>Scales</source>
         <translation>스케일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scarlar_field_card.ui" line="310"/>
+        <location filename="../../plugins/core/IO/qLASIO/ui/extra_scalar_field_card.ui" line="337"/>
         <source>Offsets</source>
         <translation>옵셋</translation>
     </message>
@@ -5600,167 +5685,197 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>부피밀도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="260"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="264"/>
+        <source>Inverse of the distance to the nearest neighbor. Much faster than the exact density, and independent of the radius.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="267"/>
+        <source>Nearest neighbor distance (approx. density)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="274"/>
+        <source>Surface density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="277"/>
+        <source>Surface density (approx.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="284"/>
+        <source>Volume density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="287"/>
+        <source>Volume density (approx.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="297"/>
         <source>Moment</source>
         <translation>순간</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="266"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="303"/>
         <source>1st order moment</source>
         <translation>1번 순서순간</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="293"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="330"/>
         <source>Geometric features (based on local eigenvalues: (L1, L2, L3))</source>
         <translation>지오메트릭 피쳐 (로컬 고유값 기반: (L1, L2, L3))</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="296"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="333"/>
         <source>Features</source>
         <translation>피쳐</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="302"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="339"/>
         <source>L1 + L2 + L3</source>
         <translation>L1 + L2 + L3</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="305"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="342"/>
         <source>Sum of eigenvalues</source>
         <translation>고유값 합계</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="312"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="349"/>
         <source>(L1 * L2 * L3)^(1/3)</source>
         <translation>(L1 * L2 * L3)^(1/3)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="315"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="352"/>
         <source>Omnivariance</source>
         <translation>Omnivariance</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="322"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="359"/>
         <source>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</source>
         <translation>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="325"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="362"/>
         <source>Eigenentropy</source>
         <translation>자체엔트로피</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="332"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="369"/>
         <source>(L1 - L3)/L1</source>
         <translation>(L1 - L3)/L1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="335"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="372"/>
         <source>Anisotropy</source>
         <translation>이방성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="342"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="379"/>
         <source>(L2 - L3)/L1</source>
         <translation>(L2 - L3)/L1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="345"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="382"/>
         <source>Planarity</source>
         <translation>평면형도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="352"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="389"/>
         <source>(L1 - L2)/L1</source>
         <translation>(L1 - L2)/L1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="355"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="392"/>
         <source>Linearity</source>
         <translation>직선성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="362"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="399"/>
         <source>L1 / (L1 + L2 + L3)</source>
         <translation>L1 / (L1 + L2 + L3)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="365"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="402"/>
         <source>PCA1</source>
         <translation>PCA1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="372"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="409"/>
         <source>L2 / (L1 + L2 + L3)</source>
         <translation>L2 / (L1 + L2 + L3)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="375"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="412"/>
         <source>PCA2</source>
         <translation>PCA2</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="382"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="419"/>
         <source>L3 / (L1 + L2 + L3)</source>
         <translation>L3 / (L1 + L2 + L3)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="385"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="422"/>
         <source>Surface variation</source>
         <translation>지면변동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="392"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="429"/>
         <source>L3 / L1</source>
         <translation>L3 / L1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="395"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="432"/>
         <source>Sphericity</source>
         <translation>구형도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="402"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="439"/>
         <source>1 - |Z.N|</source>
         <translation>1 - |Z.N|</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="405"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="442"/>
         <source>Verticality</source>
         <translation>수직성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="412"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="449"/>
         <source>1st eigenvalue</source>
         <translation>1번 고유값</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="419"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="456"/>
         <source>2nd eigenvalue</source>
         <translation>2번 고유값</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="426"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="463"/>
         <source>3rd eigenvalue</source>
         <translation>3번 고유값</translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="433"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="470"/>
         <source>Degree of planarity (M)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="436"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="473"/>
         <source>ln(L1 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="443"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="480"/>
         <source>Degree of linearity (K)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/geomFeaturesDlg.ui" line="446"/>
+        <location filename="../ui_templates/geomFeaturesDlg.ui" line="483"/>
         <source>ln(L1 / L2) / ln(L2 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7569,23 +7684,21 @@ p, li { white-space: pre-wrap; }
         <translation>노말계산</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
-        <source>Use Polynomial
-(instead of tangent)</source>
-        <translation>다항식 사용
-(접선 대신)</translation>
-    </message>
-    <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="73"/>
         <source>Polynomial Order</source>
         <translation>다항식순서</translation>
     </message>
     <message>
+        <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
+        <source>Use Polynomial 
+(instead of tangent)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
-        <source>Squared Gaussian
+        <source>Squared Gaussian 
 Parameter</source>
-        <translation>가우스 제곱
-파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="114"/>
@@ -7688,32 +7801,32 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="129"/>
-        <location filename="../ui_templates/mainWindow.ui" line="908"/>
+        <location filename="../ui_templates/mainWindow.ui" line="911"/>
         <source>&amp;Help</source>
         <translation>도움말(&amp;H)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="139"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1908"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2979"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1926"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2997"/>
         <source>Edit</source>
         <translation>편집</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="143"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1760"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1778"/>
         <source>Scalar fields</source>
         <translation>스칼라필드</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="177"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2084"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2102"/>
         <source>Colors</source>
         <translation>컬러</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="197"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2070"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2088"/>
         <source>Normals</source>
         <translation>노말</translation>
     </message>
@@ -7774,7 +7887,7 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="325"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2027"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2045"/>
         <source>Plane</source>
         <translation>평면</translation>
     </message>
@@ -7785,7 +7898,7 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="342"/>
-        <location filename="../mainwindow.cpp" line="10038"/>
+        <location filename="../mainwindow.cpp" line="10320"/>
         <source>Polyline</source>
         <translation>폴리선</translation>
     </message>
@@ -7795,4178 +7908,4230 @@ Parameter</source>
         <translation>클라우드</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="392"/>
+        <location filename="../ui_templates/mainWindow.ui" line="393"/>
         <source>3D &amp;Views</source>
         <translation>3D 보기(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="410"/>
+        <location filename="../ui_templates/mainWindow.ui" line="411"/>
         <source>Tools</source>
         <translation>도구</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="414"/>
+        <location filename="../ui_templates/mainWindow.ui" line="415"/>
         <source>Segmentation</source>
         <translation>분할</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="425"/>
+        <location filename="../ui_templates/mainWindow.ui" line="427"/>
         <source>Projection</source>
         <translation>투영</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="435"/>
+        <location filename="../ui_templates/mainWindow.ui" line="437"/>
         <source>Statistics</source>
         <translation>통계</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="442"/>
+        <location filename="../ui_templates/mainWindow.ui" line="444"/>
         <source>Distances</source>
         <translation>거리</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="451"/>
-        <location filename="../mainwindow.cpp" line="4133"/>
+        <location filename="../ui_templates/mainWindow.ui" line="453"/>
+        <location filename="../mainwindow.cpp" line="4142"/>
         <source>Registration</source>
         <translation>정합</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="464"/>
+        <location filename="../ui_templates/mainWindow.ui" line="466"/>
         <source>Other</source>
         <translation>그외</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="471"/>
+        <location filename="../ui_templates/mainWindow.ui" line="473"/>
         <source>Sand box (research)</source>
         <translation>샌드박스 (검색)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="494"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2997"/>
+        <location filename="../ui_templates/mainWindow.ui" line="496"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3015"/>
         <source>Fit</source>
         <translation>맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="504"/>
+        <location filename="../ui_templates/mainWindow.ui" line="506"/>
         <source>Clean</source>
         <translation>정리</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="511"/>
+        <location filename="../ui_templates/mainWindow.ui" line="513"/>
         <source>Volume</source>
         <translation>부피</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="517"/>
+        <location filename="../ui_templates/mainWindow.ui" line="519"/>
         <source>Batch export</source>
         <translation>배치출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="562"/>
+        <location filename="../ui_templates/mainWindow.ui" line="564"/>
         <source>DB Tree</source>
         <translation>DB 트리</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="616"/>
-        <location filename="../ui_templates/mainWindow.ui" line="619"/>
+        <location filename="../ui_templates/mainWindow.ui" line="618"/>
+        <location filename="../ui_templates/mainWindow.ui" line="621"/>
         <source>Viewing tools</source>
         <translation>보기도구</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="670"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1007"/>
+        <location filename="../ui_templates/mainWindow.ui" line="672"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1010"/>
         <source>Console</source>
         <translation>콘솔</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="710"/>
-        <location filename="../ui_templates/mainWindow.ui" line="713"/>
+        <location filename="../ui_templates/mainWindow.ui" line="712"/>
+        <location filename="../ui_templates/mainWindow.ui" line="715"/>
         <source>Main tools</source>
         <translation>메인도구</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="751"/>
         <location filename="../ui_templates/mainWindow.ui" line="754"/>
+        <location filename="../ui_templates/mainWindow.ui" line="757"/>
         <source>Scalar field tools</source>
         <translation>스칼라필드 도구</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="785"/>
+        <location filename="../ui_templates/mainWindow.ui" line="788"/>
         <source>Properties</source>
         <translation>속성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="832"/>
+        <location filename="../ui_templates/mainWindow.ui" line="835"/>
         <source>&amp;Open</source>
         <translation>열기(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="841"/>
+        <location filename="../ui_templates/mainWindow.ui" line="844"/>
         <source>Ctrl+O</source>
         <translation>Ctrl+O</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="850"/>
+        <location filename="../ui_templates/mainWindow.ui" line="853"/>
         <source>&amp;Save</source>
         <translation>저장(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="853"/>
         <location filename="../ui_templates/mainWindow.ui" line="856"/>
+        <location filename="../ui_templates/mainWindow.ui" line="859"/>
         <source>Save current entity</source>
         <translation>현재 엔티니 저장</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="859"/>
+        <location filename="../ui_templates/mainWindow.ui" line="862"/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="867"/>
+        <location filename="../ui_templates/mainWindow.ui" line="870"/>
         <source>&amp;Quit</source>
         <translation>종료(&amp;Q)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="870"/>
-        <location filename="../mainwindow.cpp" line="6660"/>
+        <location filename="../ui_templates/mainWindow.ui" line="873"/>
+        <location filename="../mainwindow.cpp" line="6902"/>
         <source>Quit</source>
         <translation>종료</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="882"/>
+        <location filename="../ui_templates/mainWindow.ui" line="885"/>
         <source>&amp;Full screen</source>
         <translation>전체화면(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="885"/>
         <location filename="../ui_templates/mainWindow.ui" line="888"/>
+        <location filename="../ui_templates/mainWindow.ui" line="891"/>
         <source>Switch to full screen</source>
         <translation>전체화면 변경</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="891"/>
+        <location filename="../ui_templates/mainWindow.ui" line="894"/>
         <source>F9</source>
         <translation>F9</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="903"/>
+        <location filename="../ui_templates/mainWindow.ui" line="906"/>
         <source>Display settings</source>
         <translation>화면설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="911"/>
+        <location filename="../ui_templates/mainWindow.ui" line="914"/>
         <source>Help</source>
         <translation>도움말</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="914"/>
+        <location filename="../ui_templates/mainWindow.ui" line="917"/>
         <source>F1</source>
         <translation>F1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="919"/>
+        <location filename="../ui_templates/mainWindow.ui" line="922"/>
         <source>&amp;About ...</source>
         <translation>정보(&amp;A) ...</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="922"/>
+        <location filename="../ui_templates/mainWindow.ui" line="925"/>
         <source>About</source>
         <translation>정보</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="931"/>
+        <location filename="../ui_templates/mainWindow.ui" line="934"/>
         <source>Set unique</source>
         <translation>유니크 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="934"/>
         <location filename="../ui_templates/mainWindow.ui" line="937"/>
+        <location filename="../ui_templates/mainWindow.ui" line="940"/>
         <source>Set a unique color</source>
         <translation>중복되지 않는 컬러설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="940"/>
+        <location filename="../ui_templates/mainWindow.ui" line="943"/>
         <source>Alt+C</source>
         <translation>Alt+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="945"/>
+        <location filename="../ui_templates/mainWindow.ui" line="948"/>
         <source>Height Ramp</source>
         <translation>높이램프</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="948"/>
         <location filename="../ui_templates/mainWindow.ui" line="951"/>
+        <location filename="../ui_templates/mainWindow.ui" line="954"/>
         <source>Apply a color ramp along X, Y or Z</source>
         <translation>X, Y, Z를 따른 컬러램프 적용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="960"/>
-        <location filename="../ui_templates/mainWindow.ui" line="986"/>
+        <location filename="../ui_templates/mainWindow.ui" line="963"/>
+        <location filename="../ui_templates/mainWindow.ui" line="989"/>
         <source>Compute</source>
         <translation>계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="963"/>
         <location filename="../ui_templates/mainWindow.ui" line="966"/>
+        <location filename="../ui_templates/mainWindow.ui" line="969"/>
         <source>Compute unsigned normals (least squares approx.)</source>
         <translation>미적용 노멀 계산 (최소제곱 평균)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="971"/>
+        <location filename="../ui_templates/mainWindow.ui" line="974"/>
         <source>Invert</source>
         <translation>반전</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="974"/>
         <location filename="../ui_templates/mainWindow.ui" line="977"/>
+        <location filename="../ui_templates/mainWindow.ui" line="980"/>
         <source>Invert normals</source>
         <translation>역 노멀</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="989"/>
         <location filename="../ui_templates/mainWindow.ui" line="992"/>
+        <location filename="../ui_templates/mainWindow.ui" line="995"/>
         <source>Compute octree</source>
         <translation>옥트리계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1010"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1013"/>
         <source>F8</source>
         <translation>F8</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1018"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1021"/>
         <source>Cl&amp;ose</source>
         <translation>닫기(&amp;o)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1021"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1024"/>
         <source>Ctrl+F4</source>
         <translation>Ctrl+F4</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1026"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1029"/>
         <source>Close &amp;All</source>
         <translation>전체닫기(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1031"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1034"/>
         <source>&amp;Tile</source>
         <translation>타일형(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1036"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1039"/>
         <source>&amp;Cascade</source>
         <translation>상하형(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1041"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1044"/>
         <source>Pre&amp;vious</source>
         <translation>이전(&amp;v)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1046"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1049"/>
         <source>Ne&amp;xt</source>
         <translation>다음(&amp;x)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1051"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1054"/>
         <source>New</source>
         <translation>신규</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1054"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1057"/>
         <source>Ctrl+F3</source>
         <translation>Ctrl+F3</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1063"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1066"/>
         <source>Clone</source>
         <translation>복제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1066"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1069"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;선택한 엔티티 복제&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1075"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1078"/>
         <source>Merge</source>
         <translation>병합</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1078"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1081"/>
         <source>Merge multiple clouds</source>
         <translation>멀티 클라우드 병합</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1087"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1279"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1090"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1297"/>
         <source>Delete</source>
         <translation>삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1090"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1093"/>
         <source>Del</source>
         <translation>Del</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1102"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1105"/>
         <source>Fine registration (ICP)</source>
         <translation>정밀정합 (ICP)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1105"/>
         <location filename="../ui_templates/mainWindow.ui" line="1108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1111"/>
         <source>Finely registers already (roughly) aligned entities (clouds or meshes)</source>
         <translation>정밀한 정합 (대략) 엔티티 정렬 (클라우드 또는 메쉬)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1120"/>
         <location filename="../ui_templates/mainWindow.ui" line="1123"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1126"/>
         <source>Compute cloud/cloud distance</source>
         <translation>클라우드/클라우드 거리 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1132"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1135"/>
         <source>Cloud/Mesh Dist</source>
         <translation>클라우드/메쉬 거리</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1135"/>
         <location filename="../ui_templates/mainWindow.ui" line="1138"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1141"/>
         <source>Compute cloud/mesh distance</source>
         <translation>클라우드/메쉬 거리 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1147"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1150"/>
         <source>Local Statistical test</source>
         <translation>로컬 통계 검증</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1150"/>
         <location filename="../ui_templates/mainWindow.ui" line="1153"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1156"/>
         <source>Apply a local statistical test to separate noise from true differences</source>
         <translation>노이즈와 실제 차이를 구분하기 위해 로컬 통계검증을 적용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1162"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3090"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1165"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3108"/>
         <source>Sample points</source>
         <translation>샘플점</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1165"/>
         <location filename="../ui_templates/mainWindow.ui" line="1168"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1171"/>
         <source>Sample points on a mesh</source>
         <translation>메쉬상 샘플점</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1177"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1180"/>
+        <source>Cut Pursuit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1183"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1186"/>
+        <source>Graph-based point cloud segmentation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1195"/>
         <source>Label Connected Comp.</source>
         <translation>구성요소에 연결된 라벨</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1180"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1183"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1198"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1201"/>
         <source>Label connected components</source>
         <translation>구성요소에 연결된 라벨</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1192"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1210"/>
         <source>Segment</source>
         <translation>분할</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1195"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1213"/>
         <source>T</source>
         <translation>T</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1207"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1225"/>
         <source>Translate/Rotate</source>
         <translation>회전 (Translate/Rotate)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1216"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1234"/>
         <source>Scalar Fields Manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1225"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1243"/>
         <source>Show histogram</source>
         <translation>히스토그램 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1234"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1252"/>
         <source>Compute stat. params</source>
         <translation>통계파라미터 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1237"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1240"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2691"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2694"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1255"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1258"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2709"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2712"/>
         <source>Fits a statistical model on the active scalar field</source>
         <translation>사용 스칼라필드에 통계모델 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1249"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1267"/>
         <source>Filter By Value</source>
         <translation>값별 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1252"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1255"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1270"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1273"/>
         <source>Filter points by value</source>
         <translation>값별 점 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1264"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1363"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1282"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1381"/>
         <source>Gaussian filter</source>
         <translation>가우시안 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1267"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1270"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1366"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1369"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1285"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1288"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1384"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1387"/>
         <source>Compute gaussian filter</source>
         <translation>가우시안필터 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1282"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1300"/>
         <source>Delete Scalar Field</source>
         <translation>스칼라필드 삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1285"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1288"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1303"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1306"/>
         <source>Delete current scalar field</source>
         <translation>현재 스칼라필드 삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1297"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1315"/>
         <source>Arithmetic</source>
         <translation>산술</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1300"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1318"/>
         <source>SF arithmetic</source>
         <translation>SF 산술</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1303"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1306"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1321"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1324"/>
         <source>Add, subtract, multiply or divide two scalar fields</source>
         <translation>2 스칼라필드 (+)(-)(X)(/)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1311"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1329"/>
         <source>Colorize</source>
         <translation>컬러화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1314"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1317"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1332"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1335"/>
         <source>Colorize entity (lightness values are unchanged)</source>
         <translation>엔티티 컬러화 (밝기값 변환안됨)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1322"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3179"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1340"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3197"/>
         <source>Smooth</source>
         <translation>스무스</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1325"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1328"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1343"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1346"/>
         <source>Smooth mesh scalar field</source>
         <translation>메쉬스칼라필드 스무스</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1333"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1351"/>
         <source>Enhance</source>
         <translation>강화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1336"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1339"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1354"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1357"/>
         <source>Enhance Scalar Field</source>
         <translation>스칼라필드 강화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1348"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1415"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1366"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1433"/>
         <source>Clear</source>
         <translation>지우기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1351"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1354"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1369"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1372"/>
         <source>Clear colors</source>
         <translation>컬리지우기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1418"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1421"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1436"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1439"/>
         <source>Delete normals</source>
         <translation>노멀삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1426"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1444"/>
         <source>Resample</source>
         <translation>리샘플</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1429"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1432"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1447"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1450"/>
         <source>Resample entity with octree</source>
         <translation>옥트리로 엔티티 리샘플</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1437"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1455"/>
         <source>Delaunay 2.5D (XY plane)</source>
         <translation>들로네 2.5D (XY 평면)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1440"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1443"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1458"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1461"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
         <translation>XY평면에 점을 투영하여 &quot;2D1/2&quot; 메쉬 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1448"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1466"/>
         <source>Delaunay 2.5D (best fitting plane)</source>
         <translation>들로네 2.5D (최상맞춤 평면)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1451"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1454"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1469"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1472"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
         <translation>점을 최상맞춤면 (최소제곱법)에 투영하여 &quot;2D1/2&quot; 메쉬 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1459"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1477"/>
         <source>Measure surface</source>
         <translation>지면측정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1462"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1465"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1480"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1483"/>
         <source>Measure mesh surface</source>
         <translation>메쉬면 측정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1470"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1488"/>
         <source>Closest Point Set</source>
         <translation>최근접 점세트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1473"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1476"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1491"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1494"/>
         <source>Compute closest point set</source>
         <translation>최근접 점세트 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1481"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1499"/>
         <source>Delete all (!)</source>
         <translation>전체삭제 (!)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1484"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1487"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1502"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1505"/>
         <source>Delete all scalar fields</source>
         <translation>스칼라필드 전체삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1492"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1510"/>
         <source>Multiply</source>
         <translation>곱하기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1495"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1498"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1513"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1516"/>
         <source>Multiply scalar field by a constant</source>
         <translation>일률적으로 스칼라필드 곱하기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1506"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1524"/>
         <source>K-Means</source>
         <translation>K-평균</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1509"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1512"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1527"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1530"/>
         <source>classify point (K-Means applied on a scalar field)</source>
         <translation>점분류(스칼라필드에 K-평균 적용)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1520"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1538"/>
         <source>Front propagation</source>
         <translation>전방확산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1523"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1526"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1541"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1544"/>
         <source>Classify points by propagating a front on a scalar field</source>
         <translation>스칼라필드에 전방확산으로 점분류</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1531"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1549"/>
         <source>Multiply/Scale</source>
         <translation>곱하기/스케일</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1534"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1537"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1552"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1555"/>
         <source>Multiply coordinates (separately)</source>
         <translation>좌푝곱하시 (분리)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1542"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1560"/>
         <source>Match bounding-box centers</source>
         <translation>경계박스 중심 매치</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1545"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1548"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1563"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1566"/>
         <source>Synchronize selected entities bbox centers</source>
         <translation>선택한 엔티티 b박스 중심 동기화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1553"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1571"/>
         <source>Unroll</source>
         <translation>언롤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1556"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1559"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1574"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1577"/>
         <source>Unroll entity on a cylinder or a cone</source>
         <translation>실린더 또는 콘에 엔티티 언롤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1568"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1586"/>
         <source>Gradient</source>
         <translation>그라데이션</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1577"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1595"/>
         <source>Zoom &amp; Center</source>
         <translation>확대/축소 &amp; 중심</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1580"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1598"/>
         <source>ZoomCenter</source>
         <translation>확대중심</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1583"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1586"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1601"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1604"/>
         <source>Zoom and center on selected entities (Z)</source>
         <translation>선택한 엔티티에서 확대/축소 &amp; 중심 (Z)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1589"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1607"/>
         <source>Z</source>
         <translation>Z</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1598"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1616"/>
         <source>Top View</source>
         <translation>상단뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1601"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1604"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1619"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1622"/>
         <source>Set top view</source>
         <translation>상단뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1619"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1637"/>
         <source>Front View</source>
         <translation>전면뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1622"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1625"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1640"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1643"/>
         <source>Set front view</source>
         <translation>전면뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1640"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1658"/>
         <source>Back View</source>
         <translation>우방뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1643"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1646"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1661"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1664"/>
         <source>Set back view</source>
         <translation>후방뷰설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1661"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1679"/>
         <source>Left Side View</source>
         <translation>좌측뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1664"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1667"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1682"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1685"/>
         <source>Set left side view</source>
         <translation>좌측뷰설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1682"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1700"/>
         <source>Right Side View</source>
         <translation>우측뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1685"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1688"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1703"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1706"/>
         <source>Set right side view</source>
         <translation>우측뷰설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1703"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1721"/>
         <source>Bottom View</source>
         <translation>하단뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1706"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1709"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1724"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1727"/>
         <source>Set bottom view</source>
         <translation>하단뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1726"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1744"/>
         <source>Main</source>
         <translation>메인</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1729"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1732"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1747"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1750"/>
         <source>Show/hide main toolbar</source>
         <translation>메인툴바 보기/숨기기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1743"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1761"/>
         <source>View</source>
         <translation>보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1746"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1749"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1764"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1767"/>
         <source>Show/hide view toolbar</source>
         <translation>보기툴바 보기/숨기기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1763"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1766"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1781"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1784"/>
         <source>Show/hide scalar fields toolbar</source>
         <translation>스칼라필드 툴바 보기/숨기기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1771"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1789"/>
         <source>Toggle Sun Light</source>
         <translation>태양광 변경</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1774"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1777"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1792"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1795"/>
         <source>Toggle sun light (active window)</source>
         <translation>태양관 변경 (사용윈도우)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1780"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1798"/>
         <source>F6</source>
         <translation>F6</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1788"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1806"/>
         <source>Toggle Custom Light</source>
         <translation>커스텀라이트 변경</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1791"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1794"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1809"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1812"/>
         <source>Toggle custom light (active window)</source>
         <translation>커스텀라이트 변경 (사용윈도우)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1797"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1815"/>
         <source>F7</source>
         <translation>F7</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1809"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1827"/>
         <source>Global Zoom</source>
         <translation>글로벌확대</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1818"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1836"/>
         <source>Toggle Centered Perspective</source>
         <translation>센터뷰 변경</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1821"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1824"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1839"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1842"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
         <translation>현재 윈도우의 뷰변경 (객체 센터)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1827"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1845"/>
         <source>F3</source>
         <translation>F3</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1839"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1857"/>
         <source>Toggle Viewer Based Perspective</source>
         <translation>원근법 기반 뷰어전환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1842"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1845"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1860"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1863"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
         <translation>현재윈도우의 원근법뷰 변환 (뷰어센터)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1848"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1866"/>
         <source>F4</source>
         <translation>F4</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1860"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1878"/>
         <source>Refresh</source>
         <translation>갱신</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1863"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1881"/>
         <source>F5</source>
         <translation>F5</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1871"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1889"/>
         <source>Test Frame Rate</source>
         <translation>프라임율 테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1876"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1894"/>
         <source>Render to File</source>
         <translation>파일로 렌더딩</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1881"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1899"/>
         <source>About Plugins...</source>
         <translation>플러그인정보...</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1890"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1908"/>
         <source>Convert to RGB</source>
         <translation>RGB 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1893"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1911"/>
         <source>Convert current scalar field to RGB colors</source>
         <translation>현재스칼라필드를 RGB 컬러로 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1898"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1916"/>
         <source>Create/show depth buffer</source>
         <translation>깊이버퍼 생성/보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1903"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1921"/>
         <source>Export depth buffer</source>
         <translation>깊이버퍼 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1917"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1935"/>
         <source>Rasterize (and contour plot)</source>
         <translation>라스터화 (및 등고선플로팅)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1920"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1938"/>
         <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
         <translation>클라우드를 2D 라스터로 변환 (옵션으로 등고선플롯 생성)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1925"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1943"/>
         <source>Auto align clouds</source>
         <translation>자동 클라우드 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1928"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1931"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1946"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1949"/>
         <source>Tries to automatically register (roughly) two points clouds</source>
         <translation>2 포인트클라우드 자동정합 (대략적) 시도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1940"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1958"/>
         <source>Subsample</source>
         <translation>하위샘플</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1943"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1946"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1961"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1964"/>
         <source>Subsample a point cloud</source>
         <translation>하위샘플 포인트클라우드</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1954"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1972"/>
         <source>Load shader</source>
         <translation>쉐이더 로드</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1962"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1980"/>
         <source>Delete shader</source>
         <translation>쉐이더 삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1971"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1989"/>
         <source>Point picking</source>
         <translation>점획득</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1974"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1977"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1992"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1995"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
         <translation>점획득 (점정보, 2점간 거리, 3점간 각도등)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1982"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2000"/>
         <source>Bounding box P.C.A. fit</source>
         <translation>경계박스 P.C.A. 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1985"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1988"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2003"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2006"/>
         <source>Makes BB fit principal components (rotates entity!)</source>
         <translation>BB를 주점요소에 맞추도록 만듭니다 (요소회전!).</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1997"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2015"/>
         <source>Camera settings</source>
         <translation>카메라설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2006"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2024"/>
         <source>Point list picking</source>
         <translation>점목록추출</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2009"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2027"/>
         <source>Pick several points (and export them to ASCII file, a new cloud, etc.)</source>
         <translation>몇점 획득 (및 ASCII 파일, 신규클라우드로 출력)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2014"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2032"/>
         <source>Curvature</source>
         <translation>곡률</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2022"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2040"/>
         <source>Roughness</source>
         <translation>거칠기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2030"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3000"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2048"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3018"/>
         <source>Fit a plane on a set of point</source>
         <translation>평면을 점세트에 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2035"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2053"/>
         <source>Rename</source>
         <translation>이름변경</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2040"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2058"/>
         <source>2.5D quadric</source>
         <translation>2.5D 2차</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2045"/>
-        <location filename="../mainwindow.cpp" line="8960"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2063"/>
+        <location filename="../mainwindow.cpp" line="9245"/>
         <source>SNE test</source>
         <translation>SNE 테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2048"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2051"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2066"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2069"/>
         <source>Spherical Neighbourhood Extraction test</source>
         <translation>구면 인접영역 추출 테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2056"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2074"/>
         <source>Visibility</source>
         <translation>가시성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2059"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2077"/>
         <source>Toggle selected entities visibility (recursive)</source>
         <translation>선택한 요서 가시성 변경 (재귀)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2062"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2080"/>
         <source>V</source>
         <translation>V</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2073"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2091"/>
         <source>Toggle selected entities normals (recursive)</source>
         <translation>선택한 엔티티 노멀 변경 (재귀)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2076"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2094"/>
         <source>N</source>
         <translation>N</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2087"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2105"/>
         <source>Toggle selected entities colors (recursive)</source>
         <translation>선택한 엔티티컬러 변경 (재귀)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2090"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2108"/>
         <source>C</source>
         <translation>C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2098"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2116"/>
         <source>SF</source>
         <translation>SF</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2101"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2119"/>
         <source>Toggle selected entities SF (recursive)</source>
         <translation>선택한 엔티티 SF 변경 (재귀)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2104"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2122"/>
         <source>S</source>
         <translation>S</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2112"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2130"/>
         <source>Apply transformation</source>
         <translation>변환적용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2115"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2133"/>
         <source>Apply rotation and/or translation</source>
         <translation>회전 (rotation 및 translation) 적용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2118"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2136"/>
         <source>Ctrl+T</source>
         <translation>Ctrl+T</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2123"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2141"/>
         <source>Smooth (Laplacian)</source>
         <translation>스무스 (라플라시안)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2128"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2146"/>
         <source>HSV colors</source>
         <translation>HSV 컬러</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2137"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2155"/>
         <source>Save viewport as object</source>
         <translation>객체 뷰포트 저장</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2140"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2158"/>
         <source>Ctrl+V</source>
         <translation>Ctrl+V</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2152"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2170"/>
         <source>Pick rotation center</source>
         <translation>회전중심 획득</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2155"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2173"/>
         <source>P</source>
         <translation>P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2163"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2181"/>
         <source>Compute Ranges</source>
         <translation>거리계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2166"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2184"/>
         <source>Compute ranges from sensor</source>
         <translation>센서의 거리 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2736"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3334"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2754"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3352"/>
         <source>Lock 3D camera rotation about an axis (turntable mode)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3184"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3202"/>
         <source>Extrude</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3187"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3205"/>
         <source>Extrude polyline along Z axis to create a mesh surface</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3311"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3329"/>
         <source>Promote to cylinder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3316"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3334"/>
         <source>Current 3D view Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3319"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3337"/>
         <source>Show information on current 3D view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3331"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3349"/>
         <source>Lock 3D view rotation axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3339"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3357"/>
         <source>Shortcut settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3344"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3362"/>
         <source>Set Custom Light position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3347"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3365"/>
         <source>Alt+F7</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3355"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3373"/>
         <source>Toggle clipping planes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3358"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3376"/>
         <source>F12</source>
         <translation type="unfinished">F12</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1378"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2175"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3381"/>
+        <source>Select all displayed entities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3384"/>
+        <source>Select all the entities displayed in the active 3D view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3387"/>
+        <source>Ctrl+A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1396"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2193"/>
         <source>Bilateral filter</source>
         <translation>양방향 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="835"/>
         <location filename="../ui_templates/mainWindow.ui" line="838"/>
+        <location filename="../ui_templates/mainWindow.ui" line="841"/>
         <source>Open one or several files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1117"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1120"/>
         <source>Cloud/Cloud Dist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1381"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1384"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2178"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1399"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1402"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2196"/>
         <source>Compute bilateral filter</source>
         <translation>양방향필터 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1389"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1407"/>
         <source>Mean filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1392"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1395"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1410"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1413"/>
         <source>Compute mean filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1400"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1418"/>
         <source>Median filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1403"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1406"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1421"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1424"/>
         <source>Compute median filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2183"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2201"/>
         <source>Compute Scattering Angles</source>
         <translation>스캐터링 각도 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2186"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2204"/>
         <source>Compute laser beam scattering angle for a cloud with normals</source>
         <translation>노멀 클라우드의 레이터빔 스캐터링 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2191"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2209"/>
         <source>Toggle color scale</source>
         <translation>컬러스케일 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2194"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2197"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2212"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2215"/>
         <source>Toggle active scalar field color scale</source>
         <translation>활성화 스칼라필드 컬러 스케일 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2200"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2218"/>
         <source>Shift+C</source>
         <translation>Shift+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2208"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2226"/>
         <source>Show previous SF</source>
         <translation>이전 SF 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2211"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2214"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2229"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2232"/>
         <source>Show previous scalar field for active entity</source>
         <translation>사용 엔티티의 이전 스칼라필드 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2217"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2235"/>
         <source>Shift+Up</source>
         <translation>Shift+Up</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2225"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2243"/>
         <source>Show next SF</source>
         <translation>다음 SF 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2228"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2231"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2246"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2249"/>
         <source>Show next scalar field for active entity</source>
         <translation>사용 엔티티의 다음 스칼라필드 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2234"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2252"/>
         <source>Shift+Down</source>
         <translation>Shift+Down</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2243"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2261"/>
         <source>Align (point pairs picking)</source>
         <translation>맞춤 (점쌍 선택)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2246"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2249"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2264"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2267"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
         <translation>동일한 점쌍 (최소 4개)을 선택하여 2 클라우드 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2258"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2276"/>
         <source>Add constant SF</source>
         <translation>일률적인 SF 추가</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2263"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2281"/>
         <source>Export coordinate(s) to SF(s)</source>
         <translation>좌표를 SF로 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2266"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2284"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
         <translation>X,Y,Z 좌표를 스칼라필드로 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2271"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2289"/>
         <source>Subdivide</source>
         <translation>세분화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2276"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2294"/>
         <source>3D name</source>
         <translation>3D 이름</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2279"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2297"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
         <translation>선택한 엔티티를 3D 이름표시고 변경 (회기)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2282"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2300"/>
         <source>D</source>
         <translation>D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2294"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2312"/>
         <source>Primitive factory</source>
         <translation>기본요소 공장초기화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2299"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2317"/>
         <source>Materials/textures</source>
         <translation>자재/텍스쳐</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2302"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2320"/>
         <source>Toggle selected entities materials/textures (recursive)</source>
         <translation>선택한 엔티티 자재/텍스쳐 변경 (회기)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2305"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2323"/>
         <source>M</source>
         <translation>M</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2317"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2335"/>
         <source>Orthographic projection</source>
         <translation>직교투영</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2320"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2323"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2338"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2341"/>
         <source>Set orthographic projection for current 3D View</source>
         <translation>현재 3D뷰의 직교투영 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2332"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2350"/>
         <source>Object-centered perspective</source>
         <translation>객체중심 뷰</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2335"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2338"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2353"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2356"/>
         <source>Set object-centered perspective for current 3D View</source>
         <translation>현재 3D뷰를 객체중심뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2347"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2365"/>
         <source>Viewer-based perspective</source>
         <translation>관점기반 뷰어</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2350"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2353"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2368"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2371"/>
         <source>Set viewer-based perspective for current 3D View</source>
         <translation>현재 3D뷰의 관점기반 뷰어설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2362"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2380"/>
         <source>Always visible</source>
         <translation>항상표시</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2365"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2368"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2383"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2386"/>
         <source>Pivot always visible</source>
         <translation>피봇 항상표시</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2377"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2395"/>
         <source>Rotation only</source>
         <translation>회전</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2380"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2383"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2398"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2401"/>
         <source>Pivot visible when rotating</source>
         <translation>회전시 피봇표시</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2392"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2410"/>
         <source>Never visible</source>
         <translation>표시안함</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2395"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2398"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2413"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2416"/>
         <source>Pivot never visible</source>
         <translation>피봇표시안함</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2407"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2425"/>
         <source>Iso 1</source>
         <translation>Iso 1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2410"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2413"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2428"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2431"/>
         <source>Set view to &apos;front&apos; isometric</source>
         <translation>&apos;전면&apos; 등각뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2428"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2446"/>
         <source>Iso 2</source>
         <translation>Iso 2</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2431"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2434"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2449"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2452"/>
         <source>Set view to &apos;back&apos; isometric</source>
         <translation>&apos;후면&apos; 등각뷰 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2449"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2467"/>
         <source>Convert texture/material to RGB</source>
         <translation>텍스쳐/자재를 RGB로 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2458"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2476"/>
         <source>Color Scales Manager</source>
         <translation>컬러스케일 매니저</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2461"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2479"/>
         <source>Open Color Scales Manager dialog</source>
         <translation>컬러스케일 매니저 대화창 열기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2473"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2476"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2491"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2494"/>
         <source>Cross Section</source>
         <translation>횡단면</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2479"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2497"/>
         <source>X</source>
         <translation>X</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2484"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2502"/>
         <source>Edit global shift and scale</source>
         <translation>글로벌 이격 &amp; 스케일 편집</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2489"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2507"/>
         <source>Convert to Scalar field</source>
         <translation>스칼라필드 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2494"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2512"/>
         <source>From Scalar fields</source>
         <translation>스칼라필드 사용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2499"/>
-        <location filename="../mainwindow.cpp" line="975"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2517"/>
+        <location filename="../mainwindow.cpp" line="978"/>
         <source>Compute Kd-tree</source>
         <translation>Kd-트리 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2504"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2522"/>
         <source>test</source>
         <translation>테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2509"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2527"/>
         <source>Add point indexes as SF</source>
         <translation>점 인덱스를 SF로 추가</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2512"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2530"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
         <translation>클라우드의 각 점에 대해 순서가 지정된 정수로 스칼라 필드 추가</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2517"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2535"/>
         <source>2D polygon (facet)</source>
         <translation>2D 폴리곤 (벽면)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2522"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2540"/>
         <source>Adjust zoom</source>
         <translation>확대/축소 조정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2525"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2543"/>
         <source>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</source>
         <translation>주어진 픽셀/단위율로 확대/축소 조정 (정사영상 두영)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2530"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2548"/>
         <source>Set SF as coordinate(s)</source>
         <translation>좌표 SF 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2533"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2551"/>
         <source>Set SF as coordinate(s) (X, Y or Z)</source>
         <translation>좌표 SF 설정 (X,Y,Z)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2538"/>
-        <location filename="../mainwindow.cpp" line="10947"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2556"/>
+        <location filename="../mainwindow.cpp" line="11226"/>
         <source>Close all</source>
         <translation>전체닫기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2541"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2559"/>
         <source>Remove all entities currently loaded in the DB tree</source>
         <translation>DB 트리에 로드된 전체엔티티 제거</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2546"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2564"/>
         <source>Edit global scale</source>
         <translation>글로벌 스케일 편집</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2555"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2573"/>
         <source>View from sensor</source>
         <translation>센서에서 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2560"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2578"/>
         <source>Find biggest inner rectangle (2D)</source>
         <translation>가장큰 내부 직사각형 검색 (2D)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2565"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2570"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2971"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2583"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2588"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2989"/>
         <source>Create</source>
         <translation>생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2575"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2593"/>
         <source>Compute points visibility (with octree)</source>
         <translation>점 가시성 (옥트리 포함) 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2580"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2598"/>
         <source>Project Uncertainty</source>
         <translation>프로젝트 불확실성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2585"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2603"/>
         <source>With Minimum Spanning Tree</source>
         <translation>최소 이동트리 포함</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2590"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2608"/>
         <source>With Fast Marching</source>
         <translation>신속 매칭 사용</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2595"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2613"/>
         <source>CNE test</source>
         <translation>CNE 테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2598"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2601"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2616"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2619"/>
         <source>Cylindrical Neighbourhood Extraction test</source>
         <translation>실린더 네이버후드 추출 테스트</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2606"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2624"/>
         <source>Approximate (dist. to nearest neighbor)</source>
         <translation>대략 (최근접 네이버까지 거리)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2611"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2629"/>
         <source>Density</source>
         <translation>밀도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2614"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2632"/>
         <source>Compute density</source>
         <translation>밀도계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2619"/>
-        <location filename="../mainwindow.cpp" line="3045"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2637"/>
+        <location filename="../mainwindow.cpp" line="3058"/>
         <source>Remove duplicate points</source>
         <translation>중복점 제거</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2624"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2642"/>
         <source>Crop</source>
         <translation>자르기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2629"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2647"/>
         <source>Dip/Dip direction SFs</source>
         <translation>Dip/Dip 거리 SF</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2634"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2652"/>
         <source>Export cloud info</source>
         <translation>클라우드정보 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2637"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2655"/>
         <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
         <translation>CSV 파일로 클라우드정보 출력 (이름, 크기, 바이센터, 스칼라 필드 정보 등)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2640"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2658"/>
         <source>E</source>
         <translation>E</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2645"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3069"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2663"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3087"/>
         <source>Interpolate from another entity</source>
         <translation>다른 엔티티로 보간</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2648"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2666"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
         <translation>다른 엔티니 (클라우드 또는 메쉬)에서 컬러 보간 - 컬러는 최근접 네이버에서 얻어짐</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2653"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2671"/>
         <source>Distance map to best-fit 3D quadric</source>
         <translation>최상맞춤 사분면까지 거리지도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2658"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2676"/>
         <source>Levels</source>
         <translation>레벨</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2663"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Reset all GUI element positions</source>
         <translation>모든 GUI 요소 위치 리셋</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2666"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>Reset all GUI element positions (after restart)</source>
         <translation>모든 GUI 요소 위치 리셋 (재시작필요)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2671"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2689"/>
         <source>Convert to random RGB</source>
         <translation>무작위 RGB 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2676"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2694"/>
         <source>Noise filter</source>
         <translation>노이즈 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2679"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2697"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
         <translation>노이즈 필터 (로컬 지면에서 먼 점 제거 - 대략)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2688"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2706"/>
         <source>Compute stat. params (active SF)</source>
         <translation>상태파라미터 계산 (사용 SF)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2699"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2717"/>
         <source>Measure volume</source>
         <translation>부피측정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2704"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2722"/>
         <source>Flag vertices by type</source>
         <translation>종류별 버텍스 플래그</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2707"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2725"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
         <translation>종류별 버텍스 플래그: 노말 (0), 외곽선 (1), 비매니폴드(2)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2712"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2730"/>
         <source>Activation (not recursive)</source>
         <translation>활성화 (비반복)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2715"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2733"/>
         <source>Enable/disable selected entities (not recursive)</source>
         <translation>선택한 엔티티 활성/비활성 (비연속)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2718"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2736"/>
         <source>A</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2733"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2751"/>
         <source>Lock rotation about an axis</source>
         <translation>축의 회전고정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2739"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2757"/>
         <source>L</source>
         <translation>L</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2747"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2765"/>
         <source>Create cloud from selected entities centers</source>
         <translation>선택한 엔티티 중심에서 클라우드 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2752"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2770"/>
         <source>Compute best registration RMS matrix</source>
         <translation>최상 정합 RMS 행렬계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2755"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2773"/>
         <source>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</source>
         <translation>여러 엔티티 간에 모든 쌍의 최적의 정합 계산후 결과 RMS를 행렬 (CSV) 파일에 저장</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2760"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2778"/>
         <source>Enter bubble-view mode</source>
         <translation>버블뷰 모드 입력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2763"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2781"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2772"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2790"/>
         <source>Extract sections / Unfold</source>
         <translation>단면 추출 / 펼침</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2775"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2793"/>
         <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
         <translation>폴리선을 따라 클라우드 단면을 추출하거나 폴리선을 따라 클라우드를 펼칩니다</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2780"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2798"/>
         <source>Contour plot (polylines) to mesh</source>
         <translation>등고선을 메쉬로 플로팅 (폴리선)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2783"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2801"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
         <translation>등고선을 2.5 메쉬로 플로팅 (폴리선 세트)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2792"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2810"/>
         <source>Level</source>
         <translation>레벨</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2795"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2813"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
         <translation>3점을 선택하여 클라우드 또는 메쉬 &apos;높이&apos; 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2800"/>
-        <location filename="../mainwindow.cpp" line="9964"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2818"/>
+        <location filename="../mainwindow.cpp" line="10246"/>
         <source>Sphere</source>
         <translation>구면</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2803"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2821"/>
         <source>Fits a sphere on the selected cloud</source>
         <translation>선택한 클라우드에 구면 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2808"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2826"/>
         <source>Match scales</source>
         <translation>스케일 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2813"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2831"/>
         <source>Zoom in</source>
         <translation>확대</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2816"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2834"/>
         <source>Zoom in (current 3D view)</source>
         <translation>확대 (현재 3D 뷰)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2819"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2837"/>
         <source>+</source>
         <extracomment>Zoom in shortcut</extracomment>
         <translation>+</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2824"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2842"/>
         <source>Zoom out</source>
         <translation>축소</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2827"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2845"/>
         <source>Zoom out (current 3D view)</source>
         <translation>축소 (현재 3D뷰)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2830"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2848"/>
         <source>=</source>
         <extracomment>Zoom in shortcut</extracomment>
         <translation>=</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2835"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2853"/>
         <source>Distance map</source>
         <translation>거리지도</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2844"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2862"/>
         <source>SOR filter</source>
         <translation>SOR 필터</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2847"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2865"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
         <translation>통계 초과값 필터 (네이버에서 먼점 제거)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2859"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2877"/>
         <source>actionEnableStereo</source>
         <translation>actionEnableStereo</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2862"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2880"/>
         <source>Enable stereo mode (with red-blue or red-cyan glasses)</source>
         <translation>스테레오 모드 활성화 (레드-블루 또는 레드-사이언 안경 사용)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2865"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2883"/>
         <source>F10</source>
         <translation>F10</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2873"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2891"/>
         <source>Compute points visibility (with depth buffer)</source>
         <translation>점가시성 계산 (깊이버퍼 사용)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2878"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2896"/>
         <source>Compute 2.5D volume</source>
         <translation>2.5D 부피 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2890"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2908"/>
         <source>Full screen (3D view)</source>
         <translation>전체화면 (3D뷰)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2893"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2911"/>
         <source>Exclusive full screen (3D view)</source>
         <translation>전체화면 제외 (3D뷰)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2896"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2914"/>
         <source>F11</source>
         <translation>F11</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2904"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2922"/>
         <source>Enable Visual Debug Traces</source>
         <translation>비쥬얼 디버그 트레이스 활성화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2907"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2925"/>
         <source>Enables visual debug traces (active 3D view)</source>
         <translation>비쥬얼 디버그 트레이스 활성화 (3D뷰 활성화)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2910"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2928"/>
         <source>Ctrl+D</source>
         <translation>Ctrl+D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2915"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2933"/>
         <source>Convert to grey scale</source>
         <translation>그레이 스케일 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2918"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2936"/>
         <source>Convert RGB colors to grey scale colors</source>
         <translation>RGB 컬러를 그레이 스케일 컬러로 변환</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2927"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2945"/>
         <source>Trace Polyline</source>
         <translation>폴리선 트레이스</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2930"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2948"/>
         <source>Trace a polyline by point picking</source>
         <translation>점선택으로 폴리선 트레이스</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2933"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2951"/>
         <source>Ctrl+P</source>
         <translation>Ctrl+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2941"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2959"/>
         <source>Enable Qt warnings in Console</source>
         <translation>콘솔 Qt 경고 활성화</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2946"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2964"/>
         <source>Global Shift settings</source>
         <translation>글로벌 이격설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2949"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2967"/>
         <source>Set Global Shift &amp; Scale mechanism parameters</source>
         <translation>글로벌 이격 &amp; 스케일 매카니즘 파라미터 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2957"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2975"/>
         <source>Camera link</source>
         <translation>카메라 링크</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2960"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2978"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
         <translation>전체 3D 뷰 카메라 링크
 (모두 같은 방식으로 동시에 움직입니다)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2966"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2984"/>
         <source>2D Waveform viewer</source>
         <translation>2D 웨이브폼 뷰어</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2974"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2992"/>
         <source>Create a plane</source>
         <translation>평면 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2982"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3000"/>
         <source>Edit the plane parameters</source>
         <translation>평면 파라미터 편집</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2987"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3005"/>
         <source>Create surface between two polylines</source>
         <translation>2 x 폴리선 사이 지면 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2992"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3010"/>
         <source>Surface between 2 polylines</source>
         <translation>2 x 폴리선사이 지면</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3005"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3023"/>
         <source>Enhance with intensities</source>
         <translation>강도향상</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3010"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3028"/>
         <source>Mesh scan grids</source>
         <translation>메쉬 스캔그리드</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3013"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3031"/>
         <source>Mesh scan grids (structured point clouds)</source>
         <translation>메쉬 스캔그리드 (구조화된 포인트클라우드)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3028"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3046"/>
         <source>Auto-pick rotation center</source>
         <translation>회전중심 자동선택</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3031"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3049"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
         <translation>회전중심 자동선택 (가능한 경우 화면 중앙에 항상 배치)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3034"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3052"/>
         <source>Shift+P</source>
         <translation>Shift+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3045"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3063"/>
         <source>Show cursor coordinates</source>
         <translation>커서좌표 보기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3048"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3066"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
         <translation>커서좌표 보기 (2D  및 3D)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3053"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3071"/>
         <source>Delete scan grids</source>
         <translation>스캔그리드 삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3056"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3074"/>
         <source>Delete the underlying scan grids</source>
         <translation>기본 스캔그리드 삭제</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3061"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3079"/>
         <source>Compress FWF data</source>
         <translation>FWF 데이터 압축</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3064"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3082"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
         <translation>관련 FWF 데이터 압축 (예를 들어 대화형 분할일 가능성)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3072"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3090"/>
         <source>Interpolate scalar-field(s) from another cloud or mesh</source>
         <translation>다른 클라우드 또는 메쉬에서 스칼라필드 보간</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3077"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3095"/>
         <source>Export plane info</source>
         <translation>평면정보 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3080"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3098"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
         <translation>CSV 파일로 평면정보 출력 (이름, 너비, 높이, 중심, 노말,  dip and dip 방향등)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3085"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3103"/>
         <source>Lock rotation about arbitrary axis</source>
         <translation>임의축 회전고정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3095"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3113"/>
         <source>None (English)</source>
         <translation>없음 (영어)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3100"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3118"/>
         <source>Compute geometric features</source>
         <translation>지오메트릭 피쳐 계산</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3103"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3121"/>
         <source>Compute geometric features (density, curvature, roughness, etc.)</source>
         <translation>지오메트릭 피쳐 계산 (밀도, 곡률, 거칠기 등)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3126"/>
         <source>Move bounding-box min corner to origin</source>
         <translation>경계박스 최소코너를 원점이로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3111"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3129"/>
         <source>Move the bounding-box min corner to the origin</source>
         <translation>경계박스 최소코너를 원점이로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3116"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3134"/>
         <source>Move bounding-box max corner to origin</source>
         <translation>경계박스 최대코너를 원점으로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3119"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3137"/>
         <source>Move the bounding-box max corner to the origin</source>
         <translation>경계박스 최대코너를 원점으로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3124"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3142"/>
         <source>Move bounding-box center to origin</source>
         <translation>경계박스 중심을 원점으로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3127"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3145"/>
         <source>Move the bounding-box center to the origin</source>
         <translation>경계박스 중심을 원점으로 이동</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3132"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3150"/>
         <source>Flip</source>
         <translation>접기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3135"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3153"/>
         <source>Flip the selected plane</source>
         <translation>선택한 평면 접기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3140"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3158"/>
         <source>Compare</source>
         <translation>비교</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3143"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3161"/>
         <source>Compare two planes (angle + distance)</source>
         <translation>2면 비교 (각도 + 거리)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3148"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3166"/>
         <source>Flip triangles</source>
         <translation>TIN 접기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3151"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3169"/>
         <source>Flip triangles (if vertices are ordered in the non-direct order)</source>
         <translation>TIN 접기 (버텍트가 간접으로 정렬된 경우)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3160"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3178"/>
         <source>Cloud/Primitive Dist</source>
         <translation>클라우드/기본요소 거리</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3163"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3166"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3181"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3184"/>
         <source>Compute cloud/Primitive distance</source>
         <translation>클라우드/기본요소 거리 비교</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3171"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3189"/>
         <source>Export normals to SF(s)</source>
         <translation>SF로 노말 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3174"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3192"/>
         <source>Export normals to one or several scalar fields</source>
         <translation>하나 이상의 스칼라 필드에 노멀 출력</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3192"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3210"/>
         <source>Reset all VBOs</source>
         <translation>모든 VBO 리셋</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3195"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3213"/>
         <source>Reset all VBOs (unload GPU memory)</source>
         <translation>모든 VBO 리셋 (GPU 메모리 로드해제)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3200"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3218"/>
         <source>Create single point cloud</source>
         <translation>싱글 포인트클라우드 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3203"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3206"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3221"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3224"/>
         <source>Create a cloud with a single point</source>
         <translation>싱글점 클라우드 생성</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3214"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3232"/>
         <source>Paste from clipboard</source>
         <translation>클립보드 붙이기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3217"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3220"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3235"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3238"/>
         <source>Paste from ASCII/text data stored in the clipboard</source>
         <translation>클립보드에 저장된 ASCII/텍스트 데이터 붙이기</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3223"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3241"/>
         <source>Alt+P</source>
         <translation>Alt+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3228"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3246"/>
         <source>Split cloud (integer values)</source>
         <translation>클라우드 자르기 (정수)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3231"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3249"/>
         <source>Split the selected cloud using the current scalar field.
 The active scalar field should have integer values.</source>
         <translation>현재 스칼라필드를 사용하여 선택한 클라우드 분리.
 활성 스칼라필드는 정수여야합니다.</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3241"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3259"/>
         <source>Add classification SF</source>
         <translation>SF 분류 추가</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3244"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3262"/>
         <source>Add classification SF (shorcut to &apos;Add constant SF&apos;)</source>
         <translation>SF 분류 추가 (일정 SF 추가&apos; 단축키)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3255"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3273"/>
         <source>Restore window geometry on startup</source>
         <translation>시작시 윈도우 지오메트리 복원</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3260"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3278"/>
         <source>Shift points along normals</source>
         <translation>노말을 따라 점 이격</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3263"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3281"/>
         <source>Shift the points of the selected cloud along their normals</source>
         <translation>노말을 따라 선택한 클라우드점 이격</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="357"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3268"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3286"/>
         <source>Circle</source>
         <translation>원형</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3271"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3289"/>
         <source>Fits a circle on the selected cloud</source>
         <translation>선택한 클라우드에 원 맞춤</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3276"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3294"/>
         <source>Set SF(s) as normal</source>
         <translation>노말로 SF 설정</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3281"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3299"/>
         <source>Open project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3290"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3308"/>
         <source>Save project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3293"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3311"/>
         <source>Save project (BIN)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3296"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3299"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3314"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3317"/>
         <source>Save all entities in a BIN file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3302"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3320"/>
         <source>Ctrl+Shift+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="236"/>
-        <location filename="../mainwindow.cpp" line="6861"/>
+        <location filename="../mainwindow.cpp" line="230"/>
+        <location filename="../mainwindow.cpp" line="7114"/>
         <source>Enter Full Screen</source>
         <translation>전체화면 입력</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="259"/>
+        <location filename="../mainwindow.cpp" line="256"/>
         <source>Set current view mode</source>
         <translation>현재 뷰모드 설정</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="275"/>
+        <location filename="../mainwindow.cpp" line="272"/>
         <source>Set pivot visibility</source>
         <translation>피봇 가시 설정</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="342"/>
+        <location filename="../mainwindow.cpp" line="343"/>
         <source>Ready</source>
         <translation>준비</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="349"/>
+        <location filename="../mainwindow.cpp" line="350"/>
         <source>CloudCompare started!</source>
         <translation>CloudCompare 시작!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="969"/>
+        <location filename="../mainwindow.cpp" line="972"/>
         <source>Selected one and only one point cloud or mesh!</source>
         <translation>한개의 포인트클라우드 또는 메쉬를 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="975"/>
+        <location filename="../mainwindow.cpp" line="978"/>
         <source>Max error per leaf cell:</source>
         <translation>리프셀당 최대에러:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1009"/>
+        <location filename="../mainwindow.cpp" line="1012"/>
         <source>An error occurred</source>
         <translation>에러발생</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1029"/>
+        <location filename="../mainwindow.cpp" line="1032"/>
         <source>Resample with octree</source>
         <translation>옥트리로 리샘플링</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1029"/>
+        <location filename="../mainwindow.cpp" line="1032"/>
         <source>Points (approx.)</source>
         <translation>점 (예상)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1061"/>
+        <location filename="../mainwindow.cpp" line="1064"/>
         <source>Could not compute octree for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;의 옥트리를 계산할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1099"/>
+        <location filename="../mainwindow.cpp" line="1102"/>
         <source>[ResampleWithOctree] Errors occurred during the process, result may be incomplete</source>
         <translation>[ResampleWithOctree] 프로세싱중 에러가 발생하였습니다. 결과가 완전하지 않습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1263"/>
-        <location filename="../mainwindow.cpp" line="1649"/>
+        <location filename="../mainwindow.cpp" line="1266"/>
+        <location filename="../mainwindow.cpp" line="1652"/>
         <source>Original</source>
         <translation>오리지널</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1267"/>
+        <location filename="../mainwindow.cpp" line="1270"/>
         <source>Previous</source>
         <translation>이전</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1292"/>
+        <location filename="../mainwindow.cpp" line="1295"/>
         <source>Suggested</source>
         <translation>추천</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1315"/>
+        <location filename="../mainwindow.cpp" line="1318"/>
         <source>[ApplyTransformation] Process cancelled by user</source>
         <translation>[변환적용] 사용자 취소</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1338"/>
+        <location filename="../mainwindow.cpp" line="1341"/>
         <source>[ApplyTransformation] Cloud &apos;%1&apos; global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5</source>
         <translation>[ApplyTransformation] 클라우드 &apos;%1&apos; 클로벌 이결/스칼라정보가 업데이트 되었습니다: 이격 = (%2,%3,%4) / 스칼라 = %5</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1367"/>
+        <location filename="../mainwindow.cpp" line="1370"/>
         <source>[ApplyTransformation] Applied transformation matrix:</source>
         <translation>[ApplyTransformation] 적용된 변환 매트릭스:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4091"/>
-        <location filename="../mainwindow.cpp" line="4307"/>
-        <location filename="../mainwindow.cpp" line="5851"/>
-        <location filename="../mainwindow.cpp" line="5898"/>
+        <location filename="../mainwindow.cpp" line="4100"/>
+        <location filename="../mainwindow.cpp" line="4316"/>
+        <location filename="../mainwindow.cpp" line="6099"/>
+        <location filename="../mainwindow.cpp" line="6146"/>
         <source>Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the &apos;Edit &gt; Apply transformation&apos; tool</source>
         <translation>힌트:복사 (CTRL+C) 후 &apos;편집 &gt; 변환적용&apos; 도구를 사용하여 모든 엔터티에 적용하거나 그 반대로 적용합니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1413"/>
+        <location filename="../mainwindow.cpp" line="1416"/>
         <source>[Apply scale] Entity &apos;%1&apos; can&apos;t be scaled this way</source>
         <translation>[스케일적용] 엔티티 &apos;%1&apos;은(는) 이 방법으로 크기를 조정할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1360"/>
+        <location filename="../mainwindow.cpp" line="1363"/>
         <source>[ApplyTransformation] Transformation matrix applied to the local coordinates of %1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1371"/>
+        <location filename="../mainwindow.cpp" line="1374"/>
         <source>[ApplyTransformation] Global transformation matrix:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1374"/>
+        <location filename="../mainwindow.cpp" line="1377"/>
         <source>Hint: you can copy a transformation matrix (CTRL+C) and apply it - or its inverse - to another entity with the &apos;Edit &gt; Apply transformation&apos; tool</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1459"/>
+        <location filename="../mainwindow.cpp" line="1462"/>
         <source>Big coordinates</source>
         <translation>큰 좌표</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1460"/>
+        <location filename="../mainwindow.cpp" line="1463"/>
         <source>Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?</source>
         <translation>재조정 좌표가 너무 커집니다 (원래 정밀도가 손실될 수 있음!). 계속하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1484"/>
+        <location filename="../mainwindow.cpp" line="1487"/>
         <source>[Apply scale] No eligible entities (point clouds or meshes) were selected!</source>
         <translation>[스케일 적용] 적합한 엔터티(포인트클라우드 또는 메쉬)가 선택되지 않았습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1661"/>
+        <location filename="../mainwindow.cpp" line="1664"/>
         <source>[Global Shift/Scale] New shift: (%1, %2, %3)</source>
         <translation>[글로벌 이격/스케일] 신규이격: (%1, %2, %3)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1662"/>
+        <location filename="../mainwindow.cpp" line="1665"/>
         <source>[Global Shift/Scale] New scale: %1</source>
         <translation>[글로벌 이격/스케일] 신규 스케일: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1693"/>
+        <location filename="../mainwindow.cpp" line="1696"/>
         <source>[Global Shift/Scale] To preserve its original position, the entity &apos;%1&apos; has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5</source>
         <translation>[글로벌 이격/스케일] 원위치를 유지하기위해 엔티티 &apos;%1&apos;이(가) (%2 ; %3 ; %4)로 변환되었으며 %5 팩터로 조정되었습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1713"/>
+        <location filename="../mainwindow.cpp" line="1716"/>
         <source>This method is for test purpose only</source>
         <translation>이 방식은 테스트목적입니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1714"/>
+        <location filename="../mainwindow.cpp" line="1717"/>
         <source>Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?</source>
         <translation>클라우드가 이전 위치에 계속 표시되는 동안 회전됩니다! 계속하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1799"/>
-        <location filename="../mainwindow.cpp" line="1828"/>
+        <location filename="../mainwindow.cpp" line="1802"/>
+        <location filename="../mainwindow.cpp" line="1831"/>
         <source>Not enough memory to flag the vertices of mesh &apos;%1&apos;!</source>
         <translation>메쉬 &apos;%1&apos;의 버텍스를 표시할 메모리가 부족합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1822"/>
+        <location filename="../mainwindow.cpp" line="1825"/>
         <source>[Mesh Quality] Mesh &apos;%1&apos; edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)</source>
         <translation>[메쉬품질] 메쉬 &apos;%1&apos;엣지: %2 총 (노말: %3 / 홀테두리: %4 / 비 매니폴드: %5)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1846"/>
+        <location filename="../mainwindow.cpp" line="1849"/>
         <source>[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD</source>
         <translation>[메쉬품질] SF 플래그: %1 (노말) / %2 (외곽선) / (%3) 비 매니폴드</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1851"/>
+        <location filename="../mainwindow.cpp" line="1854"/>
         <source>Error(s) occurred! Check the console...</source>
         <translation>에러가 발생하였습니다! 콘솔을 확인하십시오...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1868"/>
+        <location filename="../mainwindow.cpp" line="1871"/>
         <source>[Mesh Volume] Mesh &apos;%1&apos;: V=%2 (cube units)</source>
         <translation>[메쉬부피] 메쉬 &apos;%1&apos;: V=%2 (cube 단위)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1876"/>
+        <location filename="../mainwindow.cpp" line="1879"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has holes)</source>
         <translation>[메쉬부피] 부피 상단이 잘못되었습니다 (메쉬에 홀이 있습니다)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1880"/>
+        <location filename="../mainwindow.cpp" line="1883"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)</source>
         <translation>[메쉬부피] 상단부피가 잘못된것 같습니다 (메쉬에 비 매니폴드 엣지가 없습니다)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1885"/>
+        <location filename="../mainwindow.cpp" line="1888"/>
         <source>[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)</source>
         <translation>[메쉬부피] 상단부피가 잘못된것 같습니다 (메쉬 폐합여부를 확인할 충분한 메모리가 없습니다)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1908"/>
+        <location filename="../mainwindow.cpp" line="1911"/>
         <source>[Mesh Surface] Mesh &apos;%1&apos;: S=%2 (square units)</source>
         <translation>[메쉬부피] 메쉬 &apos;%1&apos;: S=%2 (제곱단위)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1911"/>
+        <location filename="../mainwindow.cpp" line="1914"/>
         <source>[Mesh Surface] Average triangle surface: %1 (square units)</source>
         <translation>[메쉬표면] 평균 TIN 표면: %1 (제곱단위)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1927"/>
+        <location filename="../mainwindow.cpp" line="1930"/>
         <source>Select at least one sensor</source>
         <translation>1개이상 센서선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1945"/>
-        <location filename="../mainwindow.cpp" line="2009"/>
-        <location filename="../mainwindow.cpp" line="2362"/>
+        <location filename="../mainwindow.cpp" line="1948"/>
+        <location filename="../mainwindow.cpp" line="2012"/>
+        <location filename="../mainwindow.cpp" line="2371"/>
         <source>Select a cloud on which to project the uncertainty:</source>
         <translation>불확실성을 투영할 클라우드 선택:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1967"/>
-        <location filename="../mainwindow.cpp" line="2034"/>
-        <location filename="../mainwindow.cpp" line="2371"/>
+        <location filename="../mainwindow.cpp" line="1970"/>
+        <location filename="../mainwindow.cpp" line="2037"/>
         <location filename="../mainwindow.cpp" line="2380"/>
-        <location filename="../mainwindow.cpp" line="2911"/>
-        <location filename="../mainwindow.cpp" line="2938"/>
-        <location filename="../mainwindow.cpp" line="3722"/>
-        <location filename="../mainwindow.cpp" line="3783"/>
-        <location filename="../mainwindow.cpp" line="3809"/>
-        <location filename="../mainwindow.cpp" line="4447"/>
-        <location filename="../mainwindow.cpp" line="4902"/>
-        <location filename="../mainwindow.cpp" line="4960"/>
-        <location filename="../mainwindow.cpp" line="5009"/>
-        <location filename="../mainwindow.cpp" line="5078"/>
-        <location filename="../mainwindow.cpp" line="5436"/>
-        <location filename="../mainwindow.cpp" line="5459"/>
-        <location filename="../mainwindow.cpp" line="5472"/>
-        <location filename="../mainwindow.cpp" line="5480"/>
-        <location filename="../mainwindow.cpp" line="5571"/>
-        <location filename="../mainwindow.cpp" line="5672"/>
-        <location filename="../mainwindow.cpp" line="5944"/>
-        <location filename="../mainwindow.cpp" line="8059"/>
-        <location filename="../mainwindow.cpp" line="8914"/>
-        <location filename="../mainwindow.cpp" line="9058"/>
-        <location filename="../mainwindow.cpp" line="9086"/>
-        <location filename="../mainwindow.cpp" line="9165"/>
-        <location filename="../mainwindow.cpp" line="9223"/>
-        <location filename="../mainwindow.cpp" line="9275"/>
-        <location filename="../mainwindow.cpp" line="9319"/>
-        <location filename="../mainwindow.cpp" line="10417"/>
+        <location filename="../mainwindow.cpp" line="2389"/>
+        <location filename="../mainwindow.cpp" line="2924"/>
+        <location filename="../mainwindow.cpp" line="2951"/>
+        <location filename="../mainwindow.cpp" line="3734"/>
+        <location filename="../mainwindow.cpp" line="3794"/>
+        <location filename="../mainwindow.cpp" line="3820"/>
+        <location filename="../mainwindow.cpp" line="4455"/>
+        <location filename="../mainwindow.cpp" line="5157"/>
+        <location filename="../mainwindow.cpp" line="5215"/>
+        <location filename="../mainwindow.cpp" line="5264"/>
+        <location filename="../mainwindow.cpp" line="5333"/>
+        <location filename="../mainwindow.cpp" line="5685"/>
+        <location filename="../mainwindow.cpp" line="5708"/>
+        <location filename="../mainwindow.cpp" line="5721"/>
+        <location filename="../mainwindow.cpp" line="5729"/>
+        <location filename="../mainwindow.cpp" line="5819"/>
+        <location filename="../mainwindow.cpp" line="5920"/>
+        <location filename="../mainwindow.cpp" line="6192"/>
+        <location filename="../mainwindow.cpp" line="8312"/>
+        <location filename="../mainwindow.cpp" line="9196"/>
+        <location filename="../mainwindow.cpp" line="9343"/>
+        <location filename="../mainwindow.cpp" line="9371"/>
+        <location filename="../mainwindow.cpp" line="9450"/>
+        <location filename="../mainwindow.cpp" line="9508"/>
+        <location filename="../mainwindow.cpp" line="9560"/>
+        <location filename="../mainwindow.cpp" line="9604"/>
+        <location filename="../mainwindow.cpp" line="10696"/>
         <source>Not enough memory!</source>
         <translation>메모리 부족!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1995"/>
+        <location filename="../mainwindow.cpp" line="1998"/>
         <source>Select one and only one GBL sensor!</source>
         <translation>1 GBL 센서만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2016"/>
+        <location filename="../mainwindow.cpp" line="2019"/>
         <source>The cloud must have normals!</source>
         <translation>클라우드는 노말을 갖아야합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2080"/>
-        <location filename="../mainwindow.cpp" line="2267"/>
+        <location filename="../mainwindow.cpp" line="2083"/>
+        <location filename="../mainwindow.cpp" line="2275"/>
         <source>Select one and only one sensor!</source>
         <translation>센서 한개만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2099"/>
+        <location filename="../mainwindow.cpp" line="2102"/>
         <source>[DoActionSetViewFromSensor] Viewport applied</source>
         <translation>[DoActionSetViewFromSensor] 뷰포트 적용</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2184"/>
+        <location filename="../mainwindow.cpp" line="2192"/>
         <source>Failed to create sensor</source>
         <translation>센서생성 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2324"/>
+        <location filename="../mainwindow.cpp" line="2333"/>
         <source>Can&apos;t modify this kind of sensor!</source>
         <translation>센서종류 편집 못함!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2342"/>
+        <location filename="../mainwindow.cpp" line="2351"/>
         <source>Select one and only one camera (projective) sensor!</source>
         <translation>한개의 카메라 (투사형) 센서를 선택하십시오!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2356"/>
+        <location filename="../mainwindow.cpp" line="2365"/>
         <source>Sensor has no associated uncertainty model! (Brown, etc.)</source>
         <translation>센서에는 관련 불확실성 모델이 없습니다! (브라운 등)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2391"/>
+        <location filename="../mainwindow.cpp" line="2400"/>
         <source>[%1] Uncertainty (%2)</source>
         <translation>[%1] 불확실성 (%2)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2397"/>
-        <location filename="../mainwindow.cpp" line="2426"/>
+        <location filename="../mainwindow.cpp" line="2406"/>
+        <location filename="../mainwindow.cpp" line="2435"/>
         <source>An error occurred! (see console)</source>
         <translation>에러가 발생하였습니다! (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2420"/>
+        <location filename="../mainwindow.cpp" line="2429"/>
         <source>[%1] Uncertainty (3D)</source>
         <translation>[%1] 불확실성 (3D)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2455"/>
+        <location filename="../mainwindow.cpp" line="2464"/>
         <source>Select one and only one camera sensor!</source>
         <translation>카메라센서 1개만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2465"/>
-        <location filename="../mainwindow.cpp" line="2650"/>
+        <location filename="../mainwindow.cpp" line="2474"/>
+        <location filename="../mainwindow.cpp" line="2662"/>
         <source>Select a cloud to filter:</source>
         <translation>필터에 클라우드 선택:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2478"/>
+        <location filename="../mainwindow.cpp" line="2487"/>
         <source>Failed to compute the octree!</source>
         <translation>옥트리 계산실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2488"/>
+        <location filename="../mainwindow.cpp" line="2497"/>
         <source>Failed to intersect sensor frustum with octree!</source>
         <translation>센서 프러스텀과 옥트리와 교차하지 못했습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2498"/>
+        <location filename="../mainwindow.cpp" line="2507"/>
         <source>No point fell inside the frustum!</source>
         <translation>절두체 내부에 점이 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2508"/>
-        <location filename="../mainwindow.cpp" line="2697"/>
+        <location filename="../mainwindow.cpp" line="2517"/>
+        <location filename="../mainwindow.cpp" line="2710"/>
         <source>Failed to allocate memory for output scalar field!</source>
         <translation>스칼라필드 출력을 위한 메모리할당 실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2553"/>
+        <location filename="../mainwindow.cpp" line="2565"/>
         <source>Internal error: sensor (&apos;%1&apos;) parent is not a point cloud!</source>
         <translation>내부에러:센서 (%1)페어런트는 포인트클라우드가 아닙니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2581"/>
-        <location filename="../mainwindow.cpp" line="9413"/>
-        <location filename="../mainwindow.cpp" line="9493"/>
-        <location filename="../mainwindow.cpp" line="9607"/>
+        <location filename="../mainwindow.cpp" line="2593"/>
+        <location filename="../mainwindow.cpp" line="9697"/>
+        <location filename="../mainwindow.cpp" line="9777"/>
+        <location filename="../mainwindow.cpp" line="9891"/>
         <source>Select output file</source>
         <translation>출력파일선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2621"/>
+        <location filename="../mainwindow.cpp" line="2633"/>
         <source>saving</source>
         <translation>저장중</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2625"/>
+        <location filename="../mainwindow.cpp" line="2637"/>
         <source>[I/O] File &apos;%1&apos; saved successfully</source>
         <translation>[I/O] 파일 &apos;%1&apos; 저장완료</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2640"/>
+        <location filename="../mainwindow.cpp" line="2652"/>
         <source>Select one and only one GBL/TLS sensor!</source>
         <translation>GBL/TLS 센서 1개만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2662"/>
+        <location filename="../mainwindow.cpp" line="2674"/>
         <source>Depth buffer</source>
         <translation>깊이버퍼</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2663"/>
+        <location filename="../mainwindow.cpp" line="2675"/>
         <source>Sensor has no depth buffer: do you want to compute it now?</source>
         <translation>센서에 깊이버퍼가 없습니다: 계산하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2685"/>
+        <location filename="../mainwindow.cpp" line="2698"/>
         <source>Sensor has no depth buffer (and no associated cloud?)</source>
         <translation>센서에 깊이버퍼 &amp; 관련 클라우드가 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2710"/>
+        <location filename="../mainwindow.cpp" line="2723"/>
         <source>Compute visibility</source>
         <translation>가시성 계산</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2711"/>
+        <location filename="../mainwindow.cpp" line="2724"/>
         <source>Points: %L1</source>
         <translation>점: %L1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2738"/>
+        <location filename="../mainwindow.cpp" line="2751"/>
         <source>Visibility computed for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;에서 계산된 가시성</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2739"/>
+        <location filename="../mainwindow.cpp" line="2752"/>
         <source>	Visible = %1</source>
         <translation>	표시 = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2740"/>
+        <location filename="../mainwindow.cpp" line="2753"/>
         <source>	Hidden = %1</source>
         <translation>	숨김 = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2741"/>
+        <location filename="../mainwindow.cpp" line="2754"/>
         <source>	Out of range = %1</source>
         <translation>	범위초과 = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2742"/>
+        <location filename="../mainwindow.cpp" line="2755"/>
         <source>	Out of fov = %1</source>
         <translation>	FoV 초과 = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2816"/>
+        <location filename="../mainwindow.cpp" line="2829"/>
         <source>[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
         <translation>[doActionSamplePointsOnMesh] 프로세싱중 에러가 발생하였습니다! 계산이 완료되지 않았습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2866"/>
+        <location filename="../mainwindow.cpp" line="2879"/>
         <source>[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation>[DoActionSamplePointsOnPolyline] 계산중 에러가 발생하였습니다! 결과가 완전하지 않습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2888"/>
+        <location filename="../mainwindow.cpp" line="2901"/>
         <source>[ExtrudePolyline] Both height and depth are zero, nothing to do</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2972"/>
+        <location filename="../mainwindow.cpp" line="2985"/>
         <source>[ExtrudePolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3026"/>
+        <location filename="../mainwindow.cpp" line="3039"/>
         <source>[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation>[DoActionSmoohPolyline] 프로세싱중 에러가 발생하였습니다! 결과가 완전하지 않습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3045"/>
+        <location filename="../mainwindow.cpp" line="3058"/>
         <source>Min distance between points:</source>
         <translation>점간 최소거리:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3065"/>
+        <location filename="../mainwindow.cpp" line="3078"/>
         <source>Process failed (see Console)</source>
         <translation>프로세싱실패 (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3086"/>
-        <location filename="../mainwindow.cpp" line="3259"/>
-        <location filename="../mainwindow.cpp" line="6061"/>
-        <location filename="../mainwindow.cpp" line="6200"/>
+        <location filename="../mainwindow.cpp" line="3099"/>
+        <location filename="../mainwindow.cpp" line="3270"/>
+        <location filename="../mainwindow.cpp" line="6309"/>
+        <location filename="../mainwindow.cpp" line="6448"/>
         <source>Previously selected entities (sources) have been hidden!</source>
         <translation>이전 선택한 엔티티 (소스)사 숨겨졌습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3110"/>
+        <location filename="../mainwindow.cpp" line="3123"/>
         <source>Entity [%1] has no active scalar field!</source>
         <translation>엔티티 [%1]에 사용중인 스칼라필드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3312"/>
-        <location filename="../mainwindow.cpp" line="4807"/>
-        <location filename="../mainwindow.cpp" line="8487"/>
-        <location filename="../mainwindow.cpp" line="8532"/>
+        <location filename="../mainwindow.cpp" line="3323"/>
+        <location filename="../mainwindow.cpp" line="5062"/>
+        <location filename="../mainwindow.cpp" line="8766"/>
+        <location filename="../mainwindow.cpp" line="8811"/>
         <source>Select only one cloud or one mesh!</source>
         <translation>클라우드 한개 또는 메쉬 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3343"/>
+        <location filename="../mainwindow.cpp" line="3354"/>
         <source>No active scalar field on entity &apos;%1&apos;</source>
         <translation>사용중인 스칼라필드가 엔티티 &apos;%1&apos;에 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3526"/>
+        <location filename="../mainwindow.cpp" line="3538"/>
         <source>Subdivide mesh</source>
         <translation>하위나눔 메쉬</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3526"/>
+        <location filename="../mainwindow.cpp" line="3538"/>
         <source>Max area per triangle:</source>
         <translation>TIN 단 최대 면적:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3550"/>
+        <location filename="../mainwindow.cpp" line="3562"/>
         <source>[Subdivide] An error occurred while trying to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
         <translation>[세분화] 메쉬 &apos;%1&apos;을(를) 세분화하는 중 에러가 발생했습니다 (메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3563"/>
+        <location filename="../mainwindow.cpp" line="3575"/>
         <source>[Subdivide] Failed to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
         <translation>[세분화] 메쉬 &apos;%1&apos; 세분화실패 (메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3568"/>
+        <location filename="../mainwindow.cpp" line="3580"/>
         <source>[Subdivide] Works only on real meshes!</source>
         <translation>[세분화] 리얼 메쉬만으로 작업!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3594"/>
+        <location filename="../mainwindow.cpp" line="3606"/>
         <source>[Flip triangles] Works only on real meshes!</source>
         <translation>[TIN 접기] 리얼메쉬만으로 작업!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3609"/>
-        <location filename="../mainwindow.cpp" line="3612"/>
+        <location filename="../mainwindow.cpp" line="3621"/>
+        <location filename="../mainwindow.cpp" line="3624"/>
         <source>Smooth mesh</source>
         <translation>메쉬 스무스</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3609"/>
+        <location filename="../mainwindow.cpp" line="3621"/>
         <source>Iterations:</source>
         <translation>반복:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3612"/>
+        <location filename="../mainwindow.cpp" line="3624"/>
         <source>Smoothing factor:</source>
         <translation>스무스 상수:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3633"/>
+        <location filename="../mainwindow.cpp" line="3645"/>
         <source>Failed to apply Laplacian smoothing to mesh &apos;%1&apos;</source>
         <translation>메쉬 &apos;%1&apos;에 라플라시안 스무딩 적용 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3711"/>
+        <location filename="../mainwindow.cpp" line="3723"/>
         <source>Only meshes with standard vertices are handled for now! Can&apos;t merge entity &apos;%1&apos;...</source>
         <translation>표준 버텍스가 있는 메쉬만 처리됩니다! 엔티니 &apos;%1&apos;을 병합할 수 없습니다 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3716"/>
+        <location filename="../mainwindow.cpp" line="3728"/>
         <source>Entity &apos;%1&apos; is neither a cloud nor a mesh, can&apos;t merge it!</source>
         <translation>엔티티 &apos;%1&apos;은(는) 클라우드, 메쉬가 아니어서 병합할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3728"/>
+        <location filename="../mainwindow.cpp" line="3740"/>
         <source>Select only clouds or meshes!</source>
         <translation>클라우드 또는 메쉬만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3813"/>
+        <location filename="../mainwindow.cpp" line="3824"/>
         <source>Original cloud index</source>
         <translation>오리지널 클라우드 인덱스</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3813"/>
+        <location filename="../mainwindow.cpp" line="3824"/>
         <source>Do you want to generate a scalar field with the original cloud index?</source>
         <translation>오리지날 클라우드 인덱스로 스칼라필드를 생성하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3831"/>
+        <location filename="../mainwindow.cpp" line="3842"/>
         <source>Couldn&apos;t allocate a new scalar field for storing the original cloud index! Try to free some memory ...</source>
         <translation>오리지날 클라우드 인덱스를 저장하기위해 새로운 스칼라필드를 할당할 수 있습니다. 메모리를 확보하십시오 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3880"/>
+        <location filename="../mainwindow.cpp" line="3888"/>
         <source>Fusion failed! (not enough memory?)</source>
         <translation>퓨전 실패! (메모리부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3947"/>
+        <location filename="../mainwindow.cpp" line="3955"/>
         <source>Merged mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3960"/>
+        <location filename="../mainwindow.cpp" line="3968"/>
         <source>Merging operation failed! (not enough memory?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3995"/>
+        <location filename="../mainwindow.cpp" line="4003"/>
         <source>Select 2 point clouds or meshes!</source>
         <translation>2 포인트클라우드 또는 메쉬 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4020"/>
+        <location filename="../mainwindow.cpp" line="4028"/>
         <source>Invalid minimum RMS decrease value</source>
         <translation>잘못된 최소 RMS 감소값</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4026"/>
+        <location filename="../mainwindow.cpp" line="4034"/>
         <source>Minimum RMS decrease value is too small.
 %1 will be used instead (numerical accuracy limit).</source>
         <translation>최소 RMS 감소값이 너무 작습니다.
 대신 %1이(가) 사용됩니다(숫자 정확도 제한).</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4073"/>
+        <location filename="../mainwindow.cpp" line="4082"/>
         <source>Final RMS*: %1 (computed on %2 points)</source>
         <translation>최종 RMS*. %1 (%2점에서 계산)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4074"/>
+        <location filename="../mainwindow.cpp" line="4083"/>
         <source>(* RMS is potentially weighted, depending on the selected options)</source>
         <translation>(* RMS는 옵션에 따라 잠재적으로 가중치가 부여됩니다)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4089"/>
+        <location filename="../mainwindow.cpp" line="4098"/>
         <source>[Register] Applied transformation matrix:</source>
         <translation>[정합] 적용된 변환 매트릭스:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4096"/>
+        <location filename="../mainwindow.cpp" line="4105"/>
         <source>Scale: %1 (already integrated in above matrix!)</source>
         <translation>스케일: %1 (상단 매트릭스에 이미 통합!)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4102"/>
+        <location filename="../mainwindow.cpp" line="4111"/>
         <source>[Register] Scale: fixed (1.0)</source>
         <translation>[정합] 스케일 고정 (1.0)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4103"/>
+        <location filename="../mainwindow.cpp" line="4112"/>
         <source>Scale: fixed (1.0)</source>
         <translation>스케일: 고정 (1.0)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4108"/>
+        <location filename="../mainwindow.cpp" line="4117"/>
         <source>Theoretical overlap: %1%</source>
         <translation>이론 중복도: %1%</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4113"/>
+        <location filename="../mainwindow.cpp" line="4122"/>
         <source>This report has been output to Console (F8)</source>
         <translation>보고서가 콘솔에 출력되었습니다 (F8)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4147"/>
+        <location filename="../mainwindow.cpp" line="4156"/>
         <source>Doesn&apos;t work on sub-meshes yet!</source>
         <translation>하위 메쉬에서는 작동하지 않습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4159"/>
+        <location filename="../mainwindow.cpp" line="4168"/>
         <source>Failed to clone &apos;data&apos; mesh! (not enough memory?)</source>
         <translation>&apos;데이터&apos; 메쉬 복제 실패! (메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4178"/>
+        <location filename="../mainwindow.cpp" line="4187"/>
         <source>[ICP] The reference entity is a child of the aligned one! CC will move only the aligned entity, and not its children</source>
         <translation>[ICP] 기준엔터티는 정렬된 엔터티의 하위 엔터티입니다! CC는 정렬된 엔터티만 이동하고 하위 엔터티는 이동하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4205"/>
+        <location filename="../mainwindow.cpp" line="4214"/>
         <source>[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
         <translation>ICP] 정렬된 엔터티 글로벌이격이 기준과 일치하도록 업데이트되었습니다: (%1,%2,%3) [x%4]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4215"/>
+        <location filename="../mainwindow.cpp" line="4224"/>
         <source>Drop shift information?</source>
         <translation>이격정보 삭제?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4215"/>
+        <location filename="../mainwindow.cpp" line="4224"/>
         <source>Aligned entity is shifted but reference cloud is not: drop global shift information?</source>
         <translation>정렬된 엔터티가 이격되지만 기준클라우드는 이격되지 않습니다. 글로벌이격 정보를 삭제하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4219"/>
+        <location filename="../mainwindow.cpp" line="4228"/>
         <source>[ICP] Aligned entity global shift has been reset to match the reference!</source>
         <translation>[ICP] 정렬된 엔티티 글로벌 이격이 기준과 일치하도록 리셋되었습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4230"/>
+        <location filename="../mainwindow.cpp" line="4239"/>
         <source>Registration info</source>
         <translation>정합정보</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4242"/>
+        <location filename="../mainwindow.cpp" line="4251"/>
         <source>Work in progress</source>
         <translation>작업중</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4243"/>
+        <location filename="../mainwindow.cpp" line="4252"/>
         <source>This method is still under development: are you sure you want to use it? (a crash may likely happen)</source>
         <translation>이 방식은 개발 중입니다. 이 방식을 사용하겠습니까? (충돌이 발생할 가능성이 있음)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4251"/>
-        <location filename="../mainwindow.cpp" line="4257"/>
-        <location filename="../mainwindow.cpp" line="5637"/>
-        <location filename="../mainwindow.cpp" line="5643"/>
-        <location filename="../mainwindow.cpp" line="9724"/>
-        <location filename="../mainwindow.cpp" line="9730"/>
+        <location filename="../mainwindow.cpp" line="4260"/>
+        <location filename="../mainwindow.cpp" line="4266"/>
+        <location filename="../mainwindow.cpp" line="5885"/>
+        <location filename="../mainwindow.cpp" line="5891"/>
+        <location filename="../mainwindow.cpp" line="10008"/>
+        <location filename="../mainwindow.cpp" line="10014"/>
         <source>Select 2 point clouds!</source>
         <translation>2 포인트클라우드 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4305"/>
+        <location filename="../mainwindow.cpp" line="4314"/>
         <source>[Align] Resulting matrix:</source>
         <translation>[맞춤] 결과 매트릭스:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4329"/>
+        <location filename="../mainwindow.cpp" line="4338"/>
         <source>[Align] Registration failed!</source>
         <translation>[맞춤] 정합실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4375"/>
-        <location filename="../mainwindow.cpp" line="9597"/>
+        <location filename="../mainwindow.cpp" line="4384"/>
+        <location filename="../mainwindow.cpp" line="9881"/>
         <source>Select at least one point cloud!</source>
         <translation>1개 이상 포인트클라우드 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4401"/>
+        <location filename="../mainwindow.cpp" line="4410"/>
         <source>Subsampling</source>
         <translation>하위샘플링</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4414"/>
+        <location filename="../mainwindow.cpp" line="4422"/>
         <source>[Subsampling] Failed to subsample cloud &apos;%1&apos;!</source>
         <translation>[하위샘플링] 하위 샘플링 클라우드 실패 &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4441"/>
+        <location filename="../mainwindow.cpp" line="4449"/>
         <source>[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!</source>
         <translation>[Subsampling] 메모리가 부족합니다: 컬러, 노말 또는 스칼라필드가 누락됩니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4456"/>
+        <location filename="../mainwindow.cpp" line="4464"/>
         <source>Errors occurred (see console)</source>
         <translation>에러발생 (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4520"/>
+        <location filename="../mainwindow.cpp" line="4528"/>
         <source>[CreateComponentsClouds] Not enough memory to sort components by size!</source>
         <translation>[CreateComponentsClouds] 구성요소를 크기별로 정렬할 메모리가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4582"/>
+        <location filename="../mainwindow.cpp" line="4590"/>
         <source>[CreateComponentsClouds] Failed to create component #%1! (not enough memory)</source>
         <translation>[CreateComponentsClouds] 구성요소 #%1을(를) 생성하지 못했습니다! (메모리 부족)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4594"/>
+        <location filename="../mainwindow.cpp" line="4602"/>
         <source>No component was created! Check the minimum size...</source>
         <translation>구성요소가 생성되지 않습니다! 최소크가 확인...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4603"/>
+        <location filename="../mainwindow.cpp" line="4611"/>
         <source>[CreateComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
         <translation>[CreateComponentsClouds] %1 구성요소가 클라우드 &apos;%2&apos;에서 생성되었습니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4612"/>
+        <location filename="../mainwindow.cpp" line="4620"/>
         <source>[CreateComponentsClouds] Original cloud has been automatically hidden</source>
         <translation>[CreateComponentsClouds] 원본 클라우드가 자동으로 숨겨졌습니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4679"/>
-        <location filename="../mainwindow.cpp" line="8997"/>
+        <location filename="../mainwindow.cpp" line="4702"/>
+        <location filename="../mainwindow.cpp" line="4934"/>
+        <location filename="../mainwindow.cpp" line="9282"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
         <translation>클라우드 &apos;%1&apos;의 옥트리를 계산할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4692"/>
+        <location filename="../mainwindow.cpp" line="4715"/>
+        <source>Couldn&apos;t allocate a new scalar field for computing Cut Pursuit labels! Try to free some memory ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4805"/>
+        <source>[Cut Pursuit] Failed to compute component labels!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4820"/>
+        <source>[Cut Pursuit] Partitioned cloud &apos;%1&apos; into %2 components</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4824"/>
+        <source>[Cut Pursuit] Not enough memory to compute compontents on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4860"/>
+        <source>[Cut Pursuit] Not enough memory to average colors of cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4947"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
         <translation>CC 라벨 계산에 신규 스칼라필드를 할당할 수 없습니다! 메모리를 확보하십시오 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4724"/>
+        <location filename="../mainwindow.cpp" line="4979"/>
         <source>Many components</source>
         <translation>많은 구성요소</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4724"/>
+        <location filename="../mainwindow.cpp" line="4979"/>
         <source>Do you really expect up to %1 components?
 (this may take a lot of time to process and display)</source>
         <translation>최대 %1개의 구성요소를 기대하시나요?
 (프로세싱과 표시에 많은 시간이 걸릴 수 있음)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4744"/>
-        <location filename="../mainwindow.cpp" line="4749"/>
+        <location filename="../mainwindow.cpp" line="4999"/>
+        <location filename="../mainwindow.cpp" line="5004"/>
         <source>[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
         <translation>[DoActionLabelConnectedComponents] 클라우드 %1에서 CC를 추출하는 중 문제가 발생했습니다...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4831"/>
+        <location filename="../mainwindow.cpp" line="5086"/>
         <source>Select 2 and only 2 polylines</source>
         <translation>2개를 선택 &amp; 2개의 폴리라인만 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4840"/>
+        <location filename="../mainwindow.cpp" line="5095"/>
         <source>Projection method</source>
         <translation>투영방법</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4840"/>
+        <location filename="../mainwindow.cpp" line="5095"/>
         <source>Use best fit plane (yes) or the current viewing direction (no)</source>
         <translation>최상맞춤 (예) 또는 현재 뷰방향 (아니오) 사용</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4857"/>
+        <location filename="../mainwindow.cpp" line="5112"/>
         <source>[Mesh two polylines] Failed to compute normals!</source>
         <translation>[메쉬 2 폴리라인] 노말 계산 실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4867"/>
+        <location filename="../mainwindow.cpp" line="5122"/>
         <source>Failed to create mesh (see Console)</source>
         <translation>메쉬 생성실패 (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4908"/>
+        <location filename="../mainwindow.cpp" line="5163"/>
         <source>Select a group of polylines or multiple polylines (contour plot)!</source>
         <translation>폴라라인 그룹 또는 멀티 폴리라인 선택 ( 등고선 플로팅)!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4912"/>
+        <location filename="../mainwindow.cpp" line="5167"/>
         <source>Projection dimension</source>
         <translation>투영차원</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4912"/>
+        <location filename="../mainwindow.cpp" line="5167"/>
         <source>Contour plot to mesh</source>
         <translation>등고선을 메쉬로 플로팅 </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4945"/>
+        <location filename="../mainwindow.cpp" line="5200"/>
         <source>Not enough segments!</source>
         <translation>분할이 부족합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5000"/>
+        <location filename="../mainwindow.cpp" line="5255"/>
         <source>Third party library error: %1</source>
         <translation>타사 라이브러리 에러: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5065"/>
+        <location filename="../mainwindow.cpp" line="5320"/>
         <source>[Contour plot to mesh] Failed to compute normals!</source>
         <translation>[메쉬에 등고선 플로팅] 노말 계산실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5088"/>
+        <location filename="../mainwindow.cpp" line="5343"/>
         <source>Select one or two point clouds!</source>
         <translation>1 또는 2 포인트클라우드 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5097"/>
-        <location filename="../mainwindow.cpp" line="5112"/>
+        <location filename="../mainwindow.cpp" line="5352"/>
+        <location filename="../mainwindow.cpp" line="5364"/>
         <source>Select point clouds only!</source>
         <translation>포인트클라우드만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5129"/>
+        <location filename="../mainwindow.cpp" line="5378"/>
         <source>Select only one point cloud!</source>
         <translation>포인트클라우드 1개만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5136"/>
+        <location filename="../mainwindow.cpp" line="5385"/>
         <source>Select a point cloud!</source>
         <translation>포인트클라우드 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5173"/>
-        <location filename="../mainwindow.cpp" line="5231"/>
+        <location filename="../mainwindow.cpp" line="5422"/>
+        <location filename="../mainwindow.cpp" line="5480"/>
         <source>Triangulate</source>
         <translation>TIN</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5173"/>
+        <location filename="../mainwindow.cpp" line="5422"/>
         <source>Min triangle angle (in degrees)</source>
         <translation>최소 TIN 각도 (degree)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5231"/>
-        <location filename="../mainwindow.cpp" line="8738"/>
+        <location filename="../mainwindow.cpp" line="5480"/>
+        <location filename="../mainwindow.cpp" line="9017"/>
         <source>Max edge length (0 = no limit)</source>
         <translation>최대 엣지거리 (0 = 무제한)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5259"/>
+        <location filename="../mainwindow.cpp" line="5508"/>
         <source>Keep old normals?</source>
         <translation>기존 노말 유지?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5260"/>
+        <location filename="../mainwindow.cpp" line="5509"/>
         <source>Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?</source>
         <translation>클라우드에 노말이 있습니다. 업데이트 (예) 또는 기존값 유지 (아니오)?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5268"/>
+        <location filename="../mainwindow.cpp" line="5517"/>
         <source>Triangulation</source>
         <translation>TIN</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5269"/>
+        <location filename="../mainwindow.cpp" line="5518"/>
         <source>Triangulation in progress...</source>
         <translation>TIN 생성중...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5308"/>
+        <location filename="../mainwindow.cpp" line="5557"/>
         <source>Error(s) occurred! See the Console messages</source>
         <translation>에러가 발생하였습니다! 콘솔메세지를 확인하십시오</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5338"/>
+        <location filename="../mainwindow.cpp" line="5587"/>
         <source>[DoActionFitQuadric] Quadric local coordinate system:</source>
         <translation>[DoActionFitQuadric] 2차 지역좌표계:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5340"/>
+        <location filename="../mainwindow.cpp" line="5589"/>
         <source>[DoActionFitQuadric] Quadric equation (in local coordinate system): </source>
         <translation>[DoActionFitQuadric] 2차 방정식 (지역좌표계): </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5375"/>
+        <location filename="../mainwindow.cpp" line="5624"/>
         <source>Failed to compute quadric on cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;에 2차방정식 계산 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5383"/>
+        <location filename="../mainwindow.cpp" line="5632"/>
         <source>Error(s) occurred: see console</source>
         <translation>에러가 발생하였습니다: 콘솔확인</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5508"/>
+        <location filename="../mainwindow.cpp" line="5756"/>
         <source>[DistanceMap] Cloud &apos;%1&apos;: no point falls inside the specified range</source>
         <translation>[DistanceMap] 클라우드 &apos;%1&apos;:지정범위에 속한점이 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5530"/>
+        <location filename="../mainwindow.cpp" line="5778"/>
         <source>Distance to best fit quadric (3D)</source>
         <translation>최상 이차 맞춤까지 거리 (3D)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5530"/>
+        <location filename="../mainwindow.cpp" line="5778"/>
         <source>Steps (per dim.)</source>
         <translation>단계 (차원당)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5559"/>
+        <location filename="../mainwindow.cpp" line="5807"/>
         <source>Failed to get the center of gravity of cloud &apos;%1&apos;!</source>
         <translation>클라우드 &apos;%1&apos;의 무게 중심을 획득 실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5580"/>
-        <location filename="../mainwindow.cpp" line="5666"/>
+        <location filename="../mainwindow.cpp" line="5828"/>
+        <location filename="../mainwindow.cpp" line="5914"/>
         <source>Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
         <translation>신규 스칼라필드에 거리계산을 할당할 수 없습니다! 메모리확보후 재시도하십시오 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5617"/>
+        <location filename="../mainwindow.cpp" line="5865"/>
         <source>Distance map to 3D quadric</source>
         <translation>3D 2차원까지 지도거리</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5625"/>
+        <location filename="../mainwindow.cpp" line="5873"/>
         <source>Failed to compute 3D quadric on cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;에 3D 이차 계산살패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5647"/>
-        <location filename="../mainwindow.cpp" line="9734"/>
-        <location filename="../mainwindow.cpp" line="9831"/>
+        <location filename="../mainwindow.cpp" line="5895"/>
+        <location filename="../mainwindow.cpp" line="10018"/>
+        <location filename="../mainwindow.cpp" line="10114"/>
         <source>Compared</source>
         <translation>비교</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5647"/>
-        <location filename="../mainwindow.cpp" line="9734"/>
-        <location filename="../mainwindow.cpp" line="9831"/>
+        <location filename="../mainwindow.cpp" line="5895"/>
+        <location filename="../mainwindow.cpp" line="10018"/>
+        <location filename="../mainwindow.cpp" line="10114"/>
         <source>Reference</source>
         <translation>기준</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5656"/>
+        <location filename="../mainwindow.cpp" line="5904"/>
         <source>Compared cloud must be a real point cloud!</source>
         <translation>비교클라우드는 실제 포인트클라우드여야합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5762"/>
+        <location filename="../mainwindow.cpp" line="6010"/>
         <source>Shift along normals</source>
         <translation>노말을 따라 이격</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5762"/>
+        <location filename="../mainwindow.cpp" line="6010"/>
         <source>Shift quantity</source>
         <translation>이격량</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5787"/>
-        <location filename="../mainwindow.cpp" line="12259"/>
+        <location filename="../mainwindow.cpp" line="6035"/>
+        <location filename="../mainwindow.cpp" line="12541"/>
         <source>Select one point cloud!</source>
         <translation>포인트클라우드 1개 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5793"/>
+        <location filename="../mainwindow.cpp" line="6041"/>
         <source>Dimension</source>
         <translation>차수</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5793"/>
+        <location filename="../mainwindow.cpp" line="6041"/>
         <source>Orthogonal dim (X=0 / Y=1 / Z=2)</source>
         <translation>직교차원 (X=0 / Y=1 / Z=2)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5849"/>
+        <location filename="../mainwindow.cpp" line="6097"/>
         <source>[Synchronize] Transformation matrix (%1):</source>
         <translation>[동기화] 변환 메트릭스 (%1):</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5896"/>
+        <location filename="../mainwindow.cpp" line="6144"/>
         <source>[Synchronize] Transformation matrix (%1 --&gt; %2):</source>
         <translation>[동기화] 변환 매트릭스 (%1 --&gt; %2):</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6025"/>
+        <location filename="../mainwindow.cpp" line="6273"/>
         <source>Cloud %1 has not enough points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6045"/>
+        <location filename="../mainwindow.cpp" line="6293"/>
         <source>[DoActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
         <translation>[DoActionSORFilter] 클라우드 &apos;%1&apos;에서 제거된 점이 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6068"/>
+        <location filename="../mainwindow.cpp" line="6316"/>
         <source>[DoActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation>[DoActionSORFilter] &apos;%1&apos; 크린버전을 생성할 메모리가 부족합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6078"/>
+        <location filename="../mainwindow.cpp" line="6326"/>
         <source>[DoActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
         <translation>[DoActionSORFilter] 클라우드 &apos;%1에 노이즈필터 적용실패&apos;! (메모리부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6184"/>
+        <location filename="../mainwindow.cpp" line="6432"/>
         <source>[DoActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
         <translation>[DoActionFilterNoise] 클라우드 &apos;%1&apos;에서 제거된 점이 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6207"/>
+        <location filename="../mainwindow.cpp" line="6455"/>
         <source>[DoActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation>[DoActionFilterNoise] &apos;%1&apos;! 크린버전을 생성할 메모리가 부족합니다 !</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6217"/>
+        <location filename="../mainwindow.cpp" line="6465"/>
         <source>[DoActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
         <translation>[DoActionFilterNoise] 클라우드 &apos;%1&apos;! (메모리 부족?)에 노이즈필터 적용 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6230"/>
-        <location filename="../mainwindow.cpp" line="7277"/>
+        <location filename="../mainwindow.cpp" line="6478"/>
+        <location filename="../mainwindow.cpp" line="7530"/>
         <source>Select one and only one entity!</source>
         <translation>앤티티 한개 또는 한개만 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6280"/>
+        <location filename="../mainwindow.cpp" line="6528"/>
         <source>Error</source>
         <translation>에러</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6280"/>
+        <location filename="../mainwindow.cpp" line="6528"/>
         <source>Invalid angular range</source>
         <translation>잘못된 각도범위</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6345"/>
+        <location filename="../mainwindow.cpp" line="6593"/>
         <source>[Unroll] Original mesh has been automatically hidden</source>
         <translation>[Unroll] 오리지널 메쉬가 자동으로 숨겨집니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6357"/>
+        <location filename="../mainwindow.cpp" line="6605"/>
         <source>[Unroll] Original cloud has been automatically hidden</source>
         <translation>[Unroll] 오리지널 메쉬가 자동으로 숨겨집니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6456"/>
+        <location filename="../mainwindow.cpp" line="6698"/>
         <source>Failed to create the 3D view</source>
         <translation>3D뷰 생성 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6477"/>
+        <location filename="../mainwindow.cpp" line="6719"/>
         <source>Rotation axis locked to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6525"/>
+        <location filename="../mainwindow.cpp" line="6767"/>
         <source>New 3D View</source>
         <translation>신규 3D 뷰</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6561"/>
+        <location filename="../mainwindow.cpp" line="6803"/>
         <source>Restart</source>
         <translation>재시작</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6562"/>
+        <location filename="../mainwindow.cpp" line="6804"/>
         <source>To finish the process, you&apos;ll have to close and restart CloudCompare</source>
         <translation>과정을 종료하려면 CloudCompare 종료후 재시작해야합니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6592"/>
+        <location filename="../mainwindow.cpp" line="6834"/>
         <source>All VBOs have been released (%1 Mb)</source>
         <translation>전체 VBO가 릴리즈 (%1 Mb)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6595"/>
+        <location filename="../mainwindow.cpp" line="6837"/>
         <source>You might want to disable the &apos;use VBOs&apos; option in the Display Settings to keep the GPU memory empty</source>
         <translation>화면설정에서 VBO 옵션을 비활성하면 GPU 메모리를 비워둡니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6600"/>
+        <location filename="../mainwindow.cpp" line="6842"/>
         <source>No VBO allocated</source>
         <translation>VBO 할당없음</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6661"/>
+        <location filename="../mainwindow.cpp" line="6903"/>
         <source>Are you sure you want to quit?</source>
         <translation>종료하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6665"/>
+        <location filename="../mainwindow.cpp" line="6907"/>
         <source>Yes, don&apos;t ask again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6857"/>
+        <location filename="../mainwindow.cpp" line="7110"/>
         <source>Exit Full Screen</source>
         <translation>전체화면 종료</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6919"/>
+        <location filename="../mainwindow.cpp" line="7172"/>
         <source>Select at least one entity (point cloud or mesh)!</source>
         <translation>1개이상 엔티티 (포인트클라우드 또는 메쉬) 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6951"/>
+        <location filename="../mainwindow.cpp" line="7204"/>
         <source>Select to-be-aligned entities</source>
         <translation>정렬할 엔티티 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6978"/>
+        <location filename="../mainwindow.cpp" line="7231"/>
         <source>Not enough memory</source>
         <translation>메모리 부족</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6984"/>
+        <location filename="../mainwindow.cpp" line="7237"/>
         <source>No to-be-aligned entity selected</source>
         <translation>정렬할 엔티티 미선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6997"/>
+        <location filename="../mainwindow.cpp" line="7250"/>
         <source>[PointPairRegistration] Failed to create dedicated 3D view!</source>
         <translation>[PointPairRegistration] 전용 3D뷰를 생성 실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7078"/>
+        <location filename="../mainwindow.cpp" line="7331"/>
         <source>No cloud in selection!</source>
         <translation>선택에 클라우드 없음!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7092"/>
+        <location filename="../mainwindow.cpp" line="7345"/>
         <source>[SectionExtraction] Failed to create dedicated 3D view!</source>
         <translation>[SectionExtraction] 전용 3D뷰를 생성 실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7166"/>
+        <location filename="../mainwindow.cpp" line="7419"/>
         <source>No segmentable entity in active window!</source>
         <translation>활성 윈도우에 분할할 엔티티 없음!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7284"/>
+        <location filename="../mainwindow.cpp" line="7537"/>
         <source>Select a cloud or a mesh</source>
         <translation>클라우드 또는 메쉬 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7290"/>
+        <location filename="../mainwindow.cpp" line="7543"/>
         <source>Entity must be visible!</source>
         <translation>엔티티가 보여야합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7429"/>
-        <location filename="../mainwindow.cpp" line="7486"/>
+        <location filename="../mainwindow.cpp" line="7682"/>
+        <location filename="../mainwindow.cpp" line="7739"/>
         <source>Unexpected error!</source>
         <translation>예기치 않은 에러!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7466"/>
+        <location filename="../mainwindow.cpp" line="7719"/>
         <source>No entity eligible for manual transformation! (see console)</source>
         <translation>수동 변환에 적합한 엔터티가 없습니다! (콘솔 확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7471"/>
+        <location filename="../mainwindow.cpp" line="7724"/>
         <source>Some entities were ignored! (see console)</source>
         <translation>몇몇 엔티티가 무시되었습니다! (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7608"/>
+        <location filename="../mainwindow.cpp" line="7861"/>
         <source>Orthographic mode only!</source>
         <translation>정사모드 온리!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7672"/>
+        <location filename="../mainwindow.cpp" line="7925"/>
         <source>All selected entities must be displayed in the same 3D view!</source>
         <translation>선택한 모든 엔티티가 동일한 3D뷰에 표시되어야합니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7683"/>
+        <location filename="../mainwindow.cpp" line="7936"/>
         <source>Selected entities have no valid bounding-box!</source>
         <translation>선택한 엔티티에 올바른 바운딩박스가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7807"/>
+        <location filename="../mainwindow.cpp" line="8060"/>
         <source>Can&apos;t start the picking mechanism (another tool is already using it)</source>
         <translation>선택 메커니즘을 시작할 수 없습니다 (다른 도구가 이미 사용 중입니다)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7848"/>
+        <location filename="../mainwindow.cpp" line="8101"/>
         <source>Picking operation aborted</source>
         <translation>선택 작동 멈춤</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7878"/>
+        <location filename="../mainwindow.cpp" line="8131"/>
         <source>The point was picked in the wrong window</source>
         <translation>잘못된 윈도우에서 점이 선택되었습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7905"/>
+        <location filename="../mainwindow.cpp" line="8158"/>
         <source>[Level] Point is too close from the others!</source>
         <translation>[Level] 점이 다른값과 너무 가깝습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8035"/>
-        <location filename="../mainwindow.cpp" line="8083"/>
+        <location filename="../mainwindow.cpp" line="8288"/>
+        <location filename="../mainwindow.cpp" line="8336"/>
         <source>Stop the other picking operation first!</source>
         <translation>다른 선택 작동을 우선 정지하십시오!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8043"/>
-        <location filename="../mainwindow.cpp" line="8091"/>
+        <location filename="../mainwindow.cpp" line="8296"/>
+        <location filename="../mainwindow.cpp" line="8344"/>
         <source>No active 3D view!</source>
         <translation>활성화된 3D뷰 없음!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8049"/>
+        <location filename="../mainwindow.cpp" line="8302"/>
         <source>Select an entity!</source>
         <translation>엔티티 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8069"/>
+        <location filename="../mainwindow.cpp" line="8322"/>
         <source>Pick three points on the floor plane (click the Level button or press Escape to cancel)</source>
         <translation>평면의 3점선택 (높이버튼을 클릭하거나 ESC를 눌러 취소)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8099"/>
+        <location filename="../mainwindow.cpp" line="8352"/>
         <source>Perspective mode is viewer-centered: can&apos;t use a point as rotation center!</source>
         <translation>원근 모드는 뷰어 중심입니다. 점을 회전 중심으로 사용할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8104"/>
+        <location filename="../mainwindow.cpp" line="8357"/>
         <source>Pick a point to be used as rotation center (click on icon again to cancel)</source>
         <translation>회전 중심으로 사용할 점 선택 (아이콘을 다시 클릭하면 취소)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8113"/>
+        <location filename="../mainwindow.cpp" line="8366"/>
         <source>No cloud in database!</source>
         <translation>DB에 클라우드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8175"/>
+        <location filename="../mainwindow.cpp" line="8428"/>
         <source>Histogram</source>
         <translation>히스토그램</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8181"/>
-        <location filename="../mainwindow.cpp" line="8216"/>
+        <location filename="../mainwindow.cpp" line="8434"/>
+        <location filename="../mainwindow.cpp" line="8469"/>
         <source>Count</source>
         <translation>갯수</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8202"/>
+        <location filename="../mainwindow.cpp" line="8455"/>
         <source>Histogram [%1]</source>
         <translation>히스토그램 [%1]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8213"/>
+        <location filename="../mainwindow.cpp" line="8466"/>
         <source>%1 (%2 values) </source>
         <translation>%1 (%2 값) </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8245"/>
+        <location filename="../mainwindow.cpp" line="8498"/>
         <source>[Crop] No eligible candidate found!</source>
         <translation>[자르기]적합한 후보가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8297"/>
+        <location filename="../mainwindow.cpp" line="8550"/>
         <source>[Crop] Selected entities have been hidden</source>
         <translation>[자르기] 선택한 엔티티가 숨겨졌습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8299"/>
+        <location filename="../mainwindow.cpp" line="8552"/>
         <source>Error(s) occurred! See the Console</source>
         <translation>에러가 발생하였습니다! 콘솔확인</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8318"/>
+        <location filename="../mainwindow.cpp" line="8571"/>
         <source>An error occurred while cloning cloud %1</source>
         <translation>클라우드 %1 복제중 에러가 발생하였습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8326"/>
+        <location filename="../mainwindow.cpp" line="8579"/>
         <source>An error occurred while cloning primitive %1</source>
         <translation>기본요소 %1 복제중 에러가 발생하였습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8334"/>
+        <location filename="../mainwindow.cpp" line="8587"/>
         <source>An error occurred while cloning mesh %1</source>
         <translation>메쉬 %1 복제중 에러가 발생하였습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8342"/>
-        <location filename="../mainwindow.cpp" line="8350"/>
+        <location filename="../mainwindow.cpp" line="8595"/>
+        <location filename="../mainwindow.cpp" line="8603"/>
         <source>An error occurred while cloning polyline %1</source>
         <translation>폴리라인 %1 복제중 에러가 발생하였습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8358"/>
+        <location filename="../mainwindow.cpp" line="8611"/>
         <source>An error occurred while cloning facet %1</source>
         <translation>패싯 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8374"/>
+        <location filename="../mainwindow.cpp" line="8627"/>
         <source>An error occurred while cloning camera sensor %1</source>
         <translation>카메라센서 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8390"/>
+        <location filename="../mainwindow.cpp" line="8643"/>
         <source>An error occurred while cloning GBL sensor %1</source>
         <translation>GBL 센서 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8406"/>
+        <location filename="../mainwindow.cpp" line="8659"/>
         <source>An error occurred while cloning image %1</source>
         <translation>이미지 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8422"/>
+        <location filename="../mainwindow.cpp" line="8675"/>
         <source>An error occurred while cloning label %1</source>
         <translation>라벨 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8438"/>
-        <location filename="../mainwindow.cpp" line="8454"/>
+        <location filename="../mainwindow.cpp" line="8691"/>
+        <location filename="../mainwindow.cpp" line="8707"/>
         <source>An error occurred while cloning viewport %1</source>
         <translation>뷰포트 %1 복제중 에러가 발생했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8459"/>
+        <location filename="../mainwindow.cpp" line="8712"/>
         <source>Entity &apos;%1&apos; can&apos;t be cloned (type not supported yet!)</source>
         <translation>엔티티 &apos;%1&apos;이 복제되지 않았습니다 (종류가 지원되지 않습니다!)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8511"/>
+        <location filename="../mainwindow.cpp" line="8790"/>
         <source>Constant #%1</source>
         <translation>상수 #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8516"/>
+        <location filename="../mainwindow.cpp" line="8795"/>
         <source>New SF name</source>
         <translation>신규 SF 이름</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8516"/>
+        <location filename="../mainwindow.cpp" line="8795"/>
         <source>SF name (must be unique)</source>
         <translation>SF 이름 (중복되지 않은값)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8629"/>
+        <location filename="../mainwindow.cpp" line="8908"/>
         <source>[Fit sphere] Failed to fit a sphere on cloud &apos;%1&apos;</source>
         <translation>[구 맞춤] 클라우드 &apos;%1&apos;에 구를 맞추지 못했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8633"/>
+        <location filename="../mainwindow.cpp" line="8912"/>
         <source>[Fit sphere] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
         <translation>[구맞춤] 클라우드 &apos;%1&apos;: 중심 (%2,%3,%4) - 반경 = %5 [RMS = %6]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8643"/>
+        <location filename="../mainwindow.cpp" line="8922"/>
         <source>Sphere r=%1</source>
         <translation>구 r=%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8680"/>
+        <location filename="../mainwindow.cpp" line="8959"/>
         <source>[Fit circle] Failed to fit a circle on cloud &apos;%1&apos;</source>
         <translation>[원맞춤] 클라우드 &apos;%1&apos;에 원을 맞추지 못했습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8684"/>
+        <location filename="../mainwindow.cpp" line="8963"/>
         <source>[Fit circle] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
         <translation>[원맞춤] 클라우드 &apos;%1&apos;: 중심 (%2,%3,%4) - 반경 = %5 [RMS = %6]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8692"/>
+        <location filename="../mainwindow.cpp" line="8971"/>
         <source>[Fit circle] Normal (%1,%2,%3)</source>
         <translation>[원맞춤] 노말 (%1,%2,%3)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8738"/>
+        <location filename="../mainwindow.cpp" line="9017"/>
         <source>Fit facet</source>
         <translation>면맞춤</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8830"/>
+        <location filename="../mainwindow.cpp" line="9109"/>
         <source>[Orientation] Entity &apos;%1&apos;</source>
         <translation>[Orientation] 엔티티 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8831"/>
+        <location filename="../mainwindow.cpp" line="9110"/>
         <source>	- plane fitting RMS: %1</source>
         <translation>	- 평면 맞춤 RMS: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8836"/>
+        <location filename="../mainwindow.cpp" line="9115"/>
         <source>	- normal: (%1, %2, %3)</source>
         <translation>	- 노말: (%1, %2, %3)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8850"/>
+        <location filename="../mainwindow.cpp" line="9129"/>
         <source>[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:</source>
         <translation>[방향] 이 평면을 수평(노말 방향 Z+)으로 만드는 매트릭스:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8852"/>
+        <location filename="../mainwindow.cpp" line="9131"/>
         <source>[Orientation] You can copy this matrix values (CTRL+C) and paste them in the &apos;Apply transformation tool&apos; dialog</source>
         <translation>[방향] 이 매트릭스값을 복사 (CTRL+C) 후 &apos;변환도구 적용&apos; 대화창에 붙여넣을 수 있습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8872"/>
+        <location filename="../mainwindow.cpp" line="9151"/>
         <source>Failed to fit a plane/facet on entity &apos;%1&apos;</source>
         <translation>엔티티 &apos;%1&apos;에 평면/면 맞춤 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8955"/>
+        <location filename="../mainwindow.cpp" line="9240"/>
         <source>Invalid kernel size!</source>
         <translation>잘못된 커널크기!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8960"/>
+        <location filename="../mainwindow.cpp" line="9245"/>
         <source>Radius:</source>
         <translation>반경:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8965"/>
+        <location filename="../mainwindow.cpp" line="9250"/>
         <source>Spherical extraction test (%1)</source>
         <translation>구형 추출 테스트 (%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8985"/>
+        <location filename="../mainwindow.cpp" line="9270"/>
         <source>Failed to create scalar field on cloud &apos;%1&apos; (not enough memory?)</source>
         <translation>클라우드 &apos;%1&apos;에 스칼라필드 생성 실패(메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9031"/>
+        <location filename="../mainwindow.cpp" line="9316"/>
         <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)</source>
         <translation>[SNE_TEST] 평균 추출시간 = %1 ms (반경 = %2, 평균 (neighbours) = %3)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9046"/>
-        <location filename="../mainwindow.cpp" line="9050"/>
+        <location filename="../mainwindow.cpp" line="9331"/>
+        <location filename="../mainwindow.cpp" line="9335"/>
         <source>CNE Test</source>
         <translation>CNE 테스트</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9046"/>
+        <location filename="../mainwindow.cpp" line="9331"/>
         <source>radius</source>
         <translation>반경</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9050"/>
+        <location filename="../mainwindow.cpp" line="9335"/>
         <source>height</source>
         <translation>높이</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9054"/>
+        <location filename="../mainwindow.cpp" line="9339"/>
         <source>cube</source>
         <translation>큐브</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9139"/>
+        <location filename="../mainwindow.cpp" line="9424"/>
         <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))</source>
         <translation>[CNE_TEST] 평균 추출시간 = %1 ms (반경 = %2, 높이 = %3, 평균 (neighbours) = %4))</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9143"/>
+        <location filename="../mainwindow.cpp" line="9428"/>
         <source>Failed to compute octree!</source>
         <translation>옥트리 계산실패!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9162"/>
+        <location filename="../mainwindow.cpp" line="9447"/>
         <source>centers</source>
         <translation>중심</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9193"/>
+        <location filename="../mainwindow.cpp" line="9478"/>
         <source>No cloud in selection?!</source>
         <translation>선택에 클라우드 없음?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9230"/>
+        <location filename="../mainwindow.cpp" line="9515"/>
         <source>Need at least two clouds!</source>
         <translation>2개 이상 클라우드 필요!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9282"/>
+        <location filename="../mainwindow.cpp" line="9567"/>
         <source>Testing all possible positions</source>
         <translation>가능한 모든 위차값 테스팅</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9283"/>
+        <location filename="../mainwindow.cpp" line="9568"/>
         <source>%1 clouds and %2 positions</source>
         <translation>%1 클라우드 및 %2 위치값</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9344"/>
+        <location filename="../mainwindow.cpp" line="9628"/>
         <source>An error occurred while performing ICP!</source>
         <translation>ICP 실행중 에러가 발생하였습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9380"/>
+        <location filename="../mainwindow.cpp" line="9664"/>
         <source>Best case #%1 / #%2 - RMS = %3</source>
         <translation>최상의 경우 #%1 / #%2 - RMS = %3</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9384"/>
+        <location filename="../mainwindow.cpp" line="9668"/>
         <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)</source>
         <translation>[DoActionComputeBestICPRmsMatrix] 비교 #%1 / #%2: 최소 RMS = %3 (phi = %4 / theta = %5 deg.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9389"/>
+        <location filename="../mainwindow.cpp" line="9673"/>
         <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID</source>
         <translation>[DoActionComputeBestICPRmsMatrix] 비교 #%1 / #%2: INVALID</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9450"/>
+        <location filename="../mainwindow.cpp" line="9734"/>
         <source>[DoActionComputeBestICPRmsMatrix] Job done</source>
         <translation>[DoActionComputeBestICPRmsMatrix] 작업완료</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9454"/>
+        <location filename="../mainwindow.cpp" line="9738"/>
         <source>Failed to save output file?!</source>
         <translation>출력파일 저장 실패?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9483"/>
+        <location filename="../mainwindow.cpp" line="9767"/>
         <source>No plane in selection</source>
         <translation>선택에 평면없음</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9508"/>
-        <location filename="../mainwindow.cpp" line="9621"/>
+        <location filename="../mainwindow.cpp" line="9792"/>
+        <location filename="../mainwindow.cpp" line="9905"/>
         <source>Failed to open file for writing! (check file permissions)</source>
         <translation>쓸 파일 열기 실패! (파일권한 체크)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9568"/>
+        <location filename="../mainwindow.cpp" line="9852"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 plane(s))</source>
         <translation>I/O] 파일 &apos;%1&apos; 저장완료 (%2 평면)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9714"/>
+        <location filename="../mainwindow.cpp" line="9998"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 cloud(s))</source>
         <translation>[I/O] 파일 &apos;%1&apos; 저장완료 (%2 클라우드)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9748"/>
-        <location filename="../mainwindow.cpp" line="9847"/>
+        <location filename="../mainwindow.cpp" line="10030"/>
+        <location filename="../mainwindow.cpp" line="10129"/>
         <source>Failed to initialize comparison dialog</source>
         <translation>비교 대화창 초기화 실패</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9767"/>
+        <location filename="../mainwindow.cpp" line="10049"/>
         <source>Select 2 entities!</source>
         <translation>엔티티 2개 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9789"/>
+        <location filename="../mainwindow.cpp" line="10071"/>
         <source>Select at least one mesh!</source>
         <translation>1개 이상 메쉬 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9794"/>
+        <location filename="../mainwindow.cpp" line="10076"/>
         <source>Select one mesh and one cloud or two meshes!</source>
         <translation>메쉬1개 &amp; 클라우드1개 또는 메쉬2개 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9813"/>
+        <location filename="../mainwindow.cpp" line="10095"/>
         <source>Distance to primitive</source>
         <translation>기본요소 거리</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9814"/>
+        <location filename="../mainwindow.cpp" line="10096"/>
         <source>Computing distances to a primitive is faster and more accurate with the &apos;Tools &gt; Distances &gt; Cloud / Primitive Dist.&apos; tool.
 Do you want to use this other tool instead?</source>
         <translation>&apos;도구 &gt; 거리 &gt; 클라우드/기본요소 거리&apos; 도구를 사용하면 기본요소까지 거리를 더 빠르고 정확하게 계산할 수 있습니다.
 대신 이 다른 도구를 사용하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9877"/>
+        <location filename="../mainwindow.cpp" line="10159"/>
         <source>Select only one primitive (Plane/Box/Sphere/Cylinder/Cone) or polyline</source>
         <translation>기본요소 (평면/박스/구형/실린더/콘) 또는 폴리라인 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9896"/>
+        <location filename="../mainwindow.cpp" line="10178"/>
         <source>Select at least one cloud</source>
         <translation>1개이상 클라우드 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10058"/>
+        <location filename="../mainwindow.cpp" line="10340"/>
         <source>Unsupported primitive type</source>
         <translation>지원하지 않는 기본요소종류</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12397"/>
+        <location filename="../mainwindow.cpp" line="12679"/>
         <source>Cylinder height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12397"/>
+        <location filename="../mainwindow.cpp" line="12679"/>
         <source>Height</source>
         <translation type="unfinished">높이</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12408"/>
+        <location filename="../mainwindow.cpp" line="12690"/>
         <source>Cylinder from </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9942"/>
+        <location filename="../mainwindow.cpp" line="10224"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
         <translation>[기본요소 거리계산] [클라우드: %1] 거리계산에 새로운 스칼라필드를 할당할 수 없습니다! 메모리 확보후 재시도하십시오 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3733"/>
+        <location filename="../mainwindow.cpp" line="3745"/>
         <source>Can&apos;t mix point clouds with meshes. Each group will be merged separately.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3786"/>
+        <location filename="../mainwindow.cpp" line="3797"/>
         <source>Merged clouds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4134"/>
+        <location filename="../mainwindow.cpp" line="4143"/>
         <source>To-be-aligned mesh vertices are locked (they may be shared with other meshes):
 do you wish to clone this mesh prior to register it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6241"/>
+        <location filename="../mainwindow.cpp" line="6489"/>
         <source>This tool can&apos;t be applied to this entity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9890"/>
+        <location filename="../mainwindow.cpp" line="10172"/>
         <source>Select one primitive (Plane/Box/Sphere/Cylinder/Cone) or a polyline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9950"/>
+        <location filename="../mainwindow.cpp" line="10232"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Not enough memory</source>
         <translation>[기본요소 거리계산] [클라우드: %1] 메모리가 부족합니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9957"/>
+        <location filename="../mainwindow.cpp" line="10239"/>
         <source>[Compute Primitive Distances] Cloud to %1 distance computation failed (error code = %2)</source>
         <translation>[기본요소 거리계산] 클라우드: %1 거리계산 실패 (에러코드 = %2)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9979"/>
+        <location filename="../mainwindow.cpp" line="10261"/>
         <source>Bounded Plane</source>
         <translation>경계면</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9989"/>
+        <location filename="../mainwindow.cpp" line="10271"/>
         <source>Infinite Plane</source>
         <translation>무한면</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9999"/>
+        <location filename="../mainwindow.cpp" line="10281"/>
         <source>Cylinder</source>
         <translation>실린더</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10010"/>
+        <location filename="../mainwindow.cpp" line="10292"/>
         <source>Cone</source>
         <translation>콘</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10026"/>
+        <location filename="../mainwindow.cpp" line="10308"/>
         <source>Box</source>
         <translation>박스</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10047"/>
+        <location filename="../mainwindow.cpp" line="10329"/>
         <source>Disc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10107"/>
+        <location filename="../mainwindow.cpp" line="10389"/>
         <source>[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5</source>
         <translation>[기본요소 거리계산] [기본요소: %1] [클라우드: %2] [%3] 평균거리 = %4 / 표준편차 = %5</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10122"/>
+        <location filename="../mainwindow.cpp" line="10404"/>
         <source>%1 error(s) occurred: refer to the Console (F8)</source>
         <translation>%1 에러가 발생하였습니다: 콘솔 (F8)을 참조하십시오</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10186"/>
+        <location filename="../mainwindow.cpp" line="10468"/>
         <source>Custom light position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10267"/>
+        <location filename="../mainwindow.cpp" line="10549"/>
         <source>It seems your graphic card doesn&apos;t support Quad Buffered Stereo rendering</source>
         <translation>그래픽 카드가 쿼드 버퍼 스테레오 렌더링을 지원하지 않는 것 같습니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10293"/>
+        <location filename="../mainwindow.cpp" line="10575"/>
         <source>[Stereo] F.O.V. forced to %1 deg.</source>
         <translation>[스테레오] %1도 FoV로 강제사용됩니다.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10332"/>
+        <location filename="../mainwindow.cpp" line="10614"/>
         <source>Stereo mode</source>
         <translation>스테레오 모드</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10333"/>
+        <location filename="../mainwindow.cpp" line="10615"/>
         <source>Stereo-mode only works in perspective mode. Do you want to disable it?</source>
         <translation>스테레오모드는 원근모드에서만 작동합니다. 비활성하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10403"/>
+        <location filename="../mainwindow.cpp" line="10682"/>
         <source>Point coordinates</source>
         <translation>점좌표</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10420"/>
+        <location filename="../mainwindow.cpp" line="10699"/>
         <source>Point #%1</source>
         <translation>점 #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10439"/>
+        <location filename="../mainwindow.cpp" line="10718"/>
         <source>Clipboard is empty</source>
         <translation>클립보드가 비어있습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10459"/>
-        <location filename="../mainwindow.cpp" line="10502"/>
+        <location filename="../mainwindow.cpp" line="10738"/>
+        <location filename="../mainwindow.cpp" line="10781"/>
         <source>Clipboard</source>
         <translation>클립보드</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10462"/>
+        <location filename="../mainwindow.cpp" line="10741"/>
         <source>loading</source>
         <translation>로딩</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10462"/>
+        <location filename="../mainwindow.cpp" line="10741"/>
         <source>from the clipboard</source>
         <translation>클립보드 사용</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10471"/>
+        <location filename="../mainwindow.cpp" line="10750"/>
         <source>No cloud loaded</source>
         <translation>클라우드 로드안됨</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10515"/>
+        <location filename="../mainwindow.cpp" line="10794"/>
         <source>Cloud #%1</source>
         <translation>클라우드 #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10536"/>
+        <location filename="../mainwindow.cpp" line="10815"/>
         <source>%1 cloud(s) loaded from the clipboard</source>
         <translation>클립보드에서 %1 클라우드 로드완료</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10571"/>
+        <location filename="../mainwindow.cpp" line="10850"/>
         <source>Lock rotation axis</source>
         <translation>회전축 고정</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10592"/>
+        <location filename="../mainwindow.cpp" line="10871"/>
         <source>[ROTATION LOCKED]</source>
         <translation>[회전고정]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10729"/>
+        <location filename="../mainwindow.cpp" line="11008"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]</source>
         <translation>&apos;%1&apos; 엔터티가 이동되었습니다: (%2,%3,%4), %5 스케일로 크기 조정 [저장 시 원래 위치 복원]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10771"/>
+        <location filename="../mainwindow.cpp" line="11050"/>
         <source>[MainWindow::addToDB] Internal error: no associated DB?!</source>
         <translation>[MainWindow::addToDB] 내부에러: DB에 적용안됨?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10909"/>
+        <location filename="../mainwindow.cpp" line="11188"/>
         <source>%1 file(s) loaded</source>
         <translation>%1 파일 로드</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10948"/>
+        <location filename="../mainwindow.cpp" line="11227"/>
         <source>Are you sure you want to remove all loaded entities?</source>
         <translation>로드된 모든 엔티티를 제거하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10981"/>
+        <location filename="../mainwindow.cpp" line="11260"/>
         <source>Open file(s)</source>
         <translation>파일열기</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11095"/>
+        <location filename="../mainwindow.cpp" line="11374"/>
         <source>Can&apos;t save selected entity(ies) this way!</source>
         <translation>엔티티를 저장할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11235"/>
+        <location filename="../mainwindow.cpp" line="11514"/>
         <source>[I/O] First entity&apos;s name would make an invalid filename! Can&apos;t use it...</source>
         <translation>[I/O] 1번 엔터티 이름으로 파일명이 잘못되었습니다! 사용할 수 없습니다 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11244"/>
-        <location filename="../mainwindow.cpp" line="11400"/>
+        <location filename="../mainwindow.cpp" line="11523"/>
+        <location filename="../mainwindow.cpp" line="11679"/>
         <source>Save file</source>
         <translation>파일저장</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11259"/>
+        <location filename="../mainwindow.cpp" line="11538"/>
         <source>[I/O] The following selected entities won&apos;t be saved:</source>
         <translation>[I/O] 다음 선택된 엔티티가 저장되지 않습니다:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11291"/>
+        <location filename="../mainwindow.cpp" line="11570"/>
         <source>[I/O] None of the selected entities can be saved this way...</source>
         <translation>[I/O] 선택한 엔티티를 이 방법으로 저장할 수 없습니다...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11390"/>
+        <location filename="../mainwindow.cpp" line="11669"/>
         <source>[I/O] Top entity&apos;s name would make an invalid filename! Can&apos;t use it...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12035"/>
-        <location filename="../mainwindow.cpp" line="12040"/>
-        <location filename="../mainwindow.cpp" line="12045"/>
+        <location filename="../mainwindow.cpp" line="12317"/>
+        <location filename="../mainwindow.cpp" line="12322"/>
+        <location filename="../mainwindow.cpp" line="12327"/>
         <source>Not yet implemented! Sorry ...</source>
         <translation>아직 구현되지 않았습니다! 죄송합니다 ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12223"/>
+        <location filename="../mainwindow.cpp" line="12505"/>
         <source>[Global Shift] Max abs. coord = %1 / max abs. diag = %2</source>
         <translation>[글로벌 이격] 최대 절대좌표 = %1 / 최대 절대대화창 = %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12266"/>
+        <location filename="../mainwindow.cpp" line="12548"/>
         <source>Cloud has no associated waveform information</source>
         <translation>클라우드에는 관련 파형 정보가 없습니다</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12328"/>
-        <location filename="../mainwindow.cpp" line="12334"/>
+        <location filename="../mainwindow.cpp" line="12610"/>
+        <location filename="../mainwindow.cpp" line="12616"/>
         <source>Select 2 planes!</source>
         <translation>평면 2개 선택!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12342"/>
+        <location filename="../mainwindow.cpp" line="12624"/>
         <source>Plane 1: %1</source>
         <translation>평면 1: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12343"/>
-        <location filename="../mainwindow.cpp" line="12346"/>
-        <location filename="../mainwindow.cpp" line="12357"/>
-        <location filename="../mainwindow.cpp" line="12364"/>
-        <location filename="../mainwindow.cpp" line="12369"/>
+        <location filename="../mainwindow.cpp" line="12625"/>
+        <location filename="../mainwindow.cpp" line="12628"/>
+        <location filename="../mainwindow.cpp" line="12639"/>
+        <location filename="../mainwindow.cpp" line="12646"/>
+        <location filename="../mainwindow.cpp" line="12651"/>
         <source>[Compare] </source>
         <translation>[비교] </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12345"/>
+        <location filename="../mainwindow.cpp" line="12627"/>
         <source>Plane 2: %1</source>
         <translation>평면 2 %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12356"/>
+        <location filename="../mainwindow.cpp" line="12638"/>
         <source>Angle P1/P2: %1 deg.</source>
         <translation>각도 P1/P2: %1 deg.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12363"/>
+        <location filename="../mainwindow.cpp" line="12645"/>
         <source>Distance Center(P1)/P2: %1</source>
         <translation>거리중심(P1)/P2: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12368"/>
+        <location filename="../mainwindow.cpp" line="12650"/>
         <source>Distance Center(P2)/P1: %1</source>
         <translation>거리중심(P2)/P1: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="12372"/>
+        <location filename="../mainwindow.cpp" line="12654"/>
         <source>Plane comparison</source>
         <translation>평면비교</translation>
     </message>
@@ -13181,6 +13346,149 @@ may not handle filenames with local characters properly</source>
     </message>
 </context>
 <context>
+    <name>PoissonReconParamDialog</name>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="14"/>
+        <source>Poisson Surface Reconstruction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="23"/>
+        <source>Octree depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="33"/>
+        <source>The maximum depth of the tree that will be used for surface reconstruction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="49"/>
+        <source>Resolution</source>
+        <translation type="unfinished">해상도</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="78"/>
+        <source>interpolate cloud colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="92"/>
+        <source>Density</source>
+        <translation type="unfinished">밀도</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="98"/>
+        <source>If this flag is enabled, the sampling density is output as a scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="101"/>
+        <source>output density as SF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="111"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;Density is useful to reduce the extents of the output mesh to get a better match with the input point cloud:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;- highlight the output mesh&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;- in their properties, change the &apos;Density&apos; scalar field &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-style:italic;&quot;&gt;&apos;min displayed&apos;&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;&apos; value () until the visible part of the mesh meets your expectations&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;- export the visible part as a new mesh with &apos;&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;&apos;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt;- (you can delete the &apos;density&apos; scalar field afterwards) &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="130"/>
+        <source>Advanced</source>
+        <translation type="unfinished">고급</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="136"/>
+        <source>boundary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="147"/>
+        <source>Free</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="152"/>
+        <source>Dirichlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="157"/>
+        <source>Neumann</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="165"/>
+        <source>The minimum number of sample points that should fall within an octree node
+as the octree construction is adapted to sampling density. For noise-free
+samples, small values in the range [1.0 - 5.0] can be used. For more noisy
+samples, larger values in the range [15.0 - 20.0] may be needed to provide
+a smoother, noise-reduced, reconstruction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="172"/>
+        <source>samples per node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="179"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum number of sample points that should fall within an octree node as the octree construction is adapted to sampling density.&lt;/p&gt;&lt;p&gt;For noise-free samples, small values in the range [1.0 - 5.0] can be used.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;For more noisy samples&lt;/span&gt;, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="201"/>
+        <source>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="204"/>
+        <source>point weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="211"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interpolation weight (twice the b-spline degree by default)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="224"/>
+        <source>threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="234"/>
+        <source>Enabling this flag has the (screened) estimator try to enforce the screening constraint at exact sample position (more accurate, use it if the cloud is not noisy)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="237"/>
+        <source>Exact Interpolation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="244"/>
+        <source>Enabling this flag has the reconstructor use linear interpolation to estimate the positions of iso-vertices. (Better recovery of sharp features, use it if the cloud is not noisy)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="250"/>
+        <source>Linear fit</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PrimitiveFactoryDlg</name>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="14"/>
@@ -13485,409 +13793,409 @@ p, li { white-space: pre-wrap; }
         <translation>잘못된 그리드박스</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="756"/>
+        <location filename="../ccClippingBoxTool.cpp" line="759"/>
         <source>Section extraction</source>
         <translation>단면추출</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="757"/>
+        <location filename="../ccClippingBoxTool.cpp" line="760"/>
         <source>Section(s): %L1</source>
         <translation>단면:%L1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="889"/>
+        <location filename="../ccClippingBoxTool.cpp" line="891"/>
         <source>Up to (%1 x %2 x %3) = %4 section(s)</source>
         <translation>최대 (%1 x %2 x %3) = %4 단면</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="980"/>
+        <location filename="../ccClippingBoxTool.cpp" line="982"/>
         <source>Level(s): %L1</source>
         <translation>레벨: %L1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="322"/>
+        <location filename="../ccCommandLineCommands.cpp" line="324"/>
         <source>Cloud %1 has no SF named &apos;%2&apos;</source>
         <translation>클라우드 %1에는 이름 &apos;%2&apos;이(가) 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="332"/>
+        <location filename="../ccCommandLineCommands.cpp" line="334"/>
         <source>Input scalar field index is invalid: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="338"/>
+        <location filename="../ccCommandLineCommands.cpp" line="340"/>
         <source>Cloud %1 has less scalar fields than the SF index (%2/%3)</source>
         <translation>클라우드 %1에 SF 인덱스 (%2/%3)보다 적은 스칼라 필드가 있습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="418"/>
+        <location filename="../ccCommandLineCommands.cpp" line="417"/>
         <source>Unhandled format specifier (%1)</source>
         <translation>처리되지 않은 포맷 지정자 (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="423"/>
+        <location filename="../ccCommandLineCommands.cpp" line="422"/>
         <source>Missing file format specifier!</source>
         <translation>알수없는 포맷 지정자!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="430"/>
+        <location filename="../ccCommandLineCommands.cpp" line="429"/>
         <source>Change cloud output format</source>
         <translation>클라우드 출력포맷 변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="444"/>
+        <location filename="../ccCommandLineCommands.cpp" line="443"/>
         <source>Output export format (clouds) set to: %1</source>
         <translation>출력포맷 (클라우드) 설정:%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="468"/>
-        <location filename="../ccCommandLineCommands.cpp" line="601"/>
-        <location filename="../ccCommandLineCommands.cpp" line="645"/>
+        <location filename="../ccCommandLineCommands.cpp" line="467"/>
+        <location filename="../ccCommandLineCommands.cpp" line="600"/>
+        <location filename="../ccCommandLineCommands.cpp" line="644"/>
         <source>Missing parameter: extension after &apos;%1&apos;</source>
         <translation>알수없는 파라미터:&apos;%1&apos;후 확장자</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="472"/>
+        <location filename="../ccCommandLineCommands.cpp" line="471"/>
         <source>New output extension for clouds: %1</source>
         <translation>신규 클라우드 출력 확장자: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="481"/>
+        <location filename="../ccCommandLineCommands.cpp" line="480"/>
         <source>Missing parameter: precision value after &apos;%1&apos;</source>
         <translation>알수없는 파라미터:&apos;%1&apos;후 자릿수값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="487"/>
+        <location filename="../ccCommandLineCommands.cpp" line="486"/>
         <source>Invalid value for precision! (%1)</source>
         <translation>잘못된 자릿수값! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="492"/>
-        <location filename="../ccCommandLineCommands.cpp" line="510"/>
-        <location filename="../ccCommandLineCommands.cpp" line="546"/>
-        <location filename="../ccCommandLineCommands.cpp" line="558"/>
+        <location filename="../ccCommandLineCommands.cpp" line="491"/>
+        <location filename="../ccCommandLineCommands.cpp" line="509"/>
+        <location filename="../ccCommandLineCommands.cpp" line="545"/>
+        <location filename="../ccCommandLineCommands.cpp" line="557"/>
         <source>Argument &apos;%1&apos; is only applicable to ASCII format!</source>
         <translation>&apos;%1&apos; 인수는 ASCII 포맷에만 적용됩니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="505"/>
+        <location filename="../ccCommandLineCommands.cpp" line="504"/>
         <source>Missing parameter: separator character after &apos;%1&apos;</source>
         <translation>알수없는 파라미터: &apos;%1&apos;이후 분리문자</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="534"/>
+        <location filename="../ccCommandLineCommands.cpp" line="533"/>
         <source>Invalid separator! (&apos;%1&apos;)</source>
         <translation>잘못된 분리자! (&apos;%1&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="573"/>
+        <location filename="../ccCommandLineCommands.cpp" line="572"/>
         <source>Change mesh output format</source>
         <translation>메쉬출력포맷 변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="587"/>
+        <location filename="../ccCommandLineCommands.cpp" line="586"/>
         <source>Output export format (meshes) set to: %1</source>
         <translation>출력포맷 (메쉬) %1 설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="605"/>
+        <location filename="../ccCommandLineCommands.cpp" line="604"/>
         <source>New output extension for meshes: %1</source>
         <translation>신규 메쉬 출력확장자: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="617"/>
+        <location filename="../ccCommandLineCommands.cpp" line="616"/>
         <source>Change hierarchy output format</source>
         <translation>계층출력포맷 변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="631"/>
+        <location filename="../ccCommandLineCommands.cpp" line="630"/>
         <source>Output export format (hierarchy) set to: %1</source>
         <translation>출력포맷 (계층) %1 설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="649"/>
+        <location filename="../ccCommandLineCommands.cpp" line="648"/>
         <source>New output extension for hierarchies: %1</source>
         <translation>신규 계층출력 확장자:%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="661"/>
+        <location filename="../ccCommandLineCommands.cpp" line="660"/>
         <source>Load</source>
         <translation>로드</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="716"/>
-        <location filename="../ccCommandLineCommands.cpp" line="736"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7173"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="37"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="59"/>
+        <location filename="../ccCommandLineCommands.cpp" line="715"/>
+        <location filename="../ccCommandLineCommands.cpp" line="730"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7157"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="38"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="60"/>
         <source>Missing parameter: filename after &quot;-%1&quot;</source>
         <translation>없는 파라미터:  &quot;-%1&quot;이후 파일명</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="681"/>
+        <location filename="../ccCommandLineCommands.cpp" line="680"/>
         <source>Will not load labels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="692"/>
+        <location filename="../ccCommandLineCommands.cpp" line="691"/>
         <source>Will skip %1 lines</source>
         <translation>%1 라인을 스킵합니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="728"/>
+        <location filename="../ccCommandLineCommands.cpp" line="722"/>
         <source>Load commands from file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="886"/>
+        <location filename="../ccCommandLineCommands.cpp" line="879"/>
         <source>Clears normals</source>
         <translation>노멀 지우기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="894"/>
+        <location filename="../ccCommandLineCommands.cpp" line="887"/>
         <source>No entity loaded (be sure to open at least one file with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>엔티티 로드안됨 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="937"/>
+        <location filename="../ccCommandLineCommands.cpp" line="930"/>
         <source>Invert normals</source>
         <translation>역 노멀</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="945"/>
+        <location filename="../ccCommandLineCommands.cpp" line="938"/>
         <source>No input point cloud or mesh (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>입력 포인트클라우드 또는 메쉬가 없습니다(&quot;-%2&quot; 앞에 &quot;-%1 [클라우드 파일명]&quot;이 있는 항목을 열어야 함)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="954"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1266"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1308"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1352"/>
+        <location filename="../ccCommandLineCommands.cpp" line="947"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1259"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1301"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1345"/>
         <source>Cloud %1 has no normals</source>
         <translation>클라우드 %1에 노말이 없음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="981"/>
+        <location filename="../ccCommandLineCommands.cpp" line="974"/>
         <source>Mesh %1 has no normals</source>
         <translation>메쉬 %1에 노말이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1000"/>
+        <location filename="../ccCommandLineCommands.cpp" line="993"/>
         <source>Compute normals with octree</source>
         <translation>옥트리를 포함한 노말 계산</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1008"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1001"/>
         <source>No point cloud to compute normals (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>노말을 계산할 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1015"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1008"/>
         <source>Missing parameter: radius after &quot;-%1&quot;</source>
         <translation>없는 파라미터:&quot;-%1&quot; 이후 반경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1027"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1020"/>
         <source>	Radius: %1</source>
         <translation>반경: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1043"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1036"/>
         <source>Missing orientation</source>
         <translation>없는 방위각</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1133"/>
-        <location filename="../ccEntityAction.cpp" line="950"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1126"/>
+        <location filename="../ccEntityAction.cpp" line="948"/>
         <source>Failed to compute octree for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos; 옥트리 계산실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1150"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1143"/>
         <source>Failed to determine best normal radius for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos; 최상 노멀반경 설정실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1152"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1145"/>
         <source>	Cloud %1 radius = %2</source>
         <translation>클라우드 %1 반경 = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1184"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1177"/>
         <source>computeNormalsWithOctree failed</source>
         <translation>computeNormalsWithOctree 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1233"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1226"/>
         <source>.OctreeNormal</source>
         <translation>.OctreeNormal</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1249"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1242"/>
         <source>Convert normals to dip and dip. dir.</source>
         <translation>노멀은 dip and dip. 방향으로 변환</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1257"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1299"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1343"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1250"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1292"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1336"/>
         <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>포인트클라우 입력없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1274"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1267"/>
         <source>Failed to convert normals to dip and dip direction</source>
         <translation>노멀을 dip and dip 방향 변환실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1291"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1284"/>
         <source>Convert normals to scalar fields</source>
         <translation>노멀을 스칼라필드로 변환</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1318"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1311"/>
         <source>Failed to convert normals to scalar fields</source>
         <translation>노멀을 스칼라필드로 변환 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1335"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1328"/>
         <source>Convert normals to HSV colors</source>
         <translation>노말을 HSV컬러로 변환</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1360"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1353"/>
         <source>Failed to convert normals to HSV colors</source>
         <translation>노말을 HSV 컬러로 변환 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1377"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1370"/>
         <source>Subsample</source>
         <translation>하위샘플</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1385"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1378"/>
         <source>No point cloud to resample (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>리샘플링할 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1393"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1386"/>
         <source>Missing parameter: resampling method after &quot;-%1&quot;</source>
         <translation>없는 파라미터: &quot;-%1&quot;이후 리샘플링 방식</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1397"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1390"/>
         <source>	Method: </source>
         <translation>	방식: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="260"/>
+        <location filename="../ccCommandLineCommands.cpp" line="262"/>
         <source>SF index: LAST</source>
         <translation>SF 인텍스: 최근</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="275"/>
+        <location filename="../ccCommandLineCommands.cpp" line="277"/>
         <source>SF index: none</source>
         <translation>SF 인덱스: 없음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="280"/>
+        <location filename="../ccCommandLineCommands.cpp" line="282"/>
         <source>Invalid SF index: %1</source>
         <translation>잘못된 SF 인덱스: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="286"/>
+        <location filename="../ccCommandLineCommands.cpp" line="288"/>
         <source>SF index: %1</source>
         <translation>SF 인덱스: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="291"/>
+        <location filename="../ccCommandLineCommands.cpp" line="293"/>
         <source>SF name: &apos;%1&apos;</source>
         <translation>SF 이름: &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="743"/>
+        <location filename="../ccCommandLineCommands.cpp" line="737"/>
         <source>Command file not exists &quot;-%1&quot;</source>
         <translation>커맨드 파일이 없습니다 &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="758"/>
-        <location filename="../ccCommandLineCommands.cpp" line="868"/>
-        <location filename="../ccCommandLineCommands.cpp" line="876"/>
+        <location filename="../ccCommandLineCommands.cpp" line="752"/>
+        <location filename="../ccCommandLineCommands.cpp" line="861"/>
+        <location filename="../ccCommandLineCommands.cpp" line="869"/>
         <source>	[COMMENT] %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="864"/>
+        <location filename="../ccCommandLineCommands.cpp" line="857"/>
         <source>	[%1] %2</source>
         <translation>	[%1] %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1109"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1102"/>
         <source>	Angle for scan grids: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1101"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1094"/>
         <source>Missing min angle for scan grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1175"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1168"/>
         <source>computeNormalsWithGrids failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1402"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1395"/>
         <source>Missing parameter: number of points or option &quot;%2&quot; after &quot;-%1 RANDOM &quot;</source>
         <translation>파라미터 누락: &quot;-%1 랜덤 이후 점갯수 또는 옵션 &quot;%2&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1424"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1417"/>
         <source>	Output points: %1</source>
         <translation>	점출력: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1429"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1506"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1698"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1858"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6117"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1422"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1499"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1691"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1851"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6101"/>
         <source>	Processing cloud %1</source>
         <translation>	클라우드 %1 프로세싱</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1435"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1428"/>
         <source>	Output points: %1 * %2% = %3</source>
         <translation>	점출력: %1 * %2% = %3</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1441"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1748"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1434"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1741"/>
         <source>Subsampling process failed!</source>
         <translation>하위샘플링 프로세싱 실패!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1443"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1579"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1750"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1436"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1572"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1743"/>
         <source>	Result: %1 points</source>
         <translation>	결과: %1 점</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1452"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1588"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1768"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1445"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1581"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1761"/>
         <source>.subsampled</source>
         <translation>.subsampled</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1470"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1606"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1790"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3217"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5054"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8325"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8411"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1463"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1599"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1783"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3212"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5046"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8309"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8395"/>
         <location filename="../../plugins/core/Standard/qG3Point/src/G3PointAction.cpp" line="113"/>
         <location filename="../../plugins/core/Standard/qG3Point/src/G3PointAction.cpp" line="143"/>
         <location filename="../../plugins/core/Standard/qG3Point/src/G3PointAction.cpp" line="185"/>
@@ -13897,132 +14205,132 @@ p, li { white-space: pre-wrap; }
         <translation>메모리 부족!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1483"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1476"/>
         <source>	Spatial step: %1</source>
         <translation>	공간단계: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1632"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1625"/>
         <source>	Octree cell size: %1</source>
         <translation>	옥트리 셀크기: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1642"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1635"/>
         <source>Missing parameter: number of points or option &quot;%3&quot; after &quot;-%1 OCTREE %2 &quot;</source>
         <translation>누락된 파라미터: 점갯수 또는 &quot;-%1 OCTREE %2 &quot; 이후 옵션 &quot;%3&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1661"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1654"/>
         <source>	Octree target number of points: %1</source>
         <translation>	점의 옥트리 타겟넘버: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1829"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1822"/>
         <source>Invalid octree level!</source>
         <translation>잘못된 옥트리 레벨!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1671"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1831"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1664"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1824"/>
         <source>	Octree level: %1</source>
         <translation>	옥트리 레벨: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="688"/>
+        <location filename="../ccCommandLineCommands.cpp" line="687"/>
         <source>number of lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1711"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1704"/>
         <source>	Output point target: %1 * %2% = %3</source>
         <translation>	출력 점타겟: %1 * %2% = %3</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1738"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1731"/>
         <source>	Calculated octree level: %1</source>
         <translation>	계산된 옥트리 레벨: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1769"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1762"/>
         <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
         <translation>OCTREE_LEVEL_%1_SUBSAMPLED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1802"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1795"/>
         <source>Unknown method!</source>
         <translation>알수없는 방식!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1809"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1802"/>
         <source>ExtractCCs</source>
         <translation>CC출력</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1817"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1810"/>
         <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>로드된 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1823"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1816"/>
         <source>Missing parameter: octree level after &quot;-%1&quot;</source>
         <translation>없는 파라미터: &quot;-%1&quot;이후 옥트리 레벨</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1836"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1829"/>
         <source>Missing parameter: minimum number of points per component after &quot;-%1 [octree level]&quot;</source>
         <translation>없는 파라미터:&quot;-%1 [옥트리 레벨]&quot;이후 구성요소당 최소 점갯수 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1841"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1834"/>
         <source>Invalid min. number of points!</source>
         <translation>잘못된 최소 점갯수!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1843"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1836"/>
         <source>	Min number of points per component: %1</source>
         <translation>	구성요소: %1 당 최소 점갯수</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1868"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1861"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
         <translation>CC 라벨 계산에 신규 스칼라필드를 할당할 수 없습니다! 메모리를 확보하십시오 ...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1881"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1874"/>
         <source>No component found!</source>
         <translation>구성요서 없음!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1893"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1886"/>
         <source>An error occurred (failed to finish the extraction)</source>
         <translation>에러발생 (추출을 완료할 수 없습니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1914"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1907"/>
         <source>_COMPONENT_%1</source>
         <translation>_COMPONENT_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1934"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1927"/>
         <source>Failed to create component #%1! (not enough memory)</source>
         <translation>구성요소 #%1 생성할 수 없음 ! (메모리 부족)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1946"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1939"/>
         <source>No component was created! Check the minimum size...</source>
         <translation>구성요소가 생성되지 않습니다! 최소크가 확인...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1950"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1943"/>
         <source>%1 component(s) were created</source>
         <translation>%1 구성요서 생성완료</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1962"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5215"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5241"/>
-        <location filename="../ccCommandLineParser.cpp" line="548"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="168"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1955"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5207"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5230"/>
+        <location filename="../ccCommandLineParser.cpp" line="549"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="165"/>
         <location filename="../../plugins/core/Standard/qCloudLayers/src/ccCloudLayersHelper.cpp" line="44"/>
         <location filename="../../plugins/core/Standard/qCloudLayers/src/ccCloudLayersHelper.cpp" line="70"/>
         <location filename="../../plugins/core/Standard/qCloudLayers/src/ccCloudLayersHelper.cpp" line="86"/>
@@ -14031,974 +14339,974 @@ p, li { white-space: pre-wrap; }
         <translation>메모리 부족</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1970"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1963"/>
         <source>Curvature</source>
         <translation>곡률</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1980"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1973"/>
         <source>Missing parameter: curvature type after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 곡률종류</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1997"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2208"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8028"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8167"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1990"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2210"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8012"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8155"/>
         <source>	Kernel size: %1</source>
         <translation>	커널 크기: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2001"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1994"/>
         <source>No point cloud on which to compute curvature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>곡선을 계산한 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2015"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2012"/>
         <source>%1_CURVATURE_KERNEL_%2</source>
         <translation>%1_CURVATURE_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2042"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2039"/>
         <source>No point cloud on which to compute approx. density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>대략적인 밀도를 계산할 포인트클라우드 없음 ! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2077"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2078"/>
         <source>Density</source>
         <translation>밀도</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2089"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2090"/>
         <source>	Sphere radius: %1</source>
         <translation>	구형반경: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2103"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2104"/>
         <source>No point cloud on which to compute density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>밀도를 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2127"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2132"/>
         <source>SF gradient</source>
         <translation>SF 그라데이션</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2135"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2140"/>
         <source>Missing parameter: boolean (whether SF is euclidean or not) after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 부울 (SF가 유클리드 여부)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2146"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2612"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2151"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2618"/>
         <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
         <translation>&quot;-%1&quot; 이후 알수없는 부울값. TRUE 또는 FALSE 대신 &apos;%2&apos; 얻음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2151"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2156"/>
         <source>No point cloud on which to compute SF gradient! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>SF 그라데이션을 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2163"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2627"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2168"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2633"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no scalar field (it will be ignored)</source>
         <translation>커맨드 경고: 클라우드 &apos;%1&apos;은(는) 스칼라필드가 아닙니다 (무시됩니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2169"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2174"/>
         <source>cmd.warning: cloud &apos;%1&apos; has several scalar fields (the active one will be used by default, or the first one if none is active)</source>
         <translation>커맨드경고: 클라우드 &apos;%1&apos;은(는) 다수의 스칼라필드가 있습니다. (활성된것이 기본값으로 사용되거나 활성화사 없으면 1번값)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2197"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2199"/>
         <source>Roughness</source>
         <translation>거칠기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2230"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2232"/>
         <source>No point cloud on which to compute roughness! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>거칠리를 계산할 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려있어야합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2244"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2250"/>
         <source>ROUGHNESS_KERNEL_%2</source>
         <translation>ROUGHNESS_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2254"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2260"/>
         <source>Apply Transformation</source>
         <translation>변환적용</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2298"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2304"/>
         <source>Missing parameter: transformation file after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 변환파일</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2305"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2311"/>
         <source>Failed to read transformation matrix file &apos;%1&apos;!</source>
         <translation>변환 행렬파일 &apos;%1&apos; 읽기 실패!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2309"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2315"/>
         <source>Transformation before inversion:
 </source>
         <translation>뒤집기전 변환:
 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2313"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2319"/>
         <source>Transformation:
 </source>
         <translation>변환:
 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2317"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2323"/>
         <source>No entity on which to apply the transformation! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>변환을 적용할 엔티티 없음! (&quot;-%2&quot; 전에 &quot;-%1 [파일명]&quot;이 열려있어야합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2433"/>
         <source>Entity &apos;%1&apos; global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5</source>
         <translation>엔터티 &apos;%1&apos; 글로벌 이격/스케일 정보가 업데이트되었습니다. 이격 = (%2,%3,%4) / 스케일 = %5</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2441"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2447"/>
         <source>Entity &apos;%1&apos; already has very large local coordinates. Global shift/scale won&apos;t be automatically adjusted to preserve accuracy. Consider using the -%2 option to force global shift/scale adjustment.</source>
         <translation>엔터티 &apos;%1&apos;에는 매우큰 지역좌표가 있습니다. 정확성을 유지하기 위해 글로벌 이격/스케일이 자동으로 조정되지 않습니다. 강제 글로벌 이격/스케일을 조정하려면 -%2 옵션을 사용하는 것이 좋습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2453"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2459"/>
         <source>Entity &apos;%1&apos; will have very large local coordinates after transformation. Consider using the -%1 option to preserve accuracy.</source>
         <translation>엔티티 &apos;%1&apos;은(는) 변환 후 매우 큰 지역좌표를 갖게 됩니다. 정확성을 유지하려면 -%1 옵션을 사용하는 것이 좋습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2466"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2471"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2472"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2477"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3373"/>
         <location filename="../ccCommandLineCommands.cpp" line="3378"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3383"/>
         <source>%1%2</source>
         <translation>%1%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2489"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2495"/>
         <source>Drop global shift</source>
         <translation>글로벌 이격 드롭</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2497"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3265"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2503"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3260"/>
         <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>로드된 엔티티 없음! (&quot;-%2&quot; 전에 &quot;-%1 [파일명]&quot;이 열려있어야합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2520"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2526"/>
         <source>SF color scale</source>
         <translation>SF 컬러 스케일</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2528"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2534"/>
         <source>Missing parameter: color scale file after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 컬러스케일 파일</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2537"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2543"/>
         <source>Failed to read color scale file &apos;%1&apos;!</source>
         <translation>컬러 스케일 파일 &apos;%1&apos; 읽기 실패!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2542"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2548"/>
         <source>No point cloud or mesh on which to set the SF color scale! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>SF 컬러스케일을 설정할 포인트클라우드나 메쉬가 없습니다! (&quot;-%2&quot; 앞에 &quot;-%1 [클라우드 파일명]&quot;을 붙여서 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2593"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2599"/>
         <source>SF convert to RGB</source>
         <translation>SF를 RGB 로 변환</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2601"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2607"/>
         <source>Missing parameter: boolean (whether to mix with existing colors or not) after &quot;-%1&quot;</source>
         <translation>알 수 없는 파라미터:&quot;-%1&quot; 다음에 부울 (기존 색상과 혼합할지 여부)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2617"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2623"/>
         <source>No point cloud on which to convert SF to RGB! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>SF를 RGB로 변환하는 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려있어야합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2631"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2637"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
         <translation>커맨드경고: 클라우드 &apos;%1&apos;에 사용중인 스칼라필드 없음 (무시됩니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2645"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2651"/>
         <source>cmd.warning: cloud &apos;%1&apos; failed to convert SF to RGB</source>
         <translation>커맨드경고: 클라우드 &apos;%1&apos;에서 SF를 RGB로 변환못함</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2661"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2662"/>
         <source>RGB convert to SF</source>
         <translation>RGB를 SF로 변환</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2669"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2670"/>
         <source>No point cloud on which to convert RGB to SF! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>RGB를 SF로 변환할 포인트클라우드가 없습니다! (&quot;-%2&quot; 앞에 &quot;-%1 [클라우드 파일명]&quot;을 붙여서 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2676"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2677"/>
         <source>Cloud %1 has no colors</source>
         <translation>클라우드 %1에 컬러가 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2684"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2685"/>
         <source>Failed to convert RGB to scalar fields</source>
         <translation>RGB를 스칼라필드로 변환실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2701"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2702"/>
         <source>Filter by SF value</source>
         <translation>SF값 필터</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2847"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2842"/>
         <source>Missing parameter: min value after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터:&quot;-%1&quot; 이후 최소값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2859"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2854"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MIN&quot;).</source>
         <translation>파라미터 누락: N값 (&quot;-%1 N_SIGMA_MIN&quot;이후).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2865"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2915"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2860"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2910"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MIN&quot;). Got &apos;%2&apos; instead.</source>
         <translation>숫자 파라미터 읽기 실패:N 값( &quot;N_SIGMA_MIN&quot; 이후). &apos;%2&apos;을(를) 대신 얻습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2872"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2867"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MAX&quot;).</source>
         <translation>파라미터 누락: N값 (&quot;-%1 N_SIGMA_MAX&quot; 이후).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2878"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2928"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2873"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2923"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MAX&quot;). Got &apos;%2&apos; instead.</source>
         <translation>숫자 파라미터를 읽지 못했습니다: N 값 (&quot;N_SIGMA_MAX&quot; 이후). 대신 &apos;%2&apos;를 사용합니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2886"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2881"/>
         <source>Failed to read a numerical parameter: min value (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>숫자 파라미터 읽기 실패: 최소값 (&quot;-%1&quot; 이후). 대신 &apos;%2&apos;를 얻음.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2897"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2892"/>
         <source>Missing parameter: max value after &quot;-%1&quot; {min}</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 최소값 {min}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2909"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2904"/>
         <source>Missing parameter: N value (after &quot;-%1 XXX N_SIGMA_MIN&quot;).</source>
         <translation>파라미터 누락: N 값 (&quot;-%1 XXX N_SIGMA_MIN&quot; 이후).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2922"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2917"/>
         <source>Missing parameter: N value (after &quot;-%1 XXX N_SIGMA_MAX&quot;).</source>
         <translation>파라미터 누적: N 값 (&quot;-%1 XXX N_SIGMA_MAX&quot; 이후).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2936"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2931"/>
         <source>Failed to read a numerical parameter: max value (after min value). Got &apos;%1&apos; instead.</source>
         <translation>숫자 파라미터 읽기 실패: 최대값 (최소값 이후). 대신 &apos;%1&apos;를 얻음.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2941"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2936"/>
         <source>	Interval: [%1 - %2]</source>
         <translation>	간격: [%1 - %2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2945"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2940"/>
         <source>No point cloud nor mesh on which to filter SF! (be sure to open one or generate one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>SF를 필터링할 포인트클라우드나 메쉬가 없습니다! (&quot;-%2&quot; 앞에 &quot;-%1 [클라우드 파일명]&quot;을 열거나 생성해야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2959"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2954"/>
         <source>		Cloud &apos;%1&apos; --&gt; %2/%3 points remaining</source>
         <translation>		클라우드 &apos;%1&apos; --&gt; %2/%3 점 남음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2967"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3020"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2962"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3015"/>
         <source>_FILTERED_[%1_%2]</source>
         <translation>_FILTERED_[%1_%2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3011"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3006"/>
         <source>		Mesh &apos;%1&apos; --&gt; %2/%3 triangles remaining</source>
         <translation>		메쉬 &apos;%1&apos; --&gt; %2/%3 TIN 남음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3038"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3033"/>
         <source>Compute mesh volume</source>
         <translation>메쉬부피 계산</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3046"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3041"/>
         <source>No mesh loaded! Nothing to do...</source>
         <translation>메쉬로드안됨! 할일이 없습니다...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3064"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3059"/>
         <source>Volume report file: %1</source>
         <translation>부피 보고서파일: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3068"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3943"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3063"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3935"/>
         <source>Missing argument: filename after &apos;%1&apos;</source>
         <translation>인수 누락: &apos;%1&apos; 이후의 파일 이름입니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3080"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3075"/>
         <source>Failed to create/open volume report file</source>
         <translation>부피 보고서 파일 생성/열기 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3090"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3085"/>
         <source>Mesh &apos;%1&apos;</source>
         <translation>메쉬 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3093"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3088"/>
         <source> (#%2)</source>
         <translation> (#%2)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3096"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3091"/>
         <source>V = %2</source>
         <translation>V = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3110"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3105"/>
         <source>Merge meshes</source>
         <translation>메쉬병합</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3118"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3113"/>
         <source>Less than 2 meshes are loaded! Nothing to do...</source>
         <translation>2 메쉬 미만이 로드됩니다! 할수 있는게 없습니다...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3139"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3134"/>
         <source>Can&apos;t merge mesh &apos;%1&apos; (unhandled type)</source>
         <translation>메쉬 &apos;%1&apos;을 병합할 수 없습니다 (제어할 수 없는 종류)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3154"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3149"/>
         <source>Merge operation failed</source>
         <translation>병합작업 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3163"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3158"/>
         <source>Result is empty</source>
         <translation>결과가 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3169"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3244"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3164"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3239"/>
         <source>_MERGED</source>
         <translation>_병합</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3186"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3181"/>
         <source>Merge clouds</source>
         <translation>클라우드 병합</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3194"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3189"/>
         <source>Less than 2 clouds are loaded! Nothing to do...</source>
         <translation>2개 미만 클라우드가 로드되었습니다! 할일이 없습니다...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3236"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3231"/>
         <source>Fusion failed! (not enough memory?)</source>
         <translation>퓨전 실패! (메모리부족?)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3257"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3252"/>
         <source>Set global shift</source>
         <translation>글로벌 이격설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3279"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3274"/>
         <source>Global shift must be in the form of three coordinates &apos;x&apos; &apos;y&apos; &apos;z&apos;</source>
         <translation>글로벌 이격은 3D 좌표 &apos;x&apos; &apos;y&apos; &apos;z&apos;이어야합니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3320"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3315"/>
         <source>	[%4 - %5] Original global shift {%1,%2,%3}</source>
         <translation>	[%4 - %5] 오리지널 글로벌이격 {%1,%2,%3}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3335"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3330"/>
         <source>	[%5 - %6] Applied transformation is bigger {%1,%2,%3} than the threshold {%4}, precision loss may occur.</source>
         <translation>	[%5 - %6] 적용된 변환이 한계값 {%4}보다 큽니다 {%1,%2,%3}, 정밀도가 낮아질 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3339"/>
         <source>	[%4 - %5] Applied Transformation {%1,%2,%3}</source>
         <translation>	[%4 - %5] 적용된 변환 {%1,%2,%3}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3357"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3352"/>
         <source>	[%4 - %5] Global shift set to {%1,%2,%3}</source>
         <translation>	[%4 - %5] 글로벌이격이 {%1,%2,%3}로 설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3364"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3359"/>
         <source>_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6</source>
         <translation>_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3402"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3397"/>
         <source>Set active SF</source>
         <translation>사용 SF 설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3410"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3405"/>
         <source>Missing parameter: scalar field index after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터:&quot;-%1&quot; 이후 스칼라 인덱스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3422"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3417"/>
         <source>No point cloud nor mesh loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>포인트클라우드나 메쉬가 로드되지 않았습니다! (&quot;-%2&quot; 앞에 &quot;-%1 [클라우드 파일명]&quot;을 붙여서 열어야 합니다.)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3448"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3443"/>
         <source>Remove all SF</source>
         <translation>전체 SF 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3481"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3476"/>
         <source>Remove a specific SF</source>
         <translation>특정 SF 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3512"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3504"/>
         <source>Missing parameter: SF index after %1</source>
         <translation>파라미터 누락:%1 이후 SF 인텍스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3560"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3552"/>
         <source>Remove RGB</source>
         <translation>RGB 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3594"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3586"/>
         <source>Remove normals</source>
         <translation>노말 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3632"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3624"/>
         <source>Remove scan grids</source>
         <translation>스캔그리드 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3711"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3703"/>
         <source>Match B.B. centers</source>
         <translation>B.B. 중심 매치</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3750"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3742"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
         <translation>엔티티 &apos;%1&quot;이 이동되었습니다: (%2,%3,%4)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3765"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3757"/>
         <source>Match scales</source>
         <translation type="unfinished">스케일 맞춤</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3771"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3763"/>
         <source>[MATCH SCALES]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3780"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3772"/>
         <source>scale matching algorithm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3799"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3791"/>
         <source>reference index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3806"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3798"/>
         <source>RMS difference</source>
         <translation type="unfinished">RMS 편차</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3820"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3812"/>
         <source>minimum scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3827"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3819"/>
         <source>maximum scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3840"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3832"/>
         <source>Invalid parameters: &apos;-%1&apos; value must not exceed &apos;-%2&apos; value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3856"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3848"/>
         <source>Not enough loaded entities (2 or more clouds/meshes are expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3860"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3852"/>
         <source>Invalid reference index (%1): only %2 entities are loaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3880"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3872"/>
         <source>Failed to match scales</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3939"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3931"/>
         <source>Plane info file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3954"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4091"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4159"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5911"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6015"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3946"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4083"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4151"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5895"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5999"/>
         <source>No cloud available. Be sure to open one first!</source>
         <translation>클라우드 없음. 파일을 먼저 열어야합니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3960"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3952"/>
         <source>Option &apos;%1&apos; requires a single loaded cloud (%2 are loaded)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3970"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3962"/>
         <source>Plane successfully fitted: rms = %1</source>
         <translation>평면 맞춤완료: rms = %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4000"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3992"/>
         <source>%1/%2_BEST_FIT_PLANE_INFO</source>
         <translation>%1/%2_BEST_FIT_PLANE_INFO</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4004"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3996"/>
         <source>_%1</source>
         <translation>_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4006"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3998"/>
         <source>.txt</source>
         <translation>.txt</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4013"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4005"/>
         <source>Filename: %1</source>
         <translation>파일명: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4006"/>
         <source>Fitting RMS: %1</source>
         <translation>맞춤 RMS: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4023"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4015"/>
         <source>Normal: (%1,%2,%3)</source>
         <translation>노말: (%1,%2,%3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4055"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4047"/>
         <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
         <translation>상단 매트릭스로 클라우드 &apos;%1&apos;이(가) 변환되었습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4056"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4048"/>
         <source>_HORIZ</source>
         <translation>_수평</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4069"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4061"/>
         <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos; 최상맞춤 평면을 계산할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4077"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4069"/>
         <source>Orient normals</source>
         <translation>오리엔트 노멀</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4113"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4105"/>
         <source>_NORMS_REORIENTED</source>
         <translation>_NORMS_REORIENTED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4125"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4117"/>
         <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
         <translation>클라우드 &apos;%1&apos; 오리엔트 노말 실패!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4139"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4131"/>
         <source>S.O.R. filter</source>
         <translation>S.O.R. 필터</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4185"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4325"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4177"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4317"/>
         <source>.clean</source>
         <translation>.clean</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4199"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4191"/>
         <source>_SOR</source>
         <translation>_SOR</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4205"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4345"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4197"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4337"/>
         <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation>메모리가 부족하여 클라우드 &apos;%1&apos;의 클린 버전을 만들 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4214"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4206"/>
         <source>Failed to apply SOR filter on cloud &apos;%1&apos;! (empty output or not enough memory?)</source>
         <translation>클라우드 &apos;%1&apos;에 SOR 필터 적용 실패 (출력이 없거나 메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4228"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4220"/>
         <source>Noise filter</source>
         <translation>노이즈 필터</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4236"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4228"/>
         <source>Missing parameters: &apos;KNN/RADIUS {value} REL/ABS {value}&apos; expected after &quot;-%1&quot;</source>
         <translation>파라미터 누적:&quot;-%1&quot;이후 KNN/RADIUS {value} REL/ABS {value}&apos; 필요합니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4265"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4257"/>
         <source>Invalid parameter: KNN or RADIUS expected after &quot;-%1&quot;</source>
         <translation>잘못된 파라미터: &quot;-%1&quot; 뒤에 KNN 또는 RADIUS가 필요합니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4339"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4331"/>
         <source>_DENOISED</source>
         <translation>_DENOISED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4354"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4346"/>
         <source>Failed to apply Noise filter on cloud &apos;%1&apos;! (empty output or not enough memory?)</source>
         <translation>클라우드 &apos;%1&apos;에 노이즈필터 적용 실패 (빈 출력 또는 메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4368"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4360"/>
         <source>Remove duplicate points</source>
         <translation>중복점 제거</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4386"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4378"/>
         <source>Invalid argument: &apos;%1&apos;</source>
         <translation>잘못된 인수: &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4393"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4385"/>
         <source>Minimum distance between points: &apos;%1&apos;</source>
         <translation>점간 최소거리: &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4408"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4400"/>
         <source>Process failed (see log)</source>
         <translation>프로세싱 실패 (로그확인)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4419"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4411"/>
         <source>_REMOVED_DUPLICATE_POINTS</source>
         <translation>_REMOVED_DUPLICATE_POINTS</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4440"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4490"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4548"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5415"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4432"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4482"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4540"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5399"/>
         <source>No mesh available. Be sure to open one first!</source>
         <translation>메쉬가 없습니다. 열려있는지 확인하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4456"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4448"/>
         <source>.vertices</source>
         <translation>.vertices</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4504"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4496"/>
         <source>_FLIPPED_TRIANGLES</source>
         <translation>_FLIPPED_TRIANGLES</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4523"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4515"/>
         <source>Sample mesh</source>
         <translation>샘플 메쉬</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4571"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4563"/>
         <source>Sampled cloud created: %1 points</source>
         <translation>샘픙링된 클라우드 생성완료: %1 점</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4572"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4564"/>
         <source>_SAMPLED_POINTS</source>
         <translation>_SAMPLED_POINTS</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4606"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4776"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4836"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4888"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4956"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5006"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5385"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4598"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4768"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4828"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4880"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4948"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4998"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5371"/>
         <source>No point cloud available. Be sure to open or generate one first!</source>
         <translation>사용가능한 포인트클라우드가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4618"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4610"/>
         <source>Crop</source>
         <translation>자르기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4626"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4618"/>
         <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
         <translation>파라미터가 누락: 박스가 &quot;-%1&quot; 이후 (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)로 확장됩니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4630"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4622"/>
         <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
         <translation>사용가능한 포인트클라우드 또는 메쉬가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4641"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4633"/>
         <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
         <translation>잘못된 파라미터: 박스범위 (예상포맷 &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4651"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4643"/>
         <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
         <translation>잘못된 파라미터: 박스범위 (구성요소 #%1은 올바른 번호가 아닙니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4764"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4756"/>
         <source>SF to Coord</source>
         <translation>SF to 좌표</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4772"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4764"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (SF INDEX OR NAME) (DIMENSION)</source>
         <translation>&quot;-%1&quot;(SF 인덱스 또는 이름)(차원) 뒤 파라미터가 누락되었습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4791"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4848"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4964"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4783"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4840"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4956"/>
         <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
         <translation>잘못된 파라미터: &quot;-%1&quot; 이후 치수 (예상: X, Y 또는 Z)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4804"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4796"/>
         <source>_SF_TO_COORD_%1</source>
         <translation>_SF_TO_COORD_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4817"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4809"/>
         <source>Failed to set SF %1 as coord %2 on cloud &apos;%3&apos;!</source>
         <translation>클라우드 &apos;%3&apos;의 SF %1을(를) 좌표 %2로 설정 실패!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4826"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4818"/>
         <source>Coord to SF</source>
         <translation>SF로 좌표</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4842"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4952"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4834"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4944"/>
         <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
         <translation>&quot;-%1&quot; 이후 빠진 파라미터 (치수)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4856"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4848"/>
         <source>_%1_TO_SF</source>
         <translation>_%1_TO_SF</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4868"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4860"/>
         <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
         <translation>좌표출력실패. 클라우드&quot;%2&quot;에서 %1 ~ SF!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4992"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4984"/>
         <source>Crop 2D</source>
         <translation>2D 자르기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5002"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4994"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
         <translation>&quot;-%1&quot; 이후 없는 파라미터 (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5073"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5065"/>
         <source>Missing parameter(s): vertex #%1 data and following</source>
         <translation>알수없는 파라미터: 버텍스 #%1 데이터 및 다음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5078"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5070"/>
         <source>Invalid parameter: X-coordinate of vertex #%1</source>
         <translation>잘못된 파라미터: 버텍스 #%1의 X 좌표</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5079"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5071"/>
         <source>Invalid parameter: Y-coordinate of vertex #%1</source>
         <translation>잘못된 파라미터: 버텍스 #%1의 Y 좌표</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5136"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5128"/>
         <source>.cropped</source>
         <translation>.cropped</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5149"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5141"/>
         <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
         <translation>포인트클라우드 &apos;%1&apos;을(를) 자르기에 부족한 메모리!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5156"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5148"/>
         <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
         <translation>클라우드 &apos;%1&apos;의 점이 입력박스 내부입니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5161"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5153"/>
         <source>Crop process failed! (not enough memory)</source>
         <translation>자르기과정 실패! (메모리부족)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5169"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5161"/>
         <source>Color banding</source>
         <translation>컬러발란스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5177"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5169"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
         <translation>&quot;-%1&quot; 이루 알수없는 파라미터 (DIM 주파수)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5181"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5278"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5173"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5264"/>
         <source>No entity available. Be sure to open or generate one first!</source>
         <translation>사용가능한 엔티티가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5225"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5256"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5214"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5242"/>
         <source>COLOR_BANDING_%1_%2</source>
         <translation>COLOR_BANDING_%1_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5251"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5353"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5237"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5339"/>
         <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
         <translation>메쉬 &apos;%1&apos;의 버텍스가 잠겼습니다 (예를 들어 여러 엔티티로 공유될 수 있습니다.) 현재 명령을 적용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5266"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5252"/>
         <source>Color levels</source>
         <translation>컬러레벨</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5274"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5260"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL)</source>
         <translation>&quot;-%1&quot; (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL) 뒤 파라미터가 누락되었습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5294"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5280"/>
         <source>Invalid parameter: bands after &quot;-%1&quot; (expected: any combination of R, G or B)</source>
         <translation>잘못된 매개변수: &quot;-%1&quot; (예상: R, G, B 조합) 뒤에 잘못된 밴드</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5318"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5304"/>
         <source>Failed to scale the color band(s) of cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;의 컬러밴드 스케일 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5328"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5358"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5314"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5344"/>
         <source>COLOR_LEVELS_%1_%2_%3</source>
         <translation>COLOR_LEVELS_%1_%2_%3</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5330"/>
         <source>Failed to scale the color band(s) of mesh &apos;%1&apos;</source>
         <translation>메쉬 &apos;%1&apos; 컬러밴드 스케일 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5389"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5374"/>
         <source>No point cloud available. Will use the first mesh vertices as compared cloud.</source>
         <translation>사용가능한 포인트클라우드가 없습니다. 1번 메세 버텍스를 비교 클라우드로 사용합니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5394"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5379"/>
         <source>Unhandled mesh vertices type</source>
         <translation>제어할 수 없는 메쉬 버텍스 종류</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5402"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5386"/>
         <source>[C2M] Multiple point clouds loaded! Will take the first one by default.</source>
         <translation>[C2M] 멀티 포인트클라우드가 로드되었습니다! 기본으로 1번값을 사용합니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5411"/>
         <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
         <translation>한개의 포인트클라우드만 사용가능합니다. 열렸거나 C2C 거리 실행전 2번을 생성합니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5431"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5748"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5415"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5732"/>
         <source>More than 3 point clouds loaded! We take the second one as reference by default</source>
         <translation>3점 이상 포인트클라우가 로드됩니다! 기본으로 2번을 기준으로 사용합니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5462"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5474"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5486"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5446"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5458"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5470"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2M distance!</source>
         <translation>파라미터 &quot;-%1&quot; 무시: C2M 거리만 사용합니다!</translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="5480"/>
         <location filename="../ccCommandLineCommands.cpp" line="5496"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5512"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="68"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="69"/>
         <source>Missing parameter: value after &quot;-%1&quot;</source>
         <translation>알수없는 파라미터:  &quot;-%1&quot; 이후 값</translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="5486"/>
         <location filename="../ccCommandLineCommands.cpp" line="5502"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5518"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="73"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="118"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="129"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="140"/>
@@ -15020,324 +15328,324 @@ p, li { white-space: pre-wrap; }
         <translation>잘못된 파라미터:  &quot;-%1&quot; 이후 값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5530"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5543"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5514"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5527"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2C distance!</source>
         <translation>파라미터 &quot;-%1&quot; 무시: C@C 거리만!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5568"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5552"/>
         <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
         <translation>잘못된 파라미터: 알수없는 모델종류 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5573"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5557"/>
         <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
         <translation>알수 없는 파라미:  &quot;-%1&quot; 이후 모델종류 (LS/TRI/HF)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5589"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5573"/>
         <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
         <translation>잘못된 파라미터: 알수없는 네이버후드 종류 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5594"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5578"/>
         <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
         <translation>파라미터 없음 : 모델종류 (KNN/SPHERE) 이후 예상되는 네이버후드 종류 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5604"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5588"/>
         <source>Invalid parameter: neighborhood size</source>
         <translation>잘못된 파라미터: 네이버후드 크기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5609"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5593"/>
         <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
         <translation>파리미터 없음: 네이버후드 종류 (네이버 갯수/구면반경)이후 예상되는 네이버후드 크기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5619"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5603"/>
         <source>Missing parameter: max thread count after &apos;%1&apos;</source>
         <translation>파라미터 없음:&apos;%1&apos; 이후 최대 스리트 갯수</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5626"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5610"/>
         <source>Invalid thread count! (after %1)</source>
         <translation>잘못된 스리트 갯수! (%1 이후)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5644"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5628"/>
         <source>Failed to initialize comparison dialog</source>
         <translation>비교 대화창 초기화 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5700"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5684"/>
         <source>An error occurred during distances computation!</source>
         <translation>거리비교시 에러발생!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5708"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5692"/>
         <source>_MAX_DIST_%1</source>
         <translation>_최대_거리_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5726"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5710"/>
         <source>C2M distance</source>
         <translation>C2M 거리</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5731"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5715"/>
         <source>C2C distance</source>
         <translation>C2C 거리</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5736"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5720"/>
         <source>Closest Point Set</source>
         <translation>최근접 점세트</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5744"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5728"/>
         <source>At least two point clouds are needed to compute the closest point set!</source>
         <translation>최근 점세트 계산에 2개이상 포인트클라우드가 필요합니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5789"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5773"/>
         <source>Statistical test</source>
         <translation>통계검증</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5800"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6004"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5784"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5988"/>
         <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
         <translation>알수없는 파라미터: &quot;-%1&quot; 이후 분배종류 (GAUSS/WEIBULL)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5809"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5793"/>
         <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>알 수 없는 파라미터: &quot;GAUSS&quot; 이후 중간값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5815"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5799"/>
         <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>잘못된 파라미터: &quot;GAUSS&quot; 이후 중간값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5820"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5804"/>
         <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>알 수 없는 파라미터: &quot;GAUSS&quot; 이후 시그마값 {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5826"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5810"/>
         <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>잘못된 파라미터: &quot;GAUSS&quot; 이후 시그마값 {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5838"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5822"/>
         <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5844"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5828"/>
         <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5849"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5833"/>
         <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 b 값 {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5855"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5839"/>
         <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 b 값 {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5860"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5844"/>
         <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 이격값 {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5866"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5850"/>
         <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 이격값 {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5875"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5859"/>
         <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
         <translation>잘못된 파라미터: 알수없는 분배 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5884"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5868"/>
         <source>Missing parameter: p-value after distribution</source>
         <translation>알 수 없는 파라미터: 분배후 p값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5890"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5874"/>
         <source>Invalid parameter: p-value after distribution</source>
         <translation>잘못된 파라미터: 분배후 p값</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5899"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5883"/>
         <source>Missing parameter: neighbors after p-value</source>
         <translation>알 수 없는 파라미터: p값후 네이버</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5905"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5889"/>
         <source>Invalid parameter: neighbors after p-value</source>
         <translation>잘못된 파라미터: p값후 네이버</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5938"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5922"/>
         <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
         <translation>카이2 거리를 계산할 새로운 스칼라필드에 할당할 수 없습니다! 메모리를 늘리십시오...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5950"/>
-        <location filename="../ccEntityAction.cpp" line="1160"/>
-        <location filename="../ccEntityAction.cpp" line="3231"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5934"/>
+        <location filename="../ccEntityAction.cpp" line="1158"/>
+        <location filename="../ccEntityAction.cpp" line="3194"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
         <translation>클라우드 &apos;%1&apos;의 옥트리를 계산할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5957"/>
-        <location filename="../ccEntityAction.cpp" line="3244"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5941"/>
+        <location filename="../ccEntityAction.cpp" line="3207"/>
         <source>[Chi2 Test] %1 test result = %2</source>
         <translation>[카이2 검증] %1 검증결과 = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5973"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5957"/>
         <source>_STAT_TEST_%1</source>
         <translation>_STAT_TEST_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5995"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5979"/>
         <source>Statistical model fitting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6010"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5994"/>
         <source>Invalid parameter: unknown distribution &apos;%1&apos; after &quot;-%2&quot; (GAUSS/WEIBULL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6026"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6010"/>
         <source>Cloud &apos;%1&apos; has no active scalar field. Set one with &apos;-%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6032"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6016"/>
         <source>Scalar field &apos;%1&apos; of cloud &apos;%2&apos; has no valid values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6048"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6032"/>
         <source>Failed to compute the %1 distribution parameters for cloud &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6068"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6052"/>
         <source>[Distribution fitting] Cloud &apos;%1&apos; (SF &apos;%2&apos;) - %3: %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6079"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6063"/>
         <source>Delaunay triangulation</source>
         <translation>들로네 삼각분할</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6112"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6096"/>
         <source>Axis aligned: %1</source>
         <translation>축맞춤: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6128"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6112"/>
         <source>	Resulting mesh: #%1 faces, %2 vertices</source>
         <translation>	메쉬 결과: #%1 페이스, %2 버텍스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6166"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6150"/>
         <source>SF arithmetic</source>
         <translation>SF 산술</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6174"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6158"/>
         <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
         <translation>알수 없는 파라미터: &apos;%1&apos; 이후 SF 인텍스 작동 (2값 기대)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6192"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6313"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6431"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6176"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6297"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6415"/>
         <source>Unknown operation! (%1)</source>
         <translation>알수없는 작동! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6196"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6317"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6180"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6301"/>
         <source>Operation %1 can&apos;t be applied with %2. Consider using the %3 command</source>
         <translation>작동 %1을(를) %2에 적용할 수 없습니다. %3 커맨드를 고려하십시오</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6229"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6356"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6464"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6213"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6340"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6448"/>
         <source>Failed to apply operation on cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;에 작동적용 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6258"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6387"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6500"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6242"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6371"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6484"/>
         <source>Failed to apply operation on mesh &apos;%1&apos;</source>
         <translation>메쉬  &apos;%1&apos;에 작동적용 실패</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6276"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6260"/>
         <source>SF operation</source>
         <translation>SF 작동</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6296"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6280"/>
         <source>Missing parameter(s): SF index and/or operation and/or scalar value after &apos;%1&apos; (3 values expected)</source>
         <translation>알수없는 파라미터: &apos;%1&apos; 이루 SF 인텍스 작동 스칼라값 (3값 예상)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6333"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6317"/>
         <source>Invalid scalar value! (after %1)</source>
         <translation>잘못된 스칼라값! (%1 이후)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6405"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6389"/>
         <source>SF (add, sub, mult, div) SF</source>
         <translation>SF (추가, 하위, mult, 분할) SF</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6413"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6397"/>
         <source>Missing parameter(s): SF index and operation and SF index &apos;%1&apos; (3 values expected)</source>
         <translation>파라미터 누락: SF 인덱스 &amp; 작동 &amp; SF 인덱스 &apos;%1&apos; (3값 기대)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6435"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6419"/>
         <source>Operation %1 can&apos;t be applied with %2</source>
         <translation>작동 %1을 %2에 적용할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7177"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7161"/>
         <source>[ICP] Registration matrix file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7466"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7450"/>
         <source>Don&apos;t add the &apos;scalar_&apos; prefix to PLY scalar fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7473"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7457"/>
         <source>[PLY] Scalar field names will be saved without the &apos;scalar_&apos; prefix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8135"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8123"/>
         <source>Invalid feature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of:
 - SUM_OF_EIGENVALUES
 - OMNIVARIANCE
@@ -15358,937 +15666,937 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8275"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8259"/>
         <source>Compute distances from sensor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8292"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8276"/>
         <source>Squared distances</source>
         <translation type="unfinished">거리제곱</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8313"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8399"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8297"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8383"/>
         <source>Sensor center not detected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8352"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8336"/>
         <source>Compute scattering angles</source>
         <translation type="unfinished">산란각도 계산</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8369"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8353"/>
         <source>Scattering angles in degrees</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6518"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6502"/>
         <source>SF interpolation</source>
         <translation>SF 보간</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6525"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6509"/>
         <source>Missing parameter(s): SF index after &apos;%1&apos; (1 value expected)</source>
         <translation>파라미터 누락: &apos;%1&apos; 이후 SF 인덱스 (1값 기대)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6528"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6628"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6512"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6612"/>
         <source>Unexpected number of clouds for &apos;%1&apos; (at least 2 clouds expected: first = source, second = dest)</source>
         <translation>&apos;%1&apos;에 대한 예상치 못한 클라우드 갯수 (최소 2개의 클라우드 예상: 첫번째 = 소스, 두번째 = 대상)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6544"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6528"/>
         <source>[DEST_IS_FIRST]</source>
         <translation>[DEST_IS_FIRST]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6621"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6605"/>
         <source>Color interpolation</source>
         <translation>컬러보간</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6809"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6793"/>
         <source>Rename entities</source>
         <translation>엔티티 이름변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6817"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6801"/>
         <source>Missing parameter: Name after &quot;-%1&quot;</source>
         <translation>파라미터누락: &quot;-%1&quot; 이후 이름</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6875"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6859"/>
         <source>Rename SF</source>
         <translation>SF 이름변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6883"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6867"/>
         <source>Missing parameter(s): SF index and/or scalar field name after &apos;%1&apos; (2 values expected)</source>
         <translation>파라미터누락: &apos;%1&apos; 이후 SF 인덱그 &amp; 스칼라이름 (2값 기대)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6980"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6964"/>
         <source>Missing parameter(s): SF name and value after &apos;%1&apos; (2 values expected)</source>
         <translation>파라미터 누락: &apos;%1&apos; 이후 SF 이름 &amp; 값 (2값 기대)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6991"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6975"/>
         <source>Invalid constant value! (after %1)</source>
         <translation>잘못된 상수값 (%1 이후)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1518"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1511"/>
         <source>	Can&apos;t use &apos;Use active SF&apos;: no active scalar field. Set one with &apos;-%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1534"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1527"/>
         <source>	Can&apos;t use &apos;Use active SF&apos;: scalar field &apos;%1&apos; has invalid min/max values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1554"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1547"/>
         <source>	Use active SF: enabled
 		Spacing at SF min (%1): %2
 		Spacing at SF max (%3): %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1564"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1557"/>
         <source>	Can&apos;t use &apos;Use active SF&apos;: scalar field &apos;%2&apos; does not have any valid value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1571"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1564"/>
         <source>	&apos;Use active SF&apos; disabled. Falling back to constant spacing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1918"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1911"/>
         <source>_CLOUD_%1(%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2034"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2031"/>
         <source>Approx Density</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3663"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3655"/>
         <source>Remove sensors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3902"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3894"/>
         <source>Compute best fit plane</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4432"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4424"/>
         <source>Extract vertices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4482"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4474"/>
         <source>Flip mesh triangles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4598"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4590"/>
         <source>Compress FWF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6638"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6622"/>
         <source>FILTER</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6698"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6713"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6682"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6697"/>
         <source>Missing parameter: spatial sigma after &apos;-%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6705"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6720"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6689"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6704"/>
         <source>Invalid value for spatial sigma after &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6728"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6712"/>
         <source>Missing parameter: burnt color threshold after &apos;-%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6735"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6719"/>
         <source>Invalid value for burnt color threshold after &apos;%1&apos;, must be an integer between 0 and 255!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6744"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6728"/>
         <source>Missing parameter: blend grayscale threshold and grayscale percent after &apos;-%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6751"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6735"/>
         <source>Invalid value for blend grayscale threshold after &apos;%1&apos;, must be an integer between 0 and 255!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6759"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6743"/>
         <source>Invalid value for grayscale percent after &apos;%1 %2&apos;, must be an integer between 0 and 100!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6771"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6755"/>
         <source>Missing parameter -%1 and/or -%2 need to be set.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6776"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6760"/>
         <source>Missing parameter any of &apos;-%1&apos;, &apos;-%2&apos;, &apos;-%3&apos;, &apos;-%4&apos; need to be set.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6970"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6954"/>
         <source>Add constant SF</source>
         <translation type="unfinished">일률적인 SF 추가</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6976"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6960"/>
         <source>Note: this operation is only done on clouds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7032"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7016"/>
         <source>Add indexes as SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7140"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7153"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7124"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7137"/>
         <source>Missing parameter: SF index after &apos;%1&apos;</source>
         <translation>알수 없는 파라미터: &apos;%1&apos; 이후 SF 인덱스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7187"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7171"/>
         <source>[ICP] Reset rotation constraints if any. Only one -%1 argument allowed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7193"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7177"/>
         <source>[ICP] Use all rotations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7198"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7182"/>
         <source>[ICP] Skip RYZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7203"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7187"/>
         <source>[ICP] Skip RXZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7208"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7192"/>
         <source>[ICP] Skip RXY</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7213"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7197"/>
         <source>[ICP] Skip rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7217"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7201"/>
         <source>Invalid parameter: unknown rotation filter &quot;%1&quot;</source>
         <translation>잘못된 파라미터: 알수없는 회전필터 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7183"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7167"/>
         <source>Missing parameter: rotation filter after &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</source>
         <translation>알수 없는 파라미터: &quot;-%1&quot;이루 회전필터 (XYZ/X/Y/Z/없음)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1021"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4256"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4248"/>
         <source>radius</source>
         <translation type="unfinished">반경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1078"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1071"/>
         <source>orientation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1091"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1084"/>
         <source>model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1103"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1096"/>
         <source>angle for scan grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1194"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1187"/>
         <source>	orient normals with grids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1198"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1191"/>
         <source>Orient normals with grids failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1222"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1215"/>
         <source>	orient normals with sensors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1226"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1219"/>
         <source>Orient normals with sensors failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1412"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1649"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1405"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1642"/>
         <source>percent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1420"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1657"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1413"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1650"/>
         <source>number of points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1478"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1471"/>
         <source>step</source>
         <translation type="unfinished">단계</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1493"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1486"/>
         <source>SF min spacing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1498"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1491"/>
         <source>SF max spacing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1627"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1620"/>
         <source>octree cell size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1667"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1660"/>
         <source>octree level</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1988"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1981"/>
         <source>curvature type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1993"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2085"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2204"/>
-        <location filename="../ccCommandLineCommands.cpp" line="8024"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1986"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2086"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2206"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8008"/>
         <source>kernel size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2030"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2027"/>
         <source>density type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2219"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2221"/>
         <source>up direction vector coordinate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3209"/>
-        <location filename="../mainwindow.cpp" line="3766"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3204"/>
+        <location filename="../mainwindow.cpp" line="3778"/>
         <source>Merged cloud is too big!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3287"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7046"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3282"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7030"/>
         <source>[%1] Option detected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4084"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4147"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4076"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4139"/>
         <source>number of neighbors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4152"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4144"/>
         <source>sigma multiplier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4247"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4239"/>
         <source>number of neighbors after KNN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4260"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4252"/>
         <source>Invalid parameter: radius must be &gt; 0 (got &apos;%1&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4270"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4262"/>
         <source>error type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4280"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4272"/>
         <source>error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4284"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4276"/>
         <source>Invalid parameter: error must be &gt; 0 (got &apos;%1&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4535"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4527"/>
         <source>sample mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4541"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4533"/>
         <source>sampling mode value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4592"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4584"/>
         <source>Errors occurred during the process! Result may be incomplete!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4876"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4868"/>
         <source>SF to Normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4884"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4876"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4935"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4927"/>
         <source>Failed to set SF %1 %2 and %3 as normals on cloud &apos;%4&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4944"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4936"/>
         <source>Normals to SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4972"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4964"/>
         <source>_NORM_%1_TO_SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4984"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4976"/>
         <source>Failed to export normal %1 to SF on cloud &apos;%2&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5024"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5016"/>
         <source>orthogonal dimension</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5044"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5036"/>
         <source>number of vertices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5194"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5186"/>
         <source>dimension</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5200"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5192"/>
         <source>frequency</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5302"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5288"/>
         <source>color level</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6101"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6085"/>
         <source>max edge length</source>
         <translation type="unfinished">최대 엣지길이</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6580"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6564"/>
         <source>[Nearest Neighbor interpolation]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6587"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6571"/>
         <source>Missing argument after &apos;%1&apos;: number of nearest neighbors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6594"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6578"/>
         <source>Invalid number of nearest neighbors! (after %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6599"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6583"/>
         <source>[Sphere interpolation]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6606"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6590"/>
         <source>Missing argument after &apos;%1&apos;: radius of the sphere</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6612"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6596"/>
         <source>Invalid sphere radius! (after %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7110"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7094"/>
         <source>min error difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7117"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7101"/>
         <source>number of iterations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3813"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7124"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3805"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7108"/>
         <source>overlap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7131"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7115"/>
         <source>random sampling limit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7164"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7148"/>
         <source>max thread count</source>
         <translation type="unfinished">최대 스레드 갯수</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7223"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7207"/>
         <source>[ICP] Skip TX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7228"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7212"/>
         <source>[ICP] Skip TY</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7233"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7217"/>
         <source>[ICP] Skip TZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7238"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7222"/>
         <source>[ICP] Use C2M distances</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7243"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7227"/>
         <source>[ICP] Use non-robust C2M distances</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7249"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7233"/>
         <source>Missing parameter: normals matching mode after &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7257"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7241"/>
         <source>[ICP] Use opposite normals matching mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7262"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7246"/>
         <source>[ICP] Use same-side normals matching mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7267"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7251"/>
         <source>[ICP] Use double-sided normals matching mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7271"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7255"/>
         <source>Unknown normal matching mode: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7280"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7264"/>
         <source>[ICP] Transfromation filter: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7305"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7289"/>
         <source>Not enough loaded entities (expect at least 2!)</source>
         <translation>로드된 엔티티 부족 (최소 2 예상!)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7324"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7308"/>
         <source>[ICP] SF #%1 (data entity) will be used as weights</source>
         <translation>[ICP] SF #%1 (데이터 엔티티)이(가) 가중치로 사용됩니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7338"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7322"/>
         <source>[ICP] SF #%1 (model entity) will be used as weights</source>
         <translation>[ICP] SF #%1 (모델 엔티티)이(가) 가중치로 사용됩니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7378"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7362"/>
         <source>Entity &apos;%1&apos; has been registered</source>
         <translation>엔티티 &apos;%1&apos;이 정합되었습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7379"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7363"/>
         <source>RMS: %1</source>
         <translation>RMS: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7380"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7364"/>
         <source>Number of points used for final step: %1</source>
         <translation>최종 단계에 사용된 점갯수: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7388"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7372"/>
         <source>%1/%2_REGISTRATION_MATRIX</source>
         <translation>%1/%2_REGISTRATION_MATRIX</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7409"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7393"/>
         <source>_REGISTERED</source>
         <translation>_REGISTERED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7428"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7412"/>
         <source>Change PLY output format</source>
         <translation>PLY 출력포맷 변경</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7436"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7420"/>
         <source>Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after &apos;%1&apos;</source>
         <translation>알 수 없는 파라미터: &apos;%1&apos; 이후 포맷 (ASCII, BINARY_LE, or BINARY_BE) </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7459"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7443"/>
         <source>Invalid PLY format! (&apos;%1&apos;)</source>
         <translation>잘못된 PLY 포맷! (&apos;%1&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7479"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7463"/>
         <source>Compute structured cloud normals</source>
         <translation>구성된 클라우드 노말 계산</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7510"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7494"/>
         <source>A file starting with %1 does not have a closing %1</source>
         <translation>%1로 시작하는 파일이 %1 폐합되지 않았습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7542"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7526"/>
         <source>Save clouds</source>
         <translation>클라우드 저장</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7579"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7651"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7563"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7635"/>
         <source>Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on</source>
         <translation>잘못된 파라미터: 특정 %1 파일명이지만 ALL_AT_ONCE 켜짐</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7583"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7567"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 clouds</source>
         <translation>잘못된 파라미터: 특정 %1 파일명이지만 %2 클라우가 있습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7614"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7598"/>
         <source>Save meshes</source>
         <translation>메쉬 저장</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7655"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7639"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 meshes</source>
         <translation>잘못된 파라미터: 특정 %1 파일면이지만 %2 메쉬가 있습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7686"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7670"/>
         <source>Auto save state</source>
         <translation>자동저장 상태</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7694"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7678"/>
         <source>Missing parameter: option after &apos;%1&apos; (%2/%3)</source>
         <translation>알 수 없는 파라미터: &apos;%1&apos; (%2/%3) 이후 옵션</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7700"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7684"/>
         <source>Auto-save is enabled</source>
         <translation>자동저장 활성화</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7705"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7689"/>
         <source>Auto-save is disabled</source>
         <translation>자동저장 비활성</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7710"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7694"/>
         <source>Unrecognized option after &apos;%1&apos; (%2 or %3 expected)</source>
         <translation>&apos;%1&apos; 이후 인식할 수 없는 옵션 (%2 또는 %3 예상)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7717"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7701"/>
         <source>Set log file</source>
         <translation>로그파일 설정</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7725"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7709"/>
         <source>Missing parameter: filename after &apos;%1&apos;</source>
         <translation>알 수 없는 파라미터: &apos;%1&quot; 이후 파일명</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7739"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7723"/>
         <source>Select entities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7972"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7956"/>
         <source>Pop cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7994"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7978"/>
         <source>Pop mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8248"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8235"/>
         <source>Set Verbosity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8256"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8243"/>
         <source>Missing parameter: verbosity level after: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8263"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8250"/>
         <source>Invalid verbosity level %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8267"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8252"/>
         <source>Set verbosity level to %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7767"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7784"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7751"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7768"/>
         <source>Missing parameter: number of entities after %1</source>
         <translation>파라미터 누락: %1 이후 엔티티 갯수</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7773"/>
-        <location filename="../ccCommandLineCommands.cpp" line="7790"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7757"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7774"/>
         <source>Invalid number after -%1</source>
         <translation>-%1 이후 잘못된 넘버</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7802"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7786"/>
         <source>Missing parameter: regex string after %1</source>
         <translation>파라미터 누락: % 1이후 정규표현 인덱스</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7808"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7792"/>
         <source>Invalid regex pattern: %1</source>
         <translation>잘못된 정규표현 패턴: %1 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7861"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7845"/>
         <source>First %1 and last %2 entity(ies) will not be selected</source>
         <translation>첫번째 %1 &amp; 마지막 %2 엔티티가 선택되지 않습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7866"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7850"/>
         <source>First %1 entity(ies) will not be selected</source>
         <translation>첫번째 %1개 엔티티가 선택되지 않습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7872"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7856"/>
         <source>First %1 entity(ies) will be selected</source>
         <translation>첫번째 %1개 엔티티가 선택됩니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7883"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7867"/>
         <source>Last %1 entity(ies) will not be selected</source>
         <translation>마지막 %1개 엔티티가 선택되지 않습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7889"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7873"/>
         <source>Last %1 entity(ies) will be selected</source>
         <translation>마지막 %1개 엔티티가 선택됩니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7898"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7882"/>
         <source>Entities with name matches the regex /%1/ will not be selected.</source>
         <translation>이름이 정규식 /%1/과 일치하는 엔티티는 선택되지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7903"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7887"/>
         <source>Entities with name matches the regex /%1/ will be selected.</source>
         <translation>이름이 정규식 /%1/과 일치하는 엔티티가 선택됩니다.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7910"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7894"/>
         <source>Missing parameter(s): any of the option (%1,%2,%3,%4) expected after %5</source>
         <translation>파라미터 누락: %5 이후에 필요한 옵션 (%1,%2,%3,%4)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7927"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7911"/>
         <source>[Select clouds]</source>
         <translation>[클라우드 선택]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7937"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7921"/>
         <source>[Select meshes]</source>
         <translation>[메쉬 선택]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7949"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7933"/>
         <source>Clear</source>
         <translation>지우기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7961"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7945"/>
         <source>Clear clouds</source>
         <translation>클라우드 지우기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="7983"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7967"/>
         <source>Clear meshes</source>
         <translation>메쉬 지우기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8005"/>
+        <location filename="../ccCommandLineCommands.cpp" line="7989"/>
         <source>No timestamp</source>
         <translation>타임스탬프 없음</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8016"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8000"/>
         <source>1st order moment</source>
         <translation>1번 순서순간</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8165"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8153"/>
         <source>Failed to read a numerical parameter: kernel size. Got &apos;%1&apos; instead.</source>
         <translation>숫자 파라미터:커널크기 읽기 실패. 대신 &apos;%1&apos; 얻음.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8032"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8016"/>
         <source>No point cloud on which to compute first order moment! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>1번 순서를 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려 있어야합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8046"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8034"/>
         <source>MOMENT_KERNEL_%2</source>
         <translation>MOMENT_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8055"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8043"/>
         <source>Feature</source>
         <translation>피쳐</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8063"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8051"/>
         <source>Missing parameter: feature type after &quot;-%1&quot;</source>
         <translation>알 수 없는 파라미터:&quot;-%1&quot;이후 피쳐종류</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8157"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8145"/>
         <source>Missing parameter: kernel size after feature type</source>
         <translation>알 수 없는 파라미터:피쳐 종류후 커넬크기</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8171"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8159"/>
         <source>No point cloud on which to compute feature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>피쳐를 계산할 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개를 열어야 합니다)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8186"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8178"/>
         <source>The computation of some geometric features failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8190"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8182"/>
         <source>%1_FEATURE_KERNEL_%2</source>
         <translation>%1_FEATURE_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8195"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8187"/>
         <source>.%1_feature(%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8208"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8195"/>
         <source>Debug Command Line</source>
         <translation>코맨드라인 디버그</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8228"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8215"/>
         <source>Global shift set: </source>
         <translation>글로벌 이격 세트: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8229"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8216"/>
         <source>Global shift: (%1, %2, %3)</source>
         <translation>글로벌 이격: (%1, %2, %3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8239"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8226"/>
         <source>Silent mode: </source>
         <translation>무음 모드: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8240"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8227"/>
         <source>Auto save: </source>
         <translation>자동저장: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8241"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8228"/>
         <source>Auto add timestamp: </source>
         <translation>자동 타임스템프 추가: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="8242"/>
+        <location filename="../ccCommandLineCommands.cpp" line="8229"/>
         <source>Numerical precision: %1</source>
         <translation>눗자 자릿수: %1</translation>
     </message>
@@ -16320,63 +16628,63 @@ Cells: %2 x %3</source>
 셀: %2 x %3</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="145"/>
+        <location filename="../ccEntityAction.cpp" line="146"/>
         <source>[SetColor] Can&apos;t set color for mesh &apos;%1&apos; (vertices are not accessible)</source>
         <translation>[SetColor] 메쉬 &apos;%1&apos;의 컬러를 설정할 수 없습니다 (버텍스에 접근할 수 없습니다)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="206"/>
+        <location filename="../ccEntityAction.cpp" line="210"/>
         <source>[SetColor] Can&apos;t change color of entity &apos;%1&apos;</source>
         <translation>[SetColor] 엔티티컬러 &apos;%1&apos;을(를) 변경할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="608"/>
+        <location filename="../ccEntityAction.cpp" line="612"/>
         <source>[ConvertTextureToColor] Mesh &apos;%1&apos; has no material/texture!</source>
         <translation>ConvertTextureToColor] 메쉬 &apos;%1&apos;에 재질/텍스처가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="616"/>
+        <location filename="../ccEntityAction.cpp" line="618"/>
         <source>Mesh &apos;%1&apos; already has colors! Overwrite them?</source>
         <translation>메쉬 &apos;%1&apos;에 컬러가 있습니다! 덮어쓰겠습니까?</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="633"/>
+        <location filename="../ccEntityAction.cpp" line="635"/>
         <source>[ConvertTextureToColor] Failed to convert texture on mesh &apos;%1&apos;!</source>
         <translation>[ConvertTextureToColor] 메쉬 &apos;%1&apos;에 컬러텍스쳐 실패!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="678"/>
+        <location filename="../ccEntityAction.cpp" line="679"/>
         <source>[EnhanceRGBWithIntensities] Entity &apos;%1&apos; has no RGB color!</source>
         <translation>[EnhanceRGBWithIntensities] 엔티티 &apos;%1&apos;에 RGB 컬러가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="683"/>
+        <location filename="../ccEntityAction.cpp" line="684"/>
         <source>[EnhanceRGBWithIntensities] Entity &apos;%1&apos; has no scalar field!</source>
         <translation>[EnhanceRGBWithIntensities] 엔티티 &apos;%1에 스칼라필드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="736"/>
+        <location filename="../ccEntityAction.cpp" line="737"/>
         <source>[EnhanceRGBWithIntensities] Failed to apply the process on entity &apos;%1&apos;!</source>
         <translation>EnhanceRGBWithIntensities] 엔티티 &apos;%1&apos;에 프로세싱 적용 실패!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="938"/>
-        <location filename="../ccEntityAction.cpp" line="1150"/>
+        <location filename="../ccEntityAction.cpp" line="936"/>
+        <location filename="../ccEntityAction.cpp" line="1148"/>
         <source>Failed to create scalar field for cloud &apos;%1&apos; (not enough memory?)</source>
         <translation>클라우드 &apos;%1&apos;에 스칼라필드 생성 실패 (메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1174"/>
+        <location filename="../ccEntityAction.cpp" line="1172"/>
         <source>Failed to apply filter on cloud %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1190"/>
+        <location filename="../ccEntityAction.cpp" line="1188"/>
         <source>Entity [%1] has no active scalar field!</source>
         <translation>엔티티 [%1]에 활성 스칼라필드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1353"/>
+        <location filename="../ccEntityAction.cpp" line="1348"/>
         <source>Cloud %1 has no displayed scalar field!</source>
         <translation>클라우드 %1은(는) 스칼라필드를 표시하지 않습니다!</translation>
     </message>
@@ -16386,125 +16694,125 @@ Cells: %2 x %3</source>
         <translation>신규 스칼라픽드 &apos;%1&apos;이 %2 (값 = %3)에 추가완료</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1966"/>
+        <location filename="../ccEntityAction.cpp" line="1963"/>
         <source>Cloud &apos;%1&apos; has no normals</source>
         <translation>클라우드 &apos;%1&apos;에 노말이 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2071"/>
+        <location filename="../ccEntityAction.cpp" line="2068"/>
         <source>[SfFromColor] Not enough memory to instantiate SF &apos;%1&apos; on cloud &apos;%2&apos;</source>
         <translation>[SfFromColor] 클라우드 &apos;%2&apos;에서 SF &apos;%1&apos;을(를) 인스턴스화하기에는 메모리가 부족합니다.</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2130"/>
+        <location filename="../ccEntityAction.cpp" line="2126"/>
         <source>[SfFromColor] Failed to add scalar field &apos;%1&apos; to cloud &apos;%2&apos;?!</source>
         <translation>[SfFromColor] 스칼라필드 &apos;%1을(를) 클라우드 &apos;%2&apos;에 추가살패?!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2137"/>
+        <location filename="../ccEntityAction.cpp" line="2132"/>
         <source>[SfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
         <translation>SfFromColor] 새로운 스칼라필드 (%1)이(가) &apos;%2&apos;에 추가 완료</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2172"/>
+        <location filename="../ccEntityAction.cpp" line="2167"/>
         <source>Mesh [%1] vertices have no activated scalar field!</source>
         <translation>메쉬 [%1] 버텍스에 활성화된 스칼라필드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2501"/>
+        <location filename="../ccEntityAction.cpp" line="2465"/>
         <source>Failed to compute normals on mesh &apos;%1&apos;</source>
         <translation>메쉬 &apos;%1&apos;에서 노말계산실패</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2596"/>
-        <location filename="../ccEntityAction.cpp" line="2669"/>
+        <location filename="../ccEntityAction.cpp" line="2560"/>
+        <location filename="../ccEntityAction.cpp" line="2633"/>
         <source>Cloud &apos;%1&apos; has no normals!</source>
         <translation>클라우드 &apos;%1&apos;에 노말이 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2680"/>
+        <location filename="../ccEntityAction.cpp" line="2644"/>
         <source>Process failed on cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;에 프로세싱 실패</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2964"/>
+        <location filename="../ccEntityAction.cpp" line="2927"/>
         <source>Octree computation on cloud &apos;%1&apos; failed!</source>
         <translation>클라우드 &apos;%1&apos;의 옥트리 계산 실패!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3329"/>
+        <location filename="../ccEntityAction.cpp" line="3292"/>
         <source>Scalar field &apos;%1&apos; of cloud %2 has no valid values</source>
         <translation>클라우드 %2의 스칼라필드 &apos;%1&apos;에 올바른 값이 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6056"/>
-        <location filename="../ccEntityAction.cpp" line="3344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6040"/>
+        <location filename="../ccEntityAction.cpp" line="3307"/>
         <source>mean = %1 / std.dev. = %2</source>
         <translation>중간값 = %1 / 표준편차 = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6065"/>
-        <location filename="../ccEntityAction.cpp" line="3355"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6049"/>
+        <location filename="../ccEntityAction.cpp" line="3318"/>
         <source>[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2</source>
         <translation>[분포맞춤] 추가적인 Weibull 분포. 파라미터모드 = %1 / 왜도 = %2</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3366"/>
+        <location filename="../ccEntityAction.cpp" line="3329"/>
         <source>[Distribution fitting] %1</source>
         <translation>[분배맞춤] %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3389"/>
+        <location filename="../ccEntityAction.cpp" line="3352"/>
         <source>[Distribution fitting] %1: Chi2 Distance = %2</source>
         <translation>[분배맞춤] %1: 카이2 거리 = %2</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3264"/>
+        <location filename="../ccEntityAction.cpp" line="3227"/>
         <source>[Chi2 Test] Test failed (error code %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3415"/>
+        <location filename="../ccEntityAction.cpp" line="3378"/>
         <source>Number of valid values = %1 / %2 (%3%)</source>
         <translation>올바른값 넘버 = %1 / %2 (%3%)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3416"/>
+        <location filename="../ccEntityAction.cpp" line="3379"/>
         <source>Sum of all valid values = %1</source>
         <translation>모든 올바른값 합계 = %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3417"/>
+        <location filename="../ccEntityAction.cpp" line="3380"/>
         <source>Sum of all valid squared values = %1</source>
         <translation>모든 올바른 제곱값의 합 = %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3418"/>
+        <location filename="../ccEntityAction.cpp" line="3381"/>
         <source>Average value = %1</source>
         <translation>평균값 = %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3419"/>
+        <location filename="../ccEntityAction.cpp" line="3382"/>
         <source>RMS (Root Mean Square) = %1</source>
         <translation>RMS (Root Mean Square) = %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3439"/>
+        <location filename="../ccEntityAction.cpp" line="3402"/>
         <source>[Entity: %1]-[SF: %2] Couldn&apos;t compute distribution parameters!</source>
         <translation>[엔터티: %1]-[SF: %2] 분배 파라미터를 계산할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="678"/>
+        <location filename="../ccLibAlgorithms.cpp" line="718"/>
         <source>Computing entities scales</source>
         <translation>엔티티 스케일 계산중</translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="679"/>
+        <location filename="../ccLibAlgorithms.cpp" line="719"/>
         <source>Entities: %1</source>
         <translation>엔티티: %1</translation>
     </message>
     <message>
-        <location filename="../ccLibAlgorithms.cpp" line="827"/>
+        <location filename="../ccLibAlgorithms.cpp" line="867"/>
         <source>Rescaling entities</source>
         <translation>엔티티 리스케일</translation>
     </message>
@@ -16524,157 +16832,159 @@ Cells: %2 x %3</source>
         <translation>셀: %1 x %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5755"/>
+        <location filename="../mainwindow.cpp" line="6003"/>
         <source>Select at least one point cloud with normals</source>
         <translation>노말을 포함한 포인트클라우드 1개이상 선택</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8701"/>
+        <location filename="../mainwindow.cpp" line="8980"/>
         <source>Circle r=%1</source>
         <translation>원 r=%1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="41"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="42"/>
         <source>Importing Bundler file: &apos;%1&apos;</source>
         <translation>번들러파일: &apos;%1&apos; 입력중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="87"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="88"/>
         <source>Missing parameter: vertices count after &quot;-%1&quot;</source>
         <translation>알수 없는 파라미터: &quot;-%1&quot; 이후 버텍스 갯수</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="91"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="92"/>
         <source>Invalid parameter: vertices count after &quot;-%1&quot;</source>
         <translation>잘못된 파라미터: &quot;-%1&quot;이후 버텍스 갯수</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="230"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="234"/>
         <source>Open Bundler file</source>
         <translation>번들러파일 열기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="231"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="235"/>
         <source>Cameras: %1
 Points: %2</source>
         <translation>카메라: %1
 점: %2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="630"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="631"/>
         <source>Open &amp; process images</source>
         <translation>이미지 열기후 프로세싱</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="631"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2910"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="632"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2906"/>
         <source>Images: %1</source>
         <translation>이미지: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="650"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="651"/>
         <source>Preparing colored DTM</source>
         <translation>컬러 DTM 준비중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="95"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="93"/>
         <source>Save PN file</source>
         <translation>PN 파일 저장</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="96"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="168"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="99"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="165"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="94"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="166"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="100"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="166"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="311"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1175"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1246"/>
-        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="782"/>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6536"/>
+        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="776"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6299"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6526"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6600"/>
         <source>Points: %L1</source>
         <translation>점: %L1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="167"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="165"/>
         <source>Open PN file</source>
         <translation>PN 파일 열기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="98"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="99"/>
         <source>Save PV file</source>
         <translation>PV 파일 저장</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="164"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="165"/>
         <source>Open PV file</source>
         <translation>PV 파일 열기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="91"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="92"/>
         <source>Open SOI file</source>
         <translation>SOI 파일 열기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="92"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="93"/>
         <source>%1 scans / %2 points</source>
         <translation>%1 스캔 / %2 점</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="155"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="157"/>
         <source>Save MA file</source>
         <translation>MA 파일 저장</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="156"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="158"/>
         <source>Triangles = %1</source>
         <translation>TIN = %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="129"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="121"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="213"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="132"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="122"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="214"/>
         <source>Saving mesh [%1]</source>
         <translation>메쉬 저장중 [%1]</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="136"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="139"/>
         <source>Writing %1 vertices</source>
         <translation>%1 버텍스 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="181"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="184"/>
         <source>Writing %1 triangle normals</source>
         <translation>TIN 노말 %1 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="216"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="219"/>
         <source>Writing %1 vertex normals</source>
         <translation>%1 버텍스 노말 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="249"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="252"/>
         <source>Writing %1 materials</source>
         <translation>%1 자재 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="293"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="296"/>
         <source>Writing %1 texture coordinates</source>
         <translation>%1 텍스쳐 좌표 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="341"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="344"/>
         <source>Writing %1 triangles</source>
         <translation>%1 TIN 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="602"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="605"/>
         <source>OBJ file</source>
         <translation>OBJ 파일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="603"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="438"/>
-        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1779"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="606"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="439"/>
+        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1792"/>
         <source>Loading in progress...</source>
         <translation>로딩 진행중...</translation>
     </message>
@@ -16684,29 +16994,29 @@ Points: %2</source>
         <translation>PTX 파일 로딩</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="204"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="514"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="205"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="512"/>
         <source>Simple BIN file</source>
         <translation>심플 BIM 파일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="205"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="206"/>
         <source>Saving %1 points / %2 scalar field(s)</source>
         <translation>%1 점 / %2 스칼라필드 저장중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="515"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="513"/>
         <source>Loading %1 points / %2 scalar field(s)</source>
         <translation>%1 점 / %2 스칼라필드 로딩중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="122"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="214"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="123"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="215"/>
         <source>Number of facets: %1</source>
         <translation>측면갯수: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="437"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="438"/>
         <source>(ASCII) STL file</source>
         <translation>(ASCII) STL 파일</translation>
     </message>
@@ -16721,31 +17031,31 @@ Points: %2</source>
         <translation>%1 면 로딩중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="660"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1109"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="662"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1111"/>
         <source>Write E57 file</source>
         <translation>E57 파일 쓰기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="661"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2181"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="663"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2176"/>
         <source>Scan #%1 - %2 points</source>
         <translation>스캔 #%1 - %2 점</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1110"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1112"/>
         <source>Cloud #%1 - Images: %2</source>
         <translation>클라우드 #%1 - 이미지: %2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2180"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2816"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2909"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2175"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2812"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2905"/>
         <source>Read E57 file</source>
         <translation>E57 파일 읽기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2817"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2813"/>
         <source>Scans: %1</source>
         <translation>스캔: %1</translation>
     </message>
@@ -16824,103 +17134,103 @@ Points: %2</source>
         <translation>기다리십시오... 쓰는중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="84"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="82"/>
         <source>Internal error: unknown scalar field &apos;%1&apos;</source>
         <translation>인터널 에러:알수없는 스칼라필드 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="124"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="122"/>
         <source>Invalid input</source>
         <translation>잘못된 입력</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="130"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="128"/>
         <source>Invalid classifier</source>
         <translation>잘못된 분류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="136"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="337"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="530"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="134"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="334"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="527"/>
         <source>Training method called without any feature (source)?!</source>
         <translation>아무런 기능없이 호출되는 훈련 방법 (출처)?!</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="180"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="177"/>
         <source>[3DMASC] Classifying %1 points with %2 feature(s)</source>
         <translation>[3DMASC] %2개의 피쳐로 %1 점 분류 중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="194"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="415"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="600"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="191"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="412"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="597"/>
         <source>Internal error: invalid source &apos;%1&apos;</source>
         <translation>인터널에러: 잘못된 소스 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="323"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="535"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="320"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="532"/>
         <source>Invalid input cloud</source>
         <translation>잘못된 입력 클라우드</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="331"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="328"/>
         <source>Classifier hasn&apos;t been trained yet</source>
         <translation>분류자는 아직 훈련되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="342"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="339"/>
         <source>Invalid test subset (associated point cloud is different)</source>
         <translation>잘못된 검정 하위세트 (연관된 포인트클라우드가 다릅니다)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="351"/>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="550"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="348"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="547"/>
         <source>Missing/invalid &apos;Classification&apos; field on input cloud</source>
         <translation>입력 클라우드에 &apos;분류&apos; 필드가 없거나 잘못되었습니다</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="383"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="380"/>
         <source>[3DMASC] Testing data: %1 samples with %2 feature(s)</source>
         <translation>[3DMASC] 검정데이터: %2 피쳐가 있는 %1 샘플</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="541"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="538"/>
         <source>Invalid train subset (associated point cloud is different)</source>
         <translation>잘못된 트래이닝 하위세트 (관련 포인트클라우드가 다릅니다)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="672"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="669"/>
         <source>Unknown error</source>
         <translation>알수없는 에러</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="711"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="708"/>
         <source>Training failed for an unknown reason...</source>
         <translation>알수없는 이유로 트레이닝 실패...</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="723"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="720"/>
         <source>Classifier hasn&apos;t been trained, can&apos;t save it</source>
         <translation>분류가 트레이닝되지 않아 저장할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="730"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="727"/>
         <source>Saving classifier</source>
         <translation>분류기 저장중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="752"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="749"/>
         <source>Loading classifier</source>
         <translation>분류기 로딩중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="776"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="773"/>
         <source>Loaded classifier is invalid</source>
         <translation>로드된 분류기가 잘못되었습니다</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="781"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="778"/>
         <source>Loaded classifier doesn&apos;t seem to be trained</source>
         <translation>로드된 분류기가 트레이닝되지 않은것 같습니다</translation>
     </message>
@@ -16937,14 +17247,14 @@ Source points: %2</source>
         <translation>분류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="919"/>
+        <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="920"/>
         <source>Core points: %1
 Source points: %2</source>
         <translation>코어점: %1
 소스점: %2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="920"/>
+        <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="921"/>
         <source>Labelling</source>
         <translation>라벨링</translation>
     </message>
@@ -17002,12 +17312,12 @@ Source points: %2</source>
         <translation>하위 패밀리 분류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="514"/>
+        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="512"/>
         <source>Facets creation</source>
         <translation>측면생성</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="515"/>
+        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="513"/>
         <source>Components: %1</source>
         <translation>구성요소: %1</translation>
     </message>
@@ -17027,12 +17337,12 @@ Source points: %2</source>
         <translation>_M3C2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="851"/>
+        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="847"/>
         <source>M3C2 Distances Computation</source>
         <translation>M3C2 거리계산</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="852"/>
+        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="848"/>
         <source>Core points: %1</source>
         <translation>코어점: %1</translation>
     </message>
@@ -17072,12 +17382,12 @@ Source points: %2</source>
         <translation>프로세싱 실패</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="59"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="67"/>
         <source>RANSAC</source>
         <translation>RANSAC</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="65"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="73"/>
         <source>No point cloud to attempt RANSAC on (be sure to open one with &quot;-O [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>RANSAC 켜짐을 시도할 포인트클라우드가 없습니다 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
     </message>
@@ -17093,8 +17403,8 @@ Source points: %2</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/include/qFacetsCommands.h" line="131"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="102"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="491"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="112"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="620"/>
         <source>	%1 : %2</source>
         <translation>	%1 : %2</translation>
     </message>
@@ -17122,13 +17432,21 @@ Source points: %2</source>
         <location filename="../../plugins/core/Standard/qFacets/include/qFacetsCommands.h" line="254"/>
         <location filename="../../plugins/core/Standard/qFacets/include/qFacetsCommands.h" line="313"/>
         <location filename="../../plugins/core/Standard/qFacets/include/qFacetsCommands.h" line="329"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="107"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="122"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="137"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="152"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="167"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="182"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="197"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="117"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="132"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="147"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="162"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="177"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="192"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="207"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="222"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="237"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="252"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="267"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="282"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="297"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="312"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="327"/>
         <source>Missing parameter: number after &quot;-%1 %2&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1 %2&quot; 이후 넘버</translation>
     </message>
@@ -17441,68 +17759,108 @@ Source points: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="115"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="130"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="125"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="140"/>
         <source>	Epsilon : %1</source>
         <translation>	Epsilon : %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="145"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="160"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="155"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="170"/>
         <source>	Bitmap Epsilon : %1</source>
         <translation>	Bitmap Epsilon : %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="175"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="185"/>
         <source>	support points: %1</source>
         <translation>	지원점: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="190"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="200"/>
         <source>	Max Normal Deviation : %1</source>
         <translation>	최대 노말편차 : %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="205"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="215"/>
         <source>	Probability : %1</source>
         <translation>	확률 : %1</translation>
     </message>
     <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="230"/>
+        <source>	Min Sphere Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="245"/>
+        <source>	Max Sphere Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="260"/>
+        <source>	Min Cylinder Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="275"/>
+        <source>	Max Cylinder Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="290"/>
+        <source>	Min Torus Minor Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="305"/>
+        <source>	Max Torus Minor Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="320"/>
+        <source>	Min Torus Major Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="335"/>
+        <source>	Max Torus Major Radius : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="390"/>
         <source>Missing parameter: primitive type after &quot;-%1 %2&quot;</source>
         <translation>알수없는 파라미터: &quot;-%1 %2&quot; 이후 기본요소종류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="306"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="436"/>
         <source>No valid parameter: primitive type after &quot;-%1 %2&quot;</source>
         <translation>잘못된 파라미터: &quot;-%1 %2&quot; 이후 기본요소종류</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="327"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="457"/>
         <source>	Default Shape Search == %1</source>
         <translation>	기본 Shape 검색 == %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="332"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="462"/>
         <source>	Default output == %1</source>
         <translation>	기본출력 == %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="478"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="607"/>
         <source>
 Missing parameter: Directory after &quot;-%1 %2&quot;</source>
         <translation>
 알수없는 파라미터: &quot;-%1 %2&quot; 이후 디렉토리</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="485"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="614"/>
         <source>
 %1 Does not exist	creating path</source>
         <translation>
 %1이(가) 없습니다	경로생성</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="496"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="625"/>
         <source>
 %1 path could not be created, skipping %2</source>
         <translation>
@@ -17521,22 +17879,22 @@ Cloud: %2 points</source>
 클라우드: %2 점</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/cc2DLabel.cpp" line="40"/>
+        <location filename="../../libs/qCC_db/src/cc2DLabel.cpp" line="39"/>
         <source>Center</source>
         <translation>중심</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="781"/>
+        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="775"/>
         <source>Depth buffer</source>
         <translation>깊이버퍼</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="618"/>
+        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="545"/>
         <source>Laplacian smooth</source>
         <translation>라플라시안 스무스</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="619"/>
+        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="546"/>
         <source>Iterations: %1
 Vertices: %2
 Faces: %3</source>
@@ -17545,12 +17903,12 @@ Faces: %3</source>
 면: %3</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="210"/>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="209"/>
         <source>Orient normals (MST)</source>
         <translation>오리엔트 노말 (MST)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="212"/>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="211"/>
         <source>Compute Minimum spanning tree
 Points: %1
 Edges: %2</source>
@@ -17559,338 +17917,338 @@ Edges: %2</source>
 엣지: %2</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="214"/>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="213"/>
         <source>Compute Minimum spanning tree
 Points: %1</source>
         <translation>최소 이동트리 계산
 점: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6293"/>
-        <source>Normals computation</source>
-        <translation>노말 계산</translation>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6298"/>
+        <source>Normals computation (Grid)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6321"/>
-        <source>Grid: %1 x %2</source>
-        <translation>그리드: %1 x %2</translation>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6525"/>
+        <source>Orienting normals (Grids)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6535"/>
-        <source>Orienting normals</source>
-        <translation>오리엔트 노말</translation>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6599"/>
+        <source>Orienting normals (Viewpoint)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6933"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6946"/>
         <source>FWF amplitude</source>
         <translation>FWF 진폭</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6934"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6947"/>
         <source>Determining min and max FWF values
 Points: </source>
         <translation>최소/최대 FWF 값 설정
 점:</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7396"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7402"/>
         <source>Couldn&apos;t create temporary scalar field! Not enough memory?</source>
         <translation>임시 스칼라필드를 생성할 수 없습니다~ 메모리 부족?</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7410"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7416"/>
         <source>An error occurred! (Not enough memory?)</source>
         <translation>에러가 발생하였습니다 (메모리 부족?)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7435"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7441"/>
         <source>Cloud &apos;%1&apos; has no duplicate points</source>
         <translation>클라우드 &apos;%1&apos;에 중복점이 없습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7440"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7446"/>
         <source>Cloud &apos;%1&apos; has %2 duplicate point(s)</source>
         <translation>클라우드 &apos;%1&apos;에 %2 중복점이 있습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7448"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="7454"/>
         <source>Not enough memory to create the filtered cloud</source>
         <translation>메모리가 부족하여 필터링된 클라우드를 생성할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="755"/>
+        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="746"/>
         <source>sampled</source>
         <translation>샘플</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="402"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="407"/>
         <source>Grid generation</source>
         <translation>그리드생성</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="294"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="299"/>
         <source>Points: %L1
 Cells: %L2 x %L3</source>
         <translation>점: %L1
 셀: %L2 x %L3</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="293"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="298"/>
         <source>Points projection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1109"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1114"/>
         <source>Kriging: not enough memory</source>
         <translation>Kriging: 메모리가 부족합니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1115"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1120"/>
         <source>Kriging</source>
         <translation>Kriging</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1116"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1121"/>
         <source>Non-empty cells: %1
 Grid: %2 x %3</source>
         <translation>비어있지 않은 셀: %1
 그리드: %2 x %3</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1157"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1162"/>
         <source>Failed to initialize the Kriging algorithm</source>
         <translation>Kriging 알고리즘 초기화 실패</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1652"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1655"/>
         <source>Cloud export</source>
         <translation>클라우드 출력</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1653"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1656"/>
         <source>Exporting %1 fields</source>
         <translation>%1 필드 출력중</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1936"/>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="1939"/>
         <source>Projecting %1 scalar fields</source>
         <translation>%1 스칼라필드 투영중</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="134"/>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="325"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="137"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="327"/>
         <source>Saving cloud [%1]</source>
         <translation>클라우드 [%1] 저장중</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="326"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="328"/>
         <source>Number of points: %1</source>
         <translation>점갯수: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="964"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="967"/>
         <source>Open ASCII data [%1]</source>
         <translation>ASCII 데이터 [%1] 열기</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="965"/>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="1074"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="968"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="1079"/>
         <source>Approximate number of points: %1</source>
         <translation>예상 점갯수: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="162"/>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="460"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="163"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1171"/>
         <source>BIN file</source>
         <translation>BIN 파일</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="163"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="164"/>
         <source>Please wait... saving in progress</source>
         <translation>기다리십시오... 읽는중</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="408"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="483"/>
         <source>Reading error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="461"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1172"/>
         <source>Loading: %1</source>
         <translation>로딩: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1084"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1371"/>
         <source>Open Bin file (old style)</source>
         <translation>Bin 파일 열기 (이전 스타일)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1110"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1397"/>
         <source>cloud %1/%2 (%3 points)</source>
         <translation>클라우드 %1/%2 (%3 점)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="283"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="275"/>
         <source>All (*.*)</source>
         <translation>전체 (*.*)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="512"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="504"/>
         <source>bad argument (internal)</source>
         <translation>잘못된 아규먼트 (인터널)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="515"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="507"/>
         <source>unknown file</source>
         <translation>알수없는 파일</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="518"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="510"/>
         <source>wrong file type (check header)</source>
         <translation>잘못된 파일 종류 (헤더체크)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="521"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="513"/>
         <source>writing error (disk full/no access right?)</source>
         <translation>에러 쓰는중 (디스크 가득참/ 접속권한 없음?)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="524"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="516"/>
         <source>reading error (no access right?)</source>
         <translation>에러 읽는중 (접속권한 없음?)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="527"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="519"/>
         <source>nothing to save</source>
         <translation>저장할 파일 없음</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="530"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="522"/>
         <source>nothing to load</source>
         <translation>로드할 파일 없음</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="533"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="525"/>
         <source>incompatible entity/file types</source>
         <translation>비호환 엔티티/파일 종류</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="536"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="528"/>
         <source>process canceled by user</source>
         <translation>사용자 프로세싱 취소</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="540"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="532"/>
         <source>not enough memory</source>
         <translation>메모리 부족</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="543"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="535"/>
         <source>malformed file</source>
         <translation>malformed 파일</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="546"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="538"/>
         <source>see console</source>
         <translation>콘솔확인</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="549"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="541"/>
         <source>dependent entities missing (see Console)</source>
         <translation>종속 엔터티 누락(콘솔 참조)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="552"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="544"/>
         <source>the file was written by a plugin but none of the loaded plugins can deserialize it</source>
         <translation>파일이 플러그인으로 작성되었지만 로드된 플러그인이 역직렬화되지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="555"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="547"/>
         <source>the third-party library in charge of saving/loading the file has failed to perform the operation</source>
         <translation>파일 저장/로드를 담당하는 타사 라이브러리가 작업을 실행하지 못하였습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="558"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="550"/>
         <source>the third-party library in charge of saving/loading the file has thrown an exception</source>
         <translation>파일 저장/로드를 담당하는 타사 라이브러리에서 예외가 발생했습니다.</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="561"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="553"/>
         <source>this function is not implemented yet!</source>
         <translation>아직 구현되지 않았습니다!</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="564"/>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="556"/>
         <source>internal error</source>
         <translation>인터널 에러</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1780"/>
+        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1793"/>
         <source>PLY file</source>
         <translation>PLY 파일</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1295"/>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1289"/>
         <source>[SHP] Polyline %1 does not have enough vertices to be saved as polygon entity</source>
         <translation>[SHP] 폴리선 %1에 폴리곤 엔티티로 저장할 충분한 버텍스가 없습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1304"/>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1298"/>
         <source>[SHP] Polyline %1 does not have enough vertices to be saved as polyline entity</source>
         <translation>[SHP] 폴리선 %1에 폴리선 엔티티로 저장할 충분한 버텍스가 없습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1317"/>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1311"/>
         <source>[SHP] Polyline %1 has too many points to be saved</source>
         <translation>[SHP] 폴리선 %1에 저장되는 점이 너무 많습니다</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="2003"/>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1996"/>
         <source>Load SHP file</source>
         <translation>SHP 파일 로드</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="2004"/>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1997"/>
         <source>File size: %1</source>
         <translation>파일크기: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineParser.cpp" line="449"/>
+        <location filename="../ccCommandLineParser.cpp" line="450"/>
         <source>	No %1 loaded. Load some with the -O command</source>
         <translation>	%1이(가) 로드되지 않았습니다. -O 명령으로 일부 로드</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineParser.cpp" line="455"/>
+        <location filename="../ccCommandLineParser.cpp" line="456"/>
         <source>Regex string invalid: %1</source>
         <translation>잘못된 정규표현 스트링: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineParser.cpp" line="474"/>
+        <location filename="../ccCommandLineParser.cpp" line="475"/>
         <source>%1/%2</source>
         <translation>%1/%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineParser.cpp" line="534"/>
+        <location filename="../ccCommandLineParser.cpp" line="535"/>
         <source>	[*] UID: %2 name: %1</source>
         <translation>	[*] UID: %2 이름: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineParser.cpp" line="540"/>
+        <location filename="../ccCommandLineParser.cpp" line="541"/>
         <source>	[ ] UID: %2 name: %1</source>
         <translation>	[ ] UID: %2 이름: %1</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="119"/>
+        <location filename="../main.cpp" line="124"/>
         <source>Missing argument after %1: language file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="138"/>
+        <location filename="../main.cpp" line="143"/>
         <source>Missing argument after %1: verbosity level</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="149"/>
+        <location filename="../main.cpp" line="154"/>
         <source>Invalid verbosity level: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -17970,12 +18328,12 @@ Grid: %2 x %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qVoxFall/src/qVoxFallProcess.cpp" line="572"/>
+        <location filename="../../plugins/core/Standard/qVoxFall/src/qVoxFallProcess.cpp" line="568"/>
         <source>Compute Volumes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qVoxFall/src/qVoxFallProcess.cpp" line="665"/>
+        <location filename="../../plugins/core/Standard/qVoxFall/src/qVoxFallProcess.cpp" line="661"/>
         <source>Exporting blocks as meshes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -17985,18 +18343,40 @@ Grid: %2 x %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="1754"/>
+        <location filename="../ccRasterizeTool.cpp" line="1887"/>
         <source>X-ray</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="1755"/>
+        <location filename="../ccRasterizeTool.cpp" line="1888"/>
         <source>Grid size: %1 x %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccRegistrationTools.cpp" line="294"/>
+        <location filename="../ccRegistrationTools.cpp" line="302"/>
+        <source>Registration</source>
+        <translation type="unfinished">정합</translation>
+    </message>
+    <message>
+        <location filename="../ccRegistrationTools.cpp" line="303"/>
+        <source>Registration canceled.
+Keep the pose of the last measured step (RMS = %1)?
+Choose &apos;No&apos; to go back to the pose from before the registration.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccRegistrationTools.cpp" line="322"/>
         <source>[ICP] Registration done in %1 sec</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCutPursuitDlg.cpp" line="24"/>
+        <source>RGB</source>
+        <translation type="unfinished">RGB</translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/include/ccSerializableObject.h" line="185"/>
+        <source>File seems to be truncated: some %1 are missing (set to 0)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -18088,187 +18468,187 @@ Grid: %2 x %3</source>
 <context>
     <name>RansacSDDialog</name>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="14"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="20"/>
         <source>Ransac Shape Detection</source>
         <translation>Ransac Shape Detection</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="24"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="102"/>
         <source>Primitives</source>
         <translation>기본요소</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="30"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="108"/>
         <source>Plane</source>
         <translation>평면</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="40"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="118"/>
         <source>Sphere</source>
         <translation>구면</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="50"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="128"/>
         <source>Cylinder</source>
         <translation>실린더</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="60"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="138"/>
         <source>Cone</source>
         <translation>콘</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="70"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="148"/>
         <source>Torus</source>
         <translation>토러스</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="86"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="427"/>
         <source>Cone Advanced Parameters</source>
         <translation>콘 고급 파라미터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="100"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="241"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="310"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="328"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="389"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="439"/>
         <source>Max Radius</source>
         <translation>최대반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="130"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="465"/>
         <source>Max Length</source>
         <translation>최대거리</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="160"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="491"/>
         <source>Max Angle</source>
         <translation>최대각도</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="170"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="501"/>
         <source>°</source>
         <translation>°</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="203"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="296"/>
         <source>Sphere Advanced Parameters</source>
         <translation>구형 고급파라미터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="211"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="280"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="302"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="363"/>
         <source>Min Radius</source>
         <translation>최소반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="272"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="357"/>
         <source>Cylinder Advanced Parameters</source>
         <translation>실린더 고급파라미터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="341"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="64"/>
         <source>Save leftover points into new cloud</source>
         <translation>남은점을 새로운 클라우드로 저장</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="348"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="71"/>
         <source>Use Least Squares fitting on found shapes</source>
         <translation>감지된 모양에 최소제곱맞춤 사용</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="358"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="81"/>
         <source>Will attempt to convert Spheres, Cones, Cylinders and Torus into a simpler shape (for example Cones may be simplified into a Cylinder, Plane, or Sphere)</source>
         <translation>구형, 콘, 실린더, 토러스를 더 단순한 모양으로 변경하려합니다 (예시 콘은 단순한 실린더, 평면, 구로 단순화됨)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="361"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="84"/>
         <source>Attempt to simplify shapes</source>
         <translation>단순한 모양으로 시도</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="383"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="32"/>
         <source>Min support points per primitive</source>
         <translation>기본요소당 최소 지원점</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="390"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="393"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="396"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="39"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="42"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="45"/>
         <source>This is the minimal number of points required for a primitive</source>
         <translation>이 값은 기본요소에 필요한 최소 점개수입니다</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="430"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="161"/>
         <source>Parameters</source>
         <translation>파라미터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="438"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="167"/>
         <source>max distance to primitive</source>
         <translation>기본요소까지 최대거리</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="445"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="174"/>
         <source>Maximum distance of samples to the ideal shape</source>
         <translation>샘플에서 이상적인 모양까지 최대거리</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="471"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="196"/>
         <source>sampling resolution</source>
         <translation>샘플링 해상도</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="478"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="203"/>
         <source>Should correspond to the distance between neighboring points in the data</source>
         <translation>데이터에서 인접점 사이의 거리에 해당해야 합니다</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="504"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="225"/>
         <source>max normal deviation</source>
         <translation>최대 노말편차</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="511"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="232"/>
         <source>Maximum deviation from the ideal shape normal vector (in degrees)</source>
         <translation>이상적인 노말벡터 최대편차 (deg)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="537"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="254"/>
         <source>overlooking probability</source>
         <translation>확률 내려보기</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="544"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="261"/>
         <source>Probability that no better candidate was overlooked during sampling (the lower the better!)</source>
         <translation>표본 추출 중에 더 나은 후보가 없을 확률입니다 (낮을수록 좋습니다!).</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="568"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="533"/>
         <source>Torus Advanced Parameters</source>
         <translation>토러스 고급파라미터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="576"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="539"/>
         <source>Min Minor Radius</source>
         <translation>최소 단반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="606"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="565"/>
         <source>Max Minor Radius</source>
         <translation>최대 단반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="636"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="591"/>
         <source>Min Major Radius</source>
         <translation>최소 장반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="666"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="617"/>
         <source>Max Major Radius</source>
         <translation>최대 장반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="697"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="91"/>
         <source>Set Random color for each shape found</source>
         <translation>각 모양별 랜덤컬러설정</translation>
     </message>
@@ -19416,68 +19796,52 @@ the cloud from sinking under the mesh surface.</source>
 <context>
     <name>SSAODialog</name>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="14"/>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="20"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="14"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="20"/>
         <source>SSAO parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="38"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="38"/>
         <source>Radius</source>
         <translation type="unfinished">반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="45"/>
-        <source>%</source>
-        <translation type="unfinished">%</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="58"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="45"/>
         <source>Amplification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="81"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="68"/>
         <source>attenuation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="101"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="88"/>
         <source>random seed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="118"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="121"/>
         <source>Bilateral filter</source>
         <translation type="unfinished">양방향 필터</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="127"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="133"/>
         <source>radius</source>
         <translation type="unfinished">반경</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="141"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="140"/>
         <source>spatial sigma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="158"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="160"/>
         <source>depth sigma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/GL/qSSAO/ssaoDialog.ui" line="178"/>
         <location filename="../../plugins/core/GL/qSSAO/ui/ssaoDialog.ui" line="196"/>
         <source>Random reflections</source>
         <translation type="unfinished"></translation>
@@ -19579,10 +19943,9 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
-        <source>might not preserve data accuracy
+        <source>might not preserve data accuracy  
 (especially if you have transformed the original data)  </source>
-        <translation>데이터 정확도를 유지하지 못할 수 있습니다
-(특히 원본 데이터를 변환한 경우)  </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="148"/>
@@ -20179,10 +20542,9 @@ multiplier threshold (nSigma)</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
-        <source>Number of points to use for
+        <source>Number of points to use for 
 mean distance estimation</source>
-        <translation>평균예상거리
-를 사용할 점의 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="47"/>
@@ -20651,7 +21013,7 @@ mean distance estimation</source>
         <translation>스케일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/q3DMASC/qTrain3DMASCDialog.cpp" line="145"/>
+        <location filename="../../plugins/core/Standard/q3DMASC/qTrain3DMASCDialog.cpp" line="146"/>
         <source>Retry</source>
         <translation>재시도</translation>
     </message>
@@ -21386,24 +21748,1200 @@ You should fill the empty cells...</source>
     </message>
 </context>
 <context>
+    <name>cc3DFinDlg</name>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="32"/>
+        <source>3DFin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="48"/>
+        <source>Basic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="73"/>
+        <source>Height-normalized cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="89"/>
+        <source>Region where one should expect mostly stems.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="123"/>
+        <source>Tutorial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="148"/>
+        <source>Documentation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="173"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;3DFin implements our algorithm to detect the trees present in a terrestrial point cloud from a forest plot, and compute individual tree parameters: tree height,tree location, diameters along the stem (including DBH), and tree stem axis. The official paper is available &lt;a href=&quot;https://academic.oup.com/forestry/article/97/4/479/7680458&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;3DFin is designed to process ground-based data of any kind (TLS, MLS, photogrammetric point clouds...) that can be used in combination with aerial data (ALS, ULS, aerial photogrammetry), but not to be used with aerial data alone.&lt;/p&gt;&lt;p&gt;Be sure to check the official paper and the documentation, which features detailed explanations on how the program works, and the tutorial by Fabian Fassnacht, which is a great tool to get started using 3DFin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="223"/>
+        <source>Stripe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="261"/>
+        <source>Clean noise on dtm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="284"/>
+        <source>0-5</source>
+        <translation type="unfinished">0-5</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="307"/>
+        <source>XLSX</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="314"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="397"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="404"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="690"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="729"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="752"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="798"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="805"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="819"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="938"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="965"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1018"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1025"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1056"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1090"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1178"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1266"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1404"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1463"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1484"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1543"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1550"/>
+        <source>meters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="321"/>
+        <source>Normalize point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="328"/>
+        <source>Normalized height scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="335"/>
+        <source>TXT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="342"/>
+        <source>Cloth resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="374"/>
+        <source>Format of output tabular data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="411"/>
+        <source>Strippe Lower Limit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="418"/>
+        <source>Strippe Upper Limit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="425"/>
+        <source>Pruning Intensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="470"/>
+        <source>Original cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="483"/>
+        <source>3DFin is able to normalize heights automatically, but also allows using already height-normalized point clouds.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="497"/>
+        <source>Advanced</source>
+        <translation type="unfinished">고급</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="559"/>
+        <source>A) Sections along the stem B) Detail of computed sections showing the distance between them and their width C) Circle fitting to the points of a section</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="578"/>
+        <source>Several quality controls are implemented to validate the fitted circles, such as measuring the point distribution along the sections.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="622"/>
+        <source>Advanced Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="632"/>
+        <source>If the results obtained by just tweaking basic parameters do not meet your expectations, you might want to modify these.
+
+
+
+You can get a brief description of what they do by hovering the mouse over the info icon right before each parameter. However, keep in mind that a thorough understanding is advisable before changing these. For that, you can get a better grasp of what the algorithm does in the attached documentation. You can easily access it through the documentation button in the bottom-right corner.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="667"/>
+        <source>Stem search diameter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="791"/>
+        <source>Lowest section</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="812"/>
+        <source>Expected maximum diameter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="826"/>
+        <source>Section width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="833"/>
+        <source>Distance between sections</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="840"/>
+        <source>Highest section</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="851"/>
+        <source>Expert</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="857"/>
+        <source>Inner/outer circle proportion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="894"/>
+        <source>Points within inner circle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="901"/>
+        <source>Minimum expected diameter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="918"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1283"/>
+        <source>Vicinity radius (verticality computation)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="945"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1470"/>
+        <source>(z) voxel resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="958"/>
+        <source>helllpqsd^pqsofkqspofjqpo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="972"/>
+        <source>Vertical Range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="998"/>
+        <source>Drawing circles and axes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1042"/>
+        <source>Minimum points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1073"/>
+        <source>Points within section</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1097"/>
+        <source>[0,1]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1114"/>
+        <source>Maximum distance to tree axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1121"/>
+        <source>Interval at which points are drawn</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1134"/>
+        <source>Height normalization</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1144"/>
+        <source>Number of sectors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1161"/>
+        <source>(x,y) voxel resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1302"/>
+        <source>Stem extraction and tree individualization</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1332"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1435"/>
+        <source>(x, y) voxel resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1339"/>
+        <source>degrees</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1366"/>
+        <source>centimeters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1373"/>
+        <source># of points to draw each circle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1380"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1428"/>
+        <source>(0,1)</source>
+        <translation type="unfinished">(0,0,0) {0,1)?}</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1397"/>
+        <source>Maximum vertical deviation from axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1411"/>
+        <source>Number of points</source>
+        <translation type="unfinished">점갯수</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1442"/>
+        <source>Minimum number of points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1449"/>
+        <source>DTM smoothing strength</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1456"/>
+        <source>Circle width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1477"/>
+        <source>Voxel resolution for height computation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1498"/>
+        <source>Number of occupied sectors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1522"/>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1536"/>
+        <source>Verticality threshold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1529"/>
+        <source>Distance from axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1557"/>
+        <source>Maximum point distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1570"/>
+        <source>Computing sections</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1612"/>
+        <source>Stem identification within the stripe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1685"/>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1695"/>
+        <source>About</source>
+        <translation type="unfinished">정보</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="1704"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.AppleSystemUIFont&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;h1 align=&quot;center&quot; style=&quot; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:704;&quot;&gt;3DFin: Forest Inventory&lt;/span&gt;&lt;/h1&gt;
+&lt;h3 align=&quot;center&quot; style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:704;&quot;&gt;Copyright © 2023 Carlos Cabo &amp;amp; Diego Laino&lt;/span&gt;&lt;/h3&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;This program comes with ABSOLUTELY NO WARRANTY. This is a free software, and you are welcome to redistribute it under certain conditions. &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;See &lt;/span&gt;&lt;a href=&quot;#license&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; text-decoration: underline; color:#0000ff;&quot;&gt;LICENSE&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt; at the bottom of this tab for further details.&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;This software has been developed at the Centre of Wildfire Research of Swansea University (UK) in collaboration  with the Research Institute of Biodiversity (CSIC, Spain) and the Department of Mining Exploitation of the University of Oviedo (Spain). Funding provided by the UK NERC project (NE/T001194/1): &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-style:italic;&quot;&gt;&apos;Advancing 3D Fuel Mapping for Wildfire Behaviour and Risk Mitigation Modelling&apos; &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;and by the Spanish Knowledge Generation project (PID2021-126790NB-I00)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; align=&quot;center&quot; cellspacing=&quot;5&quot; cellpadding=&quot;5&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/csic_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/spain_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/nerc_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/cetemas_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/uniovi_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/swansea_logo_1.png&quot; /&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:20px; margin-right:20px;&quot; cellspacing=&quot;5&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/carlos_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Carlos Cabo (carloscabo@uniovi.es). Academic position (PCD) in Geomatics Engineering at the University of Oviedo (Department of Mining Exploitation and Prospection -Cartography, Geodetics and Photogrammetry-), and Honorary Appointment at Science and Engineering Faculty, Swansea University. Research fields: Spatial analysis cartography, geomatics.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/diego_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Diego Laino (diegolainor@gmail.com). Research technician at Biodiversity Research Institute (CSIC-University of Oviedo-Principality of Asturias). PhD student in Natural Resources Engineering at Department of Mining Exploitation, University of Oviedo. Research fields: deep learning, remote sensing, forestry.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/covadonga_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Covadonga Prendes (cprendes@cetemas.es). Forest engineer and researcher at CETEMAS (Forest and Wood Technology Research Centre Foundation). Geomatics research group. Research fields: LiDAR, sustainable forestry development, spatial analysis.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/cris_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Cristina Santin (c.santin@csic.es). Research fellow at Biodiversity Research Institute (CSIC-University of Oviedo-Principality of Asturias) and Honorary Assoc. Professor at the Biosciences Department of Swansea University. Research fields: environmental impacts of wildfires.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/stefan_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Stefan Doerr (s.doerr@swansea.ac.uk). Full Professor at the Geography Department, Swansea University and Director of its Centre for Wildfire Research. Editor-in-Chief: International Journal of Wildland Fire. Research fields: wildfires, landscape carbon dynamics, soils, water quality, ecosystem services.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/celestino_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Celestino Ordonez (ordonezcelestino@uniovi.es). Full professor at Department of Mining Exploitation -Cartography, Geodetics and Photogrammetry-, University of Oviedo. Main researcher at GEOGRAPH research group. Research fields: Spatial analysis, laser scanning, photogrammetry.&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/3dfin/assets/tadas_pic_1.jpg&quot; /&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;Tadas Nikonovas (tadas.nikonovas@swansea.ac.uk). Office Researcher at Centre for Wildfire Research, Geography Department, Swansea University. Research fields: Global fire activity, atmospheric emissions, fire occurrence modelling. &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;h1 align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:704;&quot;&gt;&lt;br /&gt;&lt;/h1&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Segoe UI&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;license&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:704;&quot;&gt;L&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:704;&quot;&gt;icense&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;                    GNU GENERAL PUBLIC LICENSE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;                       Version 3, 29 June 2007&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt; Copyright (C) 2007 Free Software Foundation, Inc. &amp;lt;https://fsf.org/&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt; Everyone is permitted to copy and distribute verbatim copies&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt; of this license document, but changing it is not allowed.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;                            Preamble&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The GNU General Public License is a free, copyleft license for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;software and other kinds of works.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The licenses for most software and other practical works are designed&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to take away your freedom to share and change the works.  By contrast,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the GNU General Public License is intended to guarantee your freedom to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;share and change all versions of a program--to make sure it remains free&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;software for all its users.  We, the Free Software Foundation, use the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;GNU General Public License for most of our software; it applies also to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;any other work released this way by its authors.  You can apply it to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;your programs, too.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  When we speak of free software, we are referring to freedom, not&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;price.  Our General Public Licenses are designed to make sure that you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;have the freedom to distribute copies of free software (and charge for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;them if you wish), that you receive source code or can get it if you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;want it, that you can change the software or use pieces of it in new&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;free programs, and that you know you can do these things.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  To protect your rights, we need to prevent others from denying you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;these rights or asking you to surrender the rights.  Therefore, you have&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;certain responsibilities if you distribute copies of the software, or if&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;you modify it: responsibilities to respect the freedom of others.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  For example, if you distribute copies of such a program, whether&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;gratis or for a fee, you must pass on to the recipients the same&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;freedoms that you received.  You must make sure that they, too, receive&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;or can get the source code.  And you must show them these terms so they&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;know their rights.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Developers that use the GNU GPL protect your rights with two steps:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;(1) assert copyright on the software, and (2) offer you this License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;giving you legal permission to copy, distribute and/or modify it.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  For the developers&apos; and authors&apos; protection, the GPL clearly explains&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;that there is no warranty for this free software.  For both users&apos; and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;authors&apos; sake, the GPL requires that modified versions be marked as&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;changed, so that their problems will not be attributed erroneously to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;authors of previous versions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Some devices are designed to deny users access to install or run&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modified versions of the software inside them, although the manufacturer&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;can do so.  This is fundamentally incompatible with the aim of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;protecting users&apos; freedom to change the software.  The systematic&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;pattern of such abuse occurs in the area of products for individuals to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;use, which is precisely where it is most unacceptable.  Therefore, we&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;have designed this version of the GPL to prohibit the practice for those&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;products.  If such problems arise substantially in other domains, we&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;stand ready to extend this provision to those domains in future versions&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;of the GPL, as needed to protect the freedom of users.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Finally, every program is threatened constantly by software patents.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;States should not allow patents to restrict development and use of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;software on general-purpose computers, but in those that do, we wish to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;avoid the special danger that patents applied to a free program could&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;make it effectively proprietary.  To prevent this, the GPL assures that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patents cannot be used to render the program non-free.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The precise terms and conditions for copying, distribution and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modification follow.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;                       TERMS AND CONDITIONS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  0. Definitions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  &amp;quot;This License&amp;quot; refers to version 3 of the GNU General Public License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  &amp;quot;Copyright&amp;quot; also means copyright-like laws that apply to other kinds of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;works, such as semiconductor masks.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  &amp;quot;The Program&amp;quot; refers to any copyrightable work licensed under this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License.  Each licensee is addressed as &amp;quot;you&amp;quot;.  &amp;quot;Licensees&amp;quot; and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&amp;quot;recipients&amp;quot; may be individuals or organizations.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  To &amp;quot;modify&amp;quot; a work means to copy from or adapt all or part of the work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in a fashion requiring copyright permission, other than the making of an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;exact copy.  The resulting work is called a &amp;quot;modified version&amp;quot; of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;earlier work or a work &amp;quot;based on&amp;quot; the earlier work.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A &amp;quot;covered work&amp;quot; means either the unmodified Program or a work based&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;on the Program.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  To &amp;quot;propagate&amp;quot; a work means to do anything with it that, without&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;permission, would make you directly or secondarily liable for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;infringement under applicable copyright law, except executing it on a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;computer or modifying a private copy.  Propagation includes copying,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;distribution (with or without modification), making available to the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;public, and in some countries other activities as well.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  To &amp;quot;convey&amp;quot; a work means any kind of propagation that enables other&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;parties to make or receive copies.  Mere interaction with a user through&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;a computer network, with no transfer of a copy, is not conveying.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  An interactive user interface displays &amp;quot;Appropriate Legal Notices&amp;quot;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to the extent that it includes a convenient and prominently visible&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;feature that (1) displays an appropriate copyright notice, and (2)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;tells the user that there is no warranty for the work (except to the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;extent that warranties are provided), that licensees may convey the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work under this License, and how to view a copy of this License.  If&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the interface presents a list of user commands or options, such as a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;menu, a prominent item in the list meets this criterion.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  1. Source Code.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The &amp;quot;source code&amp;quot; for a work means the preferred form of the work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for making modifications to it.  &amp;quot;Object code&amp;quot; means any non-source&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;form of a work.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A &amp;quot;Standard Interface&amp;quot; means an interface that either is an official&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;standard defined by a recognized standards body, or, in the case of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;interfaces specified for a particular programming language, one that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;is widely used among developers working in that language.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The &amp;quot;System Libraries&amp;quot; of an executable work include anything, other&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;than the work as a whole, that (a) is included in the normal form of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;packaging a Major Component, but which is not part of that Major&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Component, and (b) serves only to enable use of the work with that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Major Component, or to implement a Standard Interface for which an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;implementation is available to the public in source code form.  A&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&amp;quot;Major Component&amp;quot;, in this context, means a major essential component&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;(kernel, window system, and so on) of the specific operating system&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;(if any) on which the executable work runs, or a compiler used to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;produce the work, or an object code interpreter used to run it.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The &amp;quot;Corresponding Source&amp;quot; for a work in object code form means all&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the source code needed to generate, install, and (for an executable&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work) run the object code and to modify the work, including scripts to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;control those activities.  However, it does not include the work&apos;s&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;System Libraries, or general-purpose tools or generally available free&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;programs which are used unmodified in performing those activities but&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;which are not part of the work.  For example, Corresponding Source&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;includes interface definition files associated with source files for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the work, and the source code for shared libraries and dynamically&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;linked subprograms that the work is specifically designed to require,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;such as by intimate data communication or control flow between those&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;subprograms and other parts of the work.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The Corresponding Source need not include anything that users&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;can regenerate automatically from other parts of the Corresponding&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Source.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The Corresponding Source for a work in source code form is that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;same work.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  2. Basic Permissions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  All rights granted under this License are granted for the term of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;copyright on the Program, and are irrevocable provided the stated&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;conditions are met.  This License explicitly affirms your unlimited&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;permission to run the unmodified Program.  The output from running a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;covered work is covered by this License only if the output, given its&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;content, constitutes a covered work.  This License acknowledges your&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;rights of fair use or other equivalent, as provided by copyright law.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may make, run and propagate covered works that you do not&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;convey, without conditions so long as your license otherwise remains&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in force.  You may convey covered works to others for the sole purpose&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;of having them make modifications exclusively for you, or provide you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;with facilities for running those works, provided that you comply with&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the terms of this License in conveying all material for which you do&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;not control copyright.  Those thus making or running the covered works&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for you must do so exclusively on your behalf, under your direction&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;and control, on terms that prohibit them from making any copies of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;your copyrighted material outside their relationship with you.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Conveying under any other circumstances is permitted solely under&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the conditions stated below.  Sublicensing is not allowed; section 10&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;makes it unnecessary.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  3. Protecting Users&apos; Legal Rights From Anti-Circumvention Law.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  No covered work shall be deemed part of an effective technological&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;measure under any applicable law fulfilling obligations under article&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;11 of the WIPO copyright treaty adopted on 20 December 1996, or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;similar laws prohibiting or restricting circumvention of such&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;measures.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  When you convey a covered work, you waive any legal power to forbid&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;circumvention of technological measures to the extent such circumvention&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;is effected by exercising rights under this License with respect to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the covered work, and you disclaim any intention to limit operation or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modification of the work as a means of enforcing, against the work&apos;s&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;users, your or third parties&apos; legal rights to forbid circumvention of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;technological measures.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  4. Conveying Verbatim Copies.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may convey verbatim copies of the Program&apos;s source code as you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;receive it, in any medium, provided that you conspicuously and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;appropriately publish on each copy an appropriate copyright notice;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;keep intact all notices stating that this License and any&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;non-permissive terms added in accord with section 7 apply to the code;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;keep intact all notices of the absence of any warranty; and give all&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;recipients a copy of this License along with the Program.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may charge any price or no price for each copy that you convey,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;and you may offer support or warranty protection for a fee.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  5. Conveying Modified Source Versions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may convey a work based on the Program, or the modifications to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;produce it from the Program, in the form of source code under the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;terms of section 4, provided that you also meet all of these conditions:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    a) The work must carry prominent notices stating that you modified&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    it, and giving a relevant date.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    b) The work must carry prominent notices stating that it is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    released under this License and any conditions added under section&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    7.  This requirement modifies the requirement in section 4 to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    &amp;quot;keep intact all notices&amp;quot;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    c) You must license the entire work, as a whole, under this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    License to anyone who comes into possession of a copy.  This&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    License will therefore apply, along with any applicable section 7&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    additional terms, to the whole of the work, and all its parts,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    regardless of how they are packaged.  This License gives no&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    permission to license the work in any other way, but it does not&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    invalidate such permission if you have separately received it.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    d) If the work has interactive user interfaces, each must display&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Appropriate Legal Notices; however, if the Program has interactive&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    interfaces that do not display Appropriate Legal Notices, your&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    work need not make them do so.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A compilation of a covered work with other separate and independent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;works, which are not by their nature extensions of the covered work,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;and which are not combined with it such as to form a larger program,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in or on a volume of a storage or distribution medium, is called an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&amp;quot;aggregate&amp;quot; if the compilation and its resulting copyright are not&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;used to limit the access or legal rights of the compilation&apos;s users&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;beyond what the individual works permit.  Inclusion of a covered work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in an aggregate does not cause this License to apply to the other&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;parts of the aggregate.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  6. Conveying Non-Source Forms.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may convey a covered work in object code form under the terms&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;of sections 4 and 5, provided that you also convey the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;machine-readable Corresponding Source under the terms of this License,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in one of these ways:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    a) Convey the object code in, or embodied in, a physical product&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    (including a physical distribution medium), accompanied by the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source fixed on a durable physical medium&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    customarily used for software interchange.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    b) Convey the object code in, or embodied in, a physical product&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    (including a physical distribution medium), accompanied by a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    written offer, valid for at least three years and valid for as&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    long as you offer spare parts or customer support for that product&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    model, to give anyone who possesses the object code either (1) a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    copy of the Corresponding Source for all the software in the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    product that is covered by this License, on a durable physical&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    medium customarily used for software interchange, for a price no&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    more than your reasonable cost of physically performing this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    conveying of source, or (2) access to copy the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source from a network server at no charge.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    c) Convey individual copies of the object code with a copy of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    written offer to provide the Corresponding Source.  This&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    alternative is allowed only occasionally and noncommercially, and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    only if you received the object code with such an offer, in accord&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    with subsection 6b.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    d) Convey the object code by offering access from a designated&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    place (gratis or for a charge), and offer equivalent access to the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source in the same way through the same place at no&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    further charge.  You need not require recipients to copy the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source along with the object code.  If the place to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    copy the object code is a network server, the Corresponding Source&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    may be on a different server (operated by you or a third party)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    that supports equivalent copying facilities, provided you maintain&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    clear directions next to the object code saying where to find the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source.  Regardless of what server hosts the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Corresponding Source, you remain obligated to ensure that it is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    available for as long as needed to satisfy these requirements.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    e) Convey the object code using peer-to-peer transmission, provided&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    you inform other peers where the object code and Corresponding&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Source of the work are being offered to the general public at no&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    charge under subsection 6d.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A separable portion of the object code, whose source code is excluded&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;from the Corresponding Source as a System Library, need not be&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;included in conveying the object code work.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A &amp;quot;User Product&amp;quot; is either (1) a &amp;quot;consumer product&amp;quot;, which means any&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;tangible personal property which is normally used for personal, family,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;or household purposes, or (2) anything designed or sold for incorporation&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;into a dwelling.  In determining whether a product is a consumer product,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;doubtful cases shall be resolved in favor of coverage.  For a particular&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;product received by a particular user, &amp;quot;normally used&amp;quot; refers to a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;typical or common use of that class of product, regardless of the status&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;of the particular user or of the way in which the particular user&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;actually uses, or expects or is expected to use, the product.  A product&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;is a consumer product regardless of whether the product has substantial&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;commercial, industrial or non-consumer uses, unless such uses represent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the only significant mode of use of the product.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  &amp;quot;Installation Information&amp;quot; for a User Product means any methods,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;procedures, authorization keys, or other information required to install&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;and execute modified versions of a covered work in that User Product from&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;a modified version of its Corresponding Source.  The information must&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;suffice to ensure that the continued functioning of the modified object&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;code is in no case prevented or interfered with solely because&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modification has been made.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If you convey an object code work under this section in, or with, or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;specifically for use in, a User Product, and the conveying occurs as&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;part of a transaction in which the right of possession and use of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;User Product is transferred to the recipient in perpetuity or for a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;fixed term (regardless of how the transaction is characterized), the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Corresponding Source conveyed under this section must be accompanied&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;by the Installation Information.  But this requirement does not apply&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;if neither you nor any third party retains the ability to install&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modified object code on the User Product (for example, the work has&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;been installed in ROM).&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The requirement to provide Installation Information does not include a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;requirement to continue to provide support service, warranty, or updates&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for a work that has been modified or installed by the recipient, or for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the User Product in which it has been modified or installed.  Access to a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;network may be denied when the modification itself materially and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;adversely affects the operation of the network or violates the rules and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;protocols for communication across the network.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Corresponding Source conveyed, and Installation Information provided,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in accord with this section must be in a format that is publicly&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;documented (and with an implementation available to the public in&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;source code form), and must require no special password or key for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;unpacking, reading or copying.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  7. Additional Terms.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  &amp;quot;Additional permissions&amp;quot; are terms that supplement the terms of this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License by making exceptions from one or more of its conditions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Additional permissions that are applicable to the entire Program shall&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;be treated as though they were included in this License, to the extent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;that they are valid under applicable law.  If additional permissions&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;apply only to part of the Program, that part may be used separately&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;under those permissions, but the entire Program remains governed by&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;this License without regard to the additional permissions.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  When you convey a copy of a covered work, you may at your option&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;remove any additional permissions from that copy, or from any part of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;it.  (Additional permissions may be written to require their own&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;removal in certain cases when you modify the work.)  You may place&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;additional permissions on material, added by you to a covered work,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for which you have or can give appropriate copyright permission.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Notwithstanding any other provision of this License, for material you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;add to a covered work, you may (if authorized by the copyright holders of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;that material) supplement the terms of this License with terms:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    a) Disclaiming warranty or limiting liability differently from the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    terms of sections 15 and 16 of this License; or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    b) Requiring preservation of specified reasonable legal notices or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    author attributions in that material or in the Appropriate Legal&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Notices displayed by works containing it; or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    c) Prohibiting misrepresentation of the origin of that material, or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    requiring that modified versions of such material be marked in&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    reasonable ways as different from the original version; or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    d) Limiting the use for publicity purposes of names of licensors or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    authors of the material; or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    e) Declining to grant rights under trademark law for use of some&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    trade names, trademarks, or service marks; or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    f) Requiring indemnification of licensors and authors of that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    material by anyone who conveys the material (or modified versions of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    it) with contractual assumptions of liability to the recipient, for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    any liability that these contractual assumptions directly impose on&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    those licensors and authors.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  All other non-permissive additional terms are considered &amp;quot;further&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;restrictions&amp;quot; within the meaning of section 10.  If the Program as you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;received it, or any part of it, contains a notice stating that it is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;governed by this License along with a term that is a further&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;restriction, you may remove that term.  If a license document contains&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;a further restriction but permits relicensing or conveying under this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License, you may add to a covered work material governed by the terms&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;of that license document, provided that the further restriction does&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;not survive such relicensing or conveying.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If you add terms to a covered work in accord with this section, you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;must place, in the relevant source files, a statement of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;additional terms that apply to those files, or a notice indicating&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;where to find the applicable terms.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Additional terms, permissive or non-permissive, may be stated in the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;form of a separately written license, or stated as exceptions;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the above requirements apply either way.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  8. Termination.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may not propagate or modify a covered work except as expressly&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;provided under this License.  Any attempt otherwise to propagate or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modify it is void, and will automatically terminate your rights under&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;this License (including any patent licenses granted under the third&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;paragraph of section 11).&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  However, if you cease all violation of this License, then your&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;license from a particular copyright holder is reinstated (a)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;provisionally, unless and until the copyright holder explicitly and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;finally terminates your license, and (b) permanently, if the copyright&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;holder fails to notify you of the violation by some reasonable means&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;prior to 60 days after the cessation.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Moreover, your license from a particular copyright holder is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;reinstated permanently if the copyright holder notifies you of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;violation by some reasonable means, this is the first time you have&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;received notice of violation of this License (for any work) from that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;copyright holder, and you cure the violation prior to 30 days after&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;your receipt of the notice.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Termination of your rights under this section does not terminate the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;licenses of parties who have received copies or rights from you under&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;this License.  If your rights have been terminated and not permanently&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;reinstated, you do not qualify to receive new licenses for the same&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;material under section 10.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  9. Acceptance Not Required for Having Copies.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You are not required to accept this License in order to receive or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;run a copy of the Program.  Ancillary propagation of a covered work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;occurring solely as a consequence of using peer-to-peer transmission&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to receive a copy likewise does not require acceptance.  However,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;nothing other than this License grants you permission to propagate or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;modify any covered work.  These actions infringe copyright if you do&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;not accept this License.  Therefore, by modifying or propagating a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;covered work, you indicate your acceptance of this License to do so.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  10. Automatic Licensing of Downstream Recipients.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Each time you convey a covered work, the recipient automatically&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;receives a license from the original licensors, to run, modify and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;propagate that work, subject to this License.  You are not responsible&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for enforcing compliance by third parties with this License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  An &amp;quot;entity transaction&amp;quot; is a transaction transferring control of an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;organization, or substantially all assets of one, or subdividing an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;organization, or merging organizations.  If propagation of a covered&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work results from an entity transaction, each party to that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;transaction who receives a copy of the work also receives whatever&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;licenses to the work the party&apos;s predecessor in interest had or could&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;give under the previous paragraph, plus a right to possession of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Corresponding Source of the work from the predecessor in interest, if&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the predecessor has it or can get it with reasonable efforts.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You may not impose any further restrictions on the exercise of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;rights granted or affirmed under this License.  For example, you may&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;not impose a license fee, royalty, or other charge for exercise of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;rights granted under this License, and you may not initiate litigation&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;(including a cross-claim or counterclaim in a lawsuit) alleging that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;any patent claim is infringed by making, using, selling, offering for&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;sale, or importing the Program or any portion of it.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  11. Patents.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A &amp;quot;contributor&amp;quot; is a copyright holder who authorizes use under this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License of the Program or a work on which the Program is based.  The&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work thus licensed is called the contributor&apos;s &amp;quot;contributor version&amp;quot;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A contributor&apos;s &amp;quot;essential patent claims&amp;quot; are all patent claims&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;owned or controlled by the contributor, whether already acquired or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;hereafter acquired, that would be infringed by some manner, permitted&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;by this License, of making, using, or selling its contributor version,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;but do not include claims that would be infringed only as a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;consequence of further modification of the contributor version.  For&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;purposes of this definition, &amp;quot;control&amp;quot; includes the right to grant&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patent sublicenses in a manner consistent with the requirements of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;this License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Each contributor grants you a non-exclusive, worldwide, royalty-free&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patent license under the contributor&apos;s essential patent claims, to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;make, use, sell, offer for sale, import and otherwise run, modify and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;propagate the contents of its contributor version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  In the following three paragraphs, a &amp;quot;patent license&amp;quot; is any express&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;agreement or commitment, however denominated, not to enforce a patent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;(such as an express permission to practice a patent or covenant not to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;sue for patent infringement).  To &amp;quot;grant&amp;quot; such a patent license to a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;party means to make such an agreement or commitment not to enforce a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patent against the party.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If you convey a covered work, knowingly relying on a patent license,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;and the Corresponding Source of the work is not available for anyone&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to copy, free of charge and under the terms of this License, through a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;publicly available network server or other readily accessible means,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;then you must either (1) cause the Corresponding Source to be so&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;available, or (2) arrange to deprive yourself of the benefit of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patent license for this particular work, or (3) arrange, in a manner&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;consistent with the requirements of this License, to extend the patent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;license to downstream recipients.  &amp;quot;Knowingly relying&amp;quot; means you have&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;actual knowledge that, but for the patent license, your conveying the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;covered work in a country, or your recipient&apos;s use of the covered work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in a country, would infringe one or more identifiable patents in that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;country that you have reason to believe are valid.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If, pursuant to or in connection with a single transaction or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;arrangement, you convey, or propagate by procuring conveyance of, a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;covered work, and grant a patent license to some of the parties&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;receiving the covered work authorizing them to use, propagate, modify&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;or convey a specific copy of the covered work, then the patent license&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;you grant is automatically extended to all recipients of the covered&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work and works based on it.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  A patent license is &amp;quot;discriminatory&amp;quot; if it does not include within&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the scope of its coverage, prohibits the exercise of, or is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;conditioned on the non-exercise of one or more of the rights that are&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;specifically granted under this License.  You may not convey a covered&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;work if you are a party to an arrangement with a third party that is&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;in the business of distributing software, under which you make payment&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to the third party based on the extent of your activity of conveying&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the work, and under which the third party grants, to any of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;parties who would receive the covered work from you, a discriminatory&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;patent license (a) in connection with copies of the covered work&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;conveyed by you (or copies made from those copies), or (b) primarily&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;for and in connection with specific products or compilations that&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;contain the covered work, unless you entered into that arrangement,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;or that patent license was granted, prior to 28 March 2007.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Nothing in this License shall be construed as excluding or limiting&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;any implied license or other defenses to infringement that may&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;otherwise be available to you under applicable patent law.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  12. No Surrender of Others&apos; Freedom.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If conditions are imposed on you (whether by court order, agreement or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;otherwise) that contradict the conditions of this License, they do not&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;excuse you from the conditions of this License.  If you cannot convey a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;covered work so as to satisfy simultaneously your obligations under this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License and any other pertinent obligations, then as a consequence you may&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;not convey it at all.  For example, if you agree to terms that obligate you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to collect a royalty for further conveying from those to whom you convey&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the Program, the only way you could satisfy both those terms and this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License would be to refrain entirely from conveying the Program.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  13. Use with the GNU Affero General Public License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Notwithstanding any other provision of this License, you have&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;permission to link or combine any covered work with a work licensed&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;under version 3 of the GNU Affero General Public License into a single&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;combined work, and to convey the resulting work.  The terms of this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;License will continue to apply to the part which is the covered work,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;but the special requirements of the GNU Affero General Public License,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;section 13, concerning interaction through a network will apply to the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;combination as such.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  14. Revised Versions of this License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The Free Software Foundation may publish revised and/or new versions of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the GNU General Public License from time to time.  Such new versions will&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;be similar in spirit to the present version, but may differ in detail to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;address new problems or concerns.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Each version is given a distinguishing version number.  If the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Program specifies that a certain numbered version of the GNU General&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Public License &amp;quot;or any later version&amp;quot; applies to it, you have the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;option of following the terms and conditions either of that numbered&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;version or of any later version published by the Free Software&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Foundation.  If the Program does not specify a version number of the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;GNU General Public License, you may choose any version ever published&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;by the Free Software Foundation.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If the Program specifies that a proxy can decide which future&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;versions of the GNU General Public License can be used, that proxy&apos;s&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;public statement of acceptance of a version permanently authorizes you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to choose that version for the Program.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  Later license versions may give you additional or different&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;permissions.  However, no additional obligations are imposed on any&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;author or copyright holder as a result of your choosing to follow a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  15. Disclaimer of Warranty.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM &amp;quot;AS IS&amp;quot; WITHOUT WARRANTY&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;ALL NECESSARY SERVICING, REPAIR OR CORRECTION.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  16. Limitation of Liability.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;SUCH DAMAGES.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  17. Interpretation of Sections 15 and 16.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If the disclaimer of warranty and limitation of liability provided&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;above cannot be given local legal effect according to their terms,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;reviewing courts shall apply local law that most closely approximates&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;an absolute waiver of all civil liability in connection with the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Program, unless a warranty or assumption of liability accompanies a&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;copy of the Program in return for a fee.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;                     END OF TERMS AND CONDITIONS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;            How to Apply These Terms to Your New Programs&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If you develop a new program, and you want it to be of the greatest&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;possible use to the public, the best way to achieve this is to make it&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;free software which everyone can redistribute and change under these terms.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  To do so, attach the following notices to the program.  It is safest&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;to attach them to the start of each source file to most effectively&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;state the exclusion of warranty; and each file should have at least&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the &amp;quot;copyright&amp;quot; line and a pointer to where the full notice is found.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    &amp;lt;one line to give the program&apos;s name and a brief idea of what it does.&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    Copyright (C) &amp;lt;year&amp;gt;  &amp;lt;name of author&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    This program is free software: you can redistribute it and/or modify&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    it under the terms of the GNU General Public License as published by&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    the Free Software Foundation, either version 3 of the License, or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    (at your option) any later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    This program is distributed in the hope that it will be useful,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    but WITHOUT ANY WARRANTY; without even the implied warranty of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    You should have received a copy of the GNU General Public License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    along with this program.  If not, see &amp;lt;https://www.gnu.org/licenses/&amp;gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Also add information on how to contact you by electronic and paper mail.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  If the program does terminal interaction, make it output a short&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;notice like this when it starts in an interactive mode:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    &amp;lt;program&amp;gt;  Copyright (C) &amp;lt;year&amp;gt;  &amp;lt;name of author&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w&apos;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    This is free software, and you are welcome to redistribute it&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;    under certain conditions; type `show c&apos; for details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;The hypothetical commands `show w&apos; and `show c&apos; should show the appropriate&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;parts of the General Public License.  Of course, your program&apos;s commands&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;might be different; for a GUI interface, you would use an &amp;quot;about box&amp;quot;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  You should also get your employer (if you work as a programmer) or school,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;if any, to sign a &amp;quot;copyright disclaimer&amp;quot; for the program, if necessary.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;For more information on this, and how to apply and follow the GNU GPL, see&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&amp;lt;https://www.gnu.org/licenses/&amp;gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;  The GNU General Public License does not permit incorporating your program&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;into proprietary programs.  If your program is a subroutine library, you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;may consider it more useful to permit linking proprietary applications with&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;the library.  If this is what you want to do, use the GNU Lesser General&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;Public License instead of this License.  But first, please read&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&amp;lt;https://www.gnu.org/licenses/why-not-lgpl.html&amp;gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Consolas&apos;,&apos;Courier New&apos;,&apos;monospace&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="2489"/>
+        <source>Select dir</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="2505"/>
+        <source>Output Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinDlg.ui" line="2552"/>
+        <source>Compute</source>
+        <translation type="unfinished">계산</translation>
+    </message>
+</context>
+<context>
+    <name>cc3DfinExpertDlg</name>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinExpertDlg.ui" line="14"/>
+        <source>About expert parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/cc3DFin/ui/cc3DFinExpertDlg.ui" line="51"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Segoe UI&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:11pt; font-weight:700;&quot;&gt;Are you sure you know what these do?&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Before modifying these, you should read the documentation and the references listed below for a deep understading of what the algorithm does.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;References:&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cabo, C., Ordonez, C., Lopez-Sanchez, C. A., &amp;amp; Armesto, J. (2018). Automatic dendrometry: Tree detection, tree height and diameter estimation using terrestrial laser scanning. International Journal of Applied Earth Observation and Geoinformation, 69, 164–174. &lt;a href=&quot;https://doi.org/10.1016/j.jag.2018.01.011&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;10.1016/j.jag.2018.01.011&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Ester, M., Kriegel, H.-P., Sander, J., &amp;amp; Xu, X. (1996). A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. www.aaai.org&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Prendes, C., Cabo, C., Ordoñez, C., Majada, J., &amp;amp; Canga, E. (2021). An algorithm for the automatic parametrization of wood volume equations from Terrestrial Laser Scanning point clouds: application in Pinus pinaster. GIScience and Remote Sensing, 58(7), 1130–1150. &lt;a href=&quot;https://doi.org/10.1080/15481603.2021.1972712&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;10.1080/15481603.2021.1972712&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zhang, W., Qi, J., Wan, P., Wang, H., Xie, D., Wang, X., &amp;amp; Yan, G. (2016). An easy-to-use airborne LiDAR data filtering method based on cloth simulation. Remote Sensing, 8(6). &lt;a href=&quot;10.3390/rs8060501&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://doi.org/10.3390/rs8060501&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ccAlignDlg</name>
     <message>
-        <location filename="../ccAlignDlg.cpp" line="40"/>
+        <location filename="../ccAlignDlg.cpp" line="43"/>
         <source>None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../ccAlignDlg.cpp" line="41"/>
+        <location filename="../ccAlignDlg.cpp" line="44"/>
         <source>Random</source>
         <translation>무작위</translation>
     </message>
     <message>
-        <location filename="../ccAlignDlg.cpp" line="42"/>
+        <location filename="../ccAlignDlg.cpp" line="45"/>
         <source>Space</source>
         <translation>공간</translation>
     </message>
     <message>
-        <location filename="../ccAlignDlg.cpp" line="43"/>
+        <location filename="../ccAlignDlg.cpp" line="46"/>
         <source>Octree</source>
         <translation>옥트리</translation>
     </message>
@@ -21411,76 +22949,76 @@ You should fill the empty cells...</source>
 <context>
     <name>ccClippingBoxTool</name>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="686"/>
+        <location filename="../ccClippingBoxTool.cpp" line="689"/>
         <source>Preparing extraction</source>
         <translation>추출 준비중</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="700"/>
+        <location filename="../ccClippingBoxTool.cpp" line="703"/>
         <source>Cloud &apos;%1</source>
         <translation>클라우드&apos;%1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="701"/>
+        <location filename="../ccClippingBoxTool.cpp" line="704"/>
         <source>Points: %L1</source>
         <translation>점: %L1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1115"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1117"/>
         <source>Failed to generate contour lines for cloud #%1</source>
         <translation>클라우드 #%1 등고선 생성실패</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1123"/>
-        <location filename="../ccClippingBoxTool.cpp" line="1228"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1125"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1231"/>
         <source>[ExtractSlicesAndContours] Process canceled by user</source>
         <translation>[ExtractSlicesAndContours] 사용자 프로세싱 취소</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1137"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1139"/>
         <source>Envelope extraction</source>
         <translation>엔벨롭 추출</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1138"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1140"/>
         <source>Envelope(s): %L1</source>
         <translation>엔벨롭: %L1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1213"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1216"/>
         <source>%1: points are too far from each other! Increase the max edge length</source>
         <translation>%1:점간 거리가 너무 멉니다! 최대 엣지거리를 증가시키십시오</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1219"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1222"/>
         <source>%1: envelope extraction failed!</source>
         <translation>%1: 엔벨롭 추출실패!</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1255"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1258"/>
         <source>[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)</source>
         <translation>[ExtractSlicesAndContours] 프로세싱시 경고가 있습니다! (결과가 완벽하지 않습니다)</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1260"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1263"/>
         <source>Not enough memory!</source>
         <translation>메모리 부족!</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1759"/>
-        <location filename="../ccClippingBoxTool.cpp" line="1763"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1765"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1769"/>
         <source>Process finished</source>
         <translation>프로세싱 완료</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1759"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1765"/>
         <source>%1 slices have been generated.
 (you may have to close the tool and hide the initial cloud to see them...)</source>
         <translation>%1 슬라이스가 생성되었습니다.
 (도구를 닫은후 초기 클라우드를 숨기면 볼 수 있습니다...)</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1763"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1769"/>
         <source>The process has generated no output</source>
         <translation>출력되지 않았습니다</translation>
     </message>
@@ -21595,7 +23133,7 @@ You should fill the empty cells...</source>
 <context>
     <name>ccColorFromScalarDlg</name>
     <message>
-        <location filename="../ccColorFromScalarDlg.cpp" line="557"/>
+        <location filename="../ccColorFromScalarDlg.cpp" line="545"/>
         <source>Not enough memory</source>
         <translation type="unfinished">메모리 부족</translation>
     </message>
@@ -21603,17 +23141,17 @@ You should fill the empty cells...</source>
 <context>
     <name>ccComparisonDlg</name>
     <message>
-        <location filename="../ccComparisonDlg.cpp" line="544"/>
+        <location filename="../ccComparisonDlg.cpp" line="542"/>
         <source>Determining optimal octree level</source>
         <translation>최적화 옥트리 레벨 설정</translation>
     </message>
     <message>
-        <location filename="../ccComparisonDlg.cpp" line="545"/>
+        <location filename="../ccComparisonDlg.cpp" line="543"/>
         <source>Testing %1 levels...</source>
         <translation>%1 레벨 테스트중...</translation>
     </message>
     <message>
-        <location filename="../ccComparisonDlg.cpp" line="910"/>
+        <location filename="../ccComparisonDlg.cpp" line="903"/>
         <source>Mean distance = %1 / std deviation = %2</source>
         <translation>중간거리 = %1 / 표준편차 = %2</translation>
     </message>
@@ -21621,22 +23159,22 @@ You should fill the empty cells...</source>
 <context>
     <name>ccCompass</name>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3522"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3547"/>
         <source>SVG Output file</source>
         <translation>SVG 출력파일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3522"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3547"/>
         <source>SVG files (*.svg)</source>
         <translation>SVG 파일 (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3541"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3571"/>
         <source>Output file</source>
         <translation>출력파일</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3541"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3571"/>
         <source>CSV files (*.csv *.txt);;XML (*.xml)</source>
         <translation>CSV 파일 (*.csv *.txt);;XML (*.xml)</translation>
     </message>
@@ -21644,123 +23182,123 @@ You should fill the empty cells...</source>
 <context>
     <name>ccDBRoot</name>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="269"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="270"/>
         <source>Expand</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="270"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="271"/>
         <source>Collapse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="271"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="272"/>
         <source>Information (recursive)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="272"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="273"/>
         <source>Sort children by type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="273"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="274"/>
         <source>Sort children by name (A-Z)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="274"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="275"/>
         <source>Sort children by name (Z-A)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="275"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="276"/>
         <source>Select children by type and/or name</source>
         <translation type="unfinished">종류 또는 이름별 칠드런 선택</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="276"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="277"/>
         <location filename="../db_tree/ccDBRoot.cpp" line="2089"/>
         <source>Export images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="277"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="278"/>
         <source>Delete</source>
         <translation type="unfinished">삭제</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="278"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="279"/>
         <source>Toggle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="279"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="280"/>
         <source>Toggle visibility</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="280"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="281"/>
         <source>Toggle color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="281"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="282"/>
         <source>Toggle normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="282"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="283"/>
         <source>Toggle materials/textures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="283"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="284"/>
         <source>Toggle SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="284"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="285"/>
         <source>Toggle 3D name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="285"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="286"/>
         <source>Add empty group</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="286"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="287"/>
         <source>Align camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="287"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="288"/>
         <source>Align camera (reverse)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="288"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="289"/>
         <source>Bubble-view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="289"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="290"/>
         <source>Edit scalar value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="557"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="558"/>
         <source>Delete selected entities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="558"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="559"/>
         <source>Are you sure?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccDBRoot.cpp" line="563"/>
+        <location filename="../db_tree/ccDBRoot.cpp" line="564"/>
         <source>Don&apos;t ask again</source>
         <translation type="unfinished"></translation>
     </message>
@@ -21842,256 +23380,256 @@ You should fill the empty cells...</source>
         <translation>상수값 추가</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="403"/>
-        <location filename="../ccEntityAction.cpp" line="551"/>
-        <location filename="../ccEntityAction.cpp" line="591"/>
-        <location filename="../ccEntityAction.cpp" line="959"/>
+        <location filename="../ccEntityAction.cpp" line="407"/>
+        <location filename="../ccEntityAction.cpp" line="555"/>
+        <location filename="../ccEntityAction.cpp" line="595"/>
+        <location filename="../ccEntityAction.cpp" line="957"/>
         <location filename="../ccEntityAction.cpp" line="1486"/>
-        <location filename="../ccEntityAction.cpp" line="2013"/>
+        <location filename="../ccEntityAction.cpp" line="2010"/>
         <source>An error occurred! (see console)</source>
         <translation>에러가 발생하였습니다! (콘솔확인)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="305"/>
+        <location filename="../ccEntityAction.cpp" line="309"/>
         <source>Select one and only one colored cloud or mesh!</source>
         <translation type="unfinished">하나의 색상이 있는 클라우드 또는 메쉬를 선택하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="323"/>
+        <location filename="../ccEntityAction.cpp" line="327"/>
         <source>Selected entity has no colors!</source>
         <translation type="unfinished">선택한 엔티티에 컬러가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="338"/>
-        <location filename="../ccEntityAction.cpp" line="350"/>
-        <location filename="../ccEntityAction.cpp" line="414"/>
-        <location filename="../ccEntityAction.cpp" line="426"/>
+        <location filename="../ccEntityAction.cpp" line="342"/>
+        <location filename="../ccEntityAction.cpp" line="354"/>
+        <location filename="../ccEntityAction.cpp" line="418"/>
+        <location filename="../ccEntityAction.cpp" line="430"/>
         <source>Select 2 entities (clouds or meshes)!</source>
         <translation type="unfinished">2 엔티티 선택 (클라우드 또는 메쉬)!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="356"/>
-        <location filename="../ccEntityAction.cpp" line="432"/>
+        <location filename="../ccEntityAction.cpp" line="360"/>
+        <location filename="../ccEntityAction.cpp" line="436"/>
         <source>None of the selected entities has per-point or per-vertex colors!</source>
         <translation type="unfinished">선택한 엔터티에는 점별 또는 버텍스별 색상이 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="361"/>
+        <location filename="../ccEntityAction.cpp" line="365"/>
         <source>Both entities have colors! Remove the colors on the entity you wish to import the colors to!</source>
         <translation type="unfinished">두 엔터티 모두 색상이 있습니다! 색상을 가져오려는 엔터티의 색상을 제거하십시오!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="377"/>
+        <location filename="../ccEntityAction.cpp" line="381"/>
         <source>Destination cloud (or vertices) must be a real point cloud!</source>
         <translation type="unfinished">대상 클라우드 (또는 버텍스)는 실제 포인트클라우드여야 합니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="438"/>
+        <location filename="../ccEntityAction.cpp" line="442"/>
         <source>Source</source>
         <translation type="unfinished">소스</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="438"/>
+        <location filename="../ccEntityAction.cpp" line="442"/>
         <source>Destination</source>
         <translation type="unfinished">경로</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="468"/>
+        <location filename="../ccEntityAction.cpp" line="472"/>
         <source>entity</source>
         <translation type="unfinished">엔티티</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="485"/>
+        <location filename="../ccEntityAction.cpp" line="489"/>
         <source>No scalar field was selected</source>
         <translation type="unfinished">스칼리필드 미선택</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="496"/>
-        <location filename="../ccEntityAction.cpp" line="1275"/>
-        <location filename="../ccEntityAction.cpp" line="1308"/>
+        <location filename="../ccEntityAction.cpp" line="500"/>
+        <location filename="../ccEntityAction.cpp" line="1273"/>
+        <location filename="../ccEntityAction.cpp" line="1306"/>
         <location filename="../ccEntityAction.cpp" line="1389"/>
-        <location filename="../ccEntityAction.cpp" line="2266"/>
+        <location filename="../ccEntityAction.cpp" line="2261"/>
         <source>Not enough memory!</source>
         <translation type="unfinished">메모리 부족!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="562"/>
+        <location filename="../ccEntityAction.cpp" line="566"/>
         <source>Unexpected null cloud pointers!</source>
         <translation type="unfinished">예상치 못한 널 클라우드 포인터!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="568"/>
+        <location filename="../ccEntityAction.cpp" line="572"/>
         <source>[ccEntityAction::interpolateSFs] The source cloud has no scalar field!</source>
         <translation type="unfinished">[ccEntityAction::interpolateSFs] 소스클라우드에 스칼라필드가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="575"/>
+        <location filename="../ccEntityAction.cpp" line="579"/>
         <source>[ccEntityAction::interpolateSFs] Invalid scalar field index!</source>
         <translation type="unfinished">[ccEntityAction::interpolateSFs] 잘못된 스칼라필드 인덱스!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="615"/>
+        <location filename="../ccEntityAction.cpp" line="617"/>
         <source>Mesh already has colors</source>
         <translation type="unfinished">메쉬에 컬러가 있습니다</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="649"/>
+        <location filename="../ccEntityAction.cpp" line="650"/>
         <source>Intensity range</source>
         <translation type="unfinished">강도범위</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="649"/>
+        <location filename="../ccEntityAction.cpp" line="650"/>
         <source>Do you want to define the theoretical intensity range (yes)
 or use the actual one (no)?</source>
         <translation type="unfinished">이론적인 강도범위를 설정하겠습니까? (예)
 또는 실제값을 사용합니까 (아니요)?</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="651"/>
+        <location filename="../ccEntityAction.cpp" line="652"/>
         <source>Min</source>
         <translation type="unfinished">최소</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="651"/>
+        <location filename="../ccEntityAction.cpp" line="652"/>
         <source>Max</source>
         <translation type="unfinished">최대</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="651"/>
+        <location filename="../ccEntityAction.cpp" line="652"/>
         <source>Theroetical intensity</source>
         <translation type="unfinished">이론적인 강도</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="699"/>
+        <location filename="../ccEntityAction.cpp" line="700"/>
         <source>Intensity scalar field</source>
         <translation type="unfinished">강도 스칼라필드</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="699"/>
+        <location filename="../ccEntityAction.cpp" line="700"/>
         <source>Choose scalar field</source>
         <translation type="unfinished">스칼라필드 선택</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="799"/>
+        <location filename="../ccEntityAction.cpp" line="797"/>
         <source>Select at least one cloud or mesh with RGB colors and an active scalar field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="801"/>
+        <location filename="../ccEntityAction.cpp" line="799"/>
         <source>Select at least one cloud or mesh with RGB colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="827"/>
-        <location filename="../ccEntityAction.cpp" line="856"/>
-        <location filename="../ccEntityAction.cpp" line="1046"/>
+        <location filename="../ccEntityAction.cpp" line="825"/>
+        <location filename="../ccEntityAction.cpp" line="854"/>
+        <location filename="../ccEntityAction.cpp" line="1044"/>
         <source>Spatial sigma</source>
         <translation type="unfinished">동간 시그마</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="828"/>
-        <location filename="../ccEntityAction.cpp" line="1047"/>
+        <location filename="../ccEntityAction.cpp" line="826"/>
+        <location filename="../ccEntityAction.cpp" line="1045"/>
         <source>Scalar sigma</source>
         <translation type="unfinished">스칼라 시그마</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="829"/>
-        <location filename="../ccEntityAction.cpp" line="857"/>
+        <location filename="../ccEntityAction.cpp" line="827"/>
+        <location filename="../ccEntityAction.cpp" line="855"/>
         <source>Color threshold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="839"/>
+        <location filename="../ccEntityAction.cpp" line="837"/>
         <source>RGB bilateral filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="841"/>
-        <location filename="../ccEntityAction.cpp" line="867"/>
-        <location filename="../ccEntityAction.cpp" line="1058"/>
+        <location filename="../ccEntityAction.cpp" line="839"/>
+        <location filename="../ccEntityAction.cpp" line="865"/>
+        <location filename="../ccEntityAction.cpp" line="1056"/>
         <source>3*sigma = 99.7% attenuation</source>
         <translation type="unfinished">3*시그마 = 99.7% 감쇠</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="842"/>
+        <location filename="../ccEntityAction.cpp" line="840"/>
         <source>Scalar sigma controls how much the filter behaves as a Gaussian Filter
 Sigma at +inf uses the whole range of scalars</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="843"/>
+        <location filename="../ccEntityAction.cpp" line="841"/>
         <source>For averaging, it will only use colors for which all components are in the range[threshold:255 - threshold]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="865"/>
+        <location filename="../ccEntityAction.cpp" line="863"/>
         <source>RGB gaussian/mean/median filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="868"/>
+        <location filename="../ccEntityAction.cpp" line="866"/>
         <source>For averaging, it will only use colors for which all components are in the range [threshold:255-threshold]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1008"/>
+        <location filename="../ccEntityAction.cpp" line="1006"/>
         <source>No eligible point cloud in selection!</source>
         <translation type="unfinished">적합한 포인트클라우드를 선택할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1027"/>
+        <location filename="../ccEntityAction.cpp" line="1025"/>
         <source>No active scalar field</source>
         <translation type="unfinished">활성화 스칼라필드 없음</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1056"/>
+        <location filename="../ccEntityAction.cpp" line="1054"/>
         <source>SF bilateral filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1059"/>
+        <location filename="../ccEntityAction.cpp" line="1057"/>
         <source>Scalar field&apos;s sigma controls how much the filter behaves as a Gaussian Filter
 Sigma at +inf uses the whole range of scalars</source>
         <translation type="unfinished">스칼라필드의 시그마는 필터가 전체 스칼라범위를
 사용하는 +inf의 가우스 필터 시그마처럼 작동하는 정도를 관리합니다.</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1072"/>
+        <location filename="../ccEntityAction.cpp" line="1070"/>
         <source>SF gaussian/mean/median filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1211"/>
+        <location filename="../ccEntityAction.cpp" line="1209"/>
         <source>Scalar Field to RGB</source>
         <translation type="unfinished">스칼라필드 to RGB</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1212"/>
+        <location filename="../ccEntityAction.cpp" line="1210"/>
         <source>Mix with existing colors (if any)?</source>
         <translation type="unfinished">기존 컬러와 믹스?</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1261"/>
+        <location filename="../ccEntityAction.cpp" line="1259"/>
         <source>Random colors</source>
         <translation type="unfinished">랜덤컬러</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1262"/>
+        <location filename="../ccEntityAction.cpp" line="1260"/>
         <source>Number of random colors (will be regularly sampled over the SF interval):</source>
         <translation type="unfinished">랜덤 색상 수 (SF 간격에 걸쳐 정기적으로 샘플링):</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1360"/>
+        <location filename="../ccEntityAction.cpp" line="1355"/>
         <source>SF name</source>
         <translation type="unfinished">SF이름</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1361"/>
+        <location filename="../ccEntityAction.cpp" line="1356"/>
         <source>name:</source>
         <translation type="unfinished">이름:</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1363"/>
+        <location filename="../ccEntityAction.cpp" line="1358"/>
         <source>unknown</source>
         <translation type="unfinished">알수없음</translation>
     </message>
@@ -22111,204 +23649,204 @@ Sigma at +inf uses the whole range of scalars</source>
         <translation type="unfinished">NaN 값에 해당하는 좌표입력:</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1662"/>
+        <location filename="../ccEntityAction.cpp" line="1660"/>
         <source>[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value</source>
         <translation type="unfinished">[SetSFAsCoord] 기본적으로 NaN 값에 해당하는 좌표는 최소 SF 값이 됩니다.</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1685"/>
+        <location filename="../ccEntityAction.cpp" line="1682"/>
         <source>Set SFs as coords</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1757"/>
+        <location filename="../ccEntityAction.cpp" line="1754"/>
         <source>Export SF to coordinate(s)</source>
         <translation type="unfinished">SF를 좌표로 출력</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1829"/>
-        <location filename="../ccEntityAction.cpp" line="1972"/>
+        <location filename="../ccEntityAction.cpp" line="1826"/>
+        <location filename="../ccEntityAction.cpp" line="1969"/>
         <source>The process failed!</source>
         <translation type="unfinished">프로세싱 실패!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1856"/>
+        <location filename="../ccEntityAction.cpp" line="1853"/>
         <source>Set SFs as normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1937"/>
+        <location filename="../ccEntityAction.cpp" line="1934"/>
         <source>Export normals to SF(s)</source>
         <translation type="unfinished">SF로 노말 출력</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2188"/>
-        <location filename="../ccEntityAction.cpp" line="2555"/>
-        <location filename="../ccEntityAction.cpp" line="2630"/>
+        <location filename="../ccEntityAction.cpp" line="2183"/>
+        <location filename="../ccEntityAction.cpp" line="2519"/>
+        <location filename="../ccEntityAction.cpp" line="2594"/>
         <source>Select at least one point cloud</source>
         <translation type="unfinished">1개 이상 포인트클라우드 선택</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2258"/>
+        <location filename="../ccEntityAction.cpp" line="2253"/>
         <source>Can&apos;t compute normals on sub-meshes! Select the parent mesh instead</source>
         <translation type="unfinished">하위 메쉬에서 노말을 계산할 수 없습니다! 상위 메쉬를 선택하십시오</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2455"/>
+        <location filename="../ccEntityAction.cpp" line="2419"/>
         <source>Failed to compute or orient the normals on some clouds! (see console)</source>
         <translation type="unfinished">일부 클라우드에서 노말을 계산하거나 방향을 지정하는 데 실패했습니다! (콘솔 참조)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2459"/>
+        <location filename="../ccEntityAction.cpp" line="2423"/>
         <source>Failed to compute or orient the normals! (see console)</source>
         <translation type="unfinished">노말을 계산하거나 방향을 지정하는 데 실패했습니다! (콘솔 참조)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2468"/>
+        <location filename="../ccEntityAction.cpp" line="2432"/>
         <source>Mesh normals</source>
         <translation type="unfinished">메쉬 노말</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2469"/>
+        <location filename="../ccEntityAction.cpp" line="2433"/>
         <source>Compute per-vertex normals (smooth) or per-triangle (faceted)?</source>
         <translation type="unfinished">버텍스별 노말 (스무스) 또는 TIN별(다면체)을 계산하겠습니까?</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2473"/>
+        <location filename="../ccEntityAction.cpp" line="2437"/>
         <source>Per-vertex</source>
         <translation type="unfinished">버텍스당</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2474"/>
+        <location filename="../ccEntityAction.cpp" line="2438"/>
         <source>Per-triangle</source>
         <translation type="unfinished">TIN당</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2562"/>
+        <location filename="../ccEntityAction.cpp" line="2526"/>
         <source>Orient normals (FM)</source>
         <translation type="unfinished">노말방향 (FM)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2563"/>
+        <location filename="../ccEntityAction.cpp" line="2527"/>
         <source>Octree level</source>
         <translation type="unfinished">옥트리 레벨</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2616"/>
-        <location filename="../ccEntityAction.cpp" line="2690"/>
+        <location filename="../ccEntityAction.cpp" line="2580"/>
+        <location filename="../ccEntityAction.cpp" line="2654"/>
         <source>Process failed (check console)</source>
         <translation type="unfinished">프로세싱실패 (콘솔체크)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2620"/>
-        <location filename="../ccEntityAction.cpp" line="2694"/>
+        <location filename="../ccEntityAction.cpp" line="2584"/>
+        <location filename="../ccEntityAction.cpp" line="2658"/>
         <source>Normals have been oriented: you may still have to globally invert the cloud normals however (Edit &gt; Normals &gt; Invert).</source>
         <translation type="unfinished">노말 방향이 설정되었습니다: 그러나 클라우드 노말을 전체적으로 반전해야 할 수도 있습니다 (편집 &gt; 노말 &gt; 반전).</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2637"/>
+        <location filename="../ccEntityAction.cpp" line="2601"/>
         <source>Neighborhood size</source>
         <translation type="unfinished">네이버후드 크기</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2638"/>
+        <location filename="../ccEntityAction.cpp" line="2602"/>
         <source>Neighbors</source>
         <translation type="unfinished">네이버</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2749"/>
-        <location filename="../ccEntityAction.cpp" line="2761"/>
+        <location filename="../ccEntityAction.cpp" line="2713"/>
+        <location filename="../ccEntityAction.cpp" line="2725"/>
         <source>[ccEntityAction::convertNormalsTo] Not enough memory!</source>
         <translation type="unfinished">[ccEntityAction::convertNormalsTo] 메모리 부족!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2793"/>
+        <location filename="../ccEntityAction.cpp" line="2756"/>
         <source>[ccEntityAction::convertNormalsTo] Internal error: unhandled destination!</source>
         <translation type="unfinished">[ccEntityAction::convertNormalsTo] 인터널 에러: 제어할 수 없는 경로!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2813"/>
+        <location filename="../ccEntityAction.cpp" line="2776"/>
         <source>Error(s) occurred! (see console)</source>
         <translation type="unfinished">에러가 발생하였습니다! (콜솔을 확인하십시오)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2858"/>
+        <location filename="../ccEntityAction.cpp" line="2821"/>
         <source>[DoActionComputeOctree] No eligible entities in selection!</source>
         <translation type="unfinished">[DoActionComputeOctree] 선택할 수 있는 올바른 엔티티가 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3008"/>
+        <location filename="../ccEntityAction.cpp" line="2971"/>
         <source>[DoActionClearNormals] Can&apos;t remove normals per-vertex on a sub mesh!</source>
         <translation type="unfinished">[DoActionClearNormals] 하위 메쉬의 버텍스별 노말을 제거할 수 없습니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3122"/>
-        <location filename="../ccEntityAction.cpp" line="3282"/>
+        <location filename="../ccEntityAction.cpp" line="3085"/>
+        <location filename="../ccEntityAction.cpp" line="3245"/>
         <source>Distribution</source>
         <translation type="unfinished">분배</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3122"/>
+        <location filename="../ccEntityAction.cpp" line="3085"/>
         <source>Choose distribution</source>
         <translation type="unfinished">분배선택</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3137"/>
+        <location filename="../ccEntityAction.cpp" line="3100"/>
         <source>Local Statistical Test (Gauss)</source>
         <translation type="unfinished">로컬 통계검정 (가우스)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3140"/>
+        <location filename="../ccEntityAction.cpp" line="3103"/>
         <source>Local Statistical Test (Weibull)</source>
         <translation type="unfinished">로컬 통계검정 (와이블)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3143"/>
+        <location filename="../ccEntityAction.cpp" line="3106"/>
         <source>Invalid distribution!</source>
         <translation type="unfinished">잘못된 분배!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3219"/>
+        <location filename="../ccEntityAction.cpp" line="3182"/>
         <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
         <translation type="unfinished">카이2 거리를 계산할 새로운 스칼라필드에 할당할 수 없습니다! 메모리를 늘리십시오...</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3282"/>
+        <location filename="../ccEntityAction.cpp" line="3245"/>
         <source>Distribution Fitting</source>
         <translation type="unfinished">분포맞춤</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3283"/>
+        <location filename="../ccEntityAction.cpp" line="3246"/>
         <source>Normal (Gauss)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3284"/>
+        <location filename="../ccEntityAction.cpp" line="3247"/>
         <source>Weibull</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3378"/>
+        <location filename="../ccEntityAction.cpp" line="3341"/>
         <source>[Distribution fitting] Not enough memory!</source>
         <translation type="unfinished">[분배맞춤] 메모리가 부족합니다!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3393"/>
+        <location filename="../ccEntityAction.cpp" line="3356"/>
         <source>[Distribution fitting] Failed to compute Chi2 distance?!</source>
         <translation type="unfinished">[분배맞춤] 카이2 거리 계산 실패?!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3414"/>
+        <location filename="../ccEntityAction.cpp" line="3377"/>
         <source>Scalar field statistics:</source>
         <translation type="unfinished">스칼라필드 통계:</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3424"/>
+        <location filename="../ccEntityAction.cpp" line="3387"/>
         <source>[Distribution fitting]</source>
         <translation type="unfinished">[분배맞춤]</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="3432"/>
+        <location filename="../ccEntityAction.cpp" line="3395"/>
         <source>Count</source>
         <translation type="unfinished">갯수</translation>
     </message>
@@ -22324,28 +23862,28 @@ Sigma at +inf uses the whole range of scalars</source>
 <context>
     <name>ccGraphicalSegmentationTool</name>
     <message>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="990"/>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="1613"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="982"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="1605"/>
         <source>Not enough memory</source>
         <translation>메모리 부족</translation>
     </message>
     <message>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="1128"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="1120"/>
         <source>Not enough memory: no entity could be segmented</source>
         <translation>메모리가 부족합니다: 엔티티를 분할할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="1132"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="1124"/>
         <source>Not enough memory: not all entities were segmented</source>
         <translation>메모리가 부족합니다: 모든 엔티티가 분할되지 않았습니다</translation>
     </message>
     <message>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="1217"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="1209"/>
         <source>Classification</source>
         <translation>분류</translation>
     </message>
     <message>
-        <location filename="../ccGraphicalSegmentationTool.cpp" line="1217"/>
+        <location filename="../ccGraphicalSegmentationTool.cpp" line="1209"/>
         <source>value</source>
         <translation>값</translation>
     </message>
@@ -22409,7 +23947,7 @@ CTRL +A를 눌러 전체선택)</translation>
 <context>
     <name>ccOctree</name>
     <message>
-        <location filename="../../libs/qCC_db/src/ccOctree.cpp" line="773"/>
+        <location filename="../../libs/qCC_db/src/ccOctree.cpp" line="814"/>
         <source>Could not compute octree for cloud &apos;%1&apos;</source>
         <translation>클라우드 &apos;%1&apos;의 옥트리 계산할 수 없음</translation>
     </message>
@@ -22488,42 +24026,42 @@ p, li { white-space: pre-wrap; }
         <translation>CloudCompare 플러그인 디렉토리:</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="114"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="120"/>
         <source>About Plugins</source>
         <translation>플러그인 정보</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="116"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="122"/>
         <source>Enabling/disabling plugins will take effect next time you run %1</source>
         <translation>%1을(를) 다시 실행시 플러그인이 활성화/비활성됩니다.</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="163"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="166"/>
         <source>%1 Plugin</source>
         <translation>%1 플러그인</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="167"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="170"/>
         <source> (core)</source>
         <translation>(코어)</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="172"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="175"/>
         <source> (3rd Party)</source>
         <translation>(타사)</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="253"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="255"/>
         <source>(No plugin selected)</source>
         <translation>(플러그인 미선택)</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="290"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="292"/>
         <source>GL Shader</source>
         <translation>GL 쉐이더</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="301"/>
+        <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="303"/>
         <source>I/O</source>
         <translation>I/O</translation>
     </message>
@@ -22531,25 +24069,25 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccPluginUIManager</name>
     <message>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="305"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="313"/>
         <source>Remove Filter</source>
         <translation>필터제거</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="310"/>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="321"/>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="357"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="318"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="329"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="365"/>
         <source>Plugins</source>
         <translation>플러그인</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="314"/>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="363"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="322"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="371"/>
         <source>GL Filters</source>
         <translation>GL 필터</translation>
     </message>
     <message>
-        <location filename="../pluginManager/ccPluginUIManager.cpp" line="323"/>
+        <location filename="../pluginManager/ccPluginUIManager.cpp" line="331"/>
         <source>Shaders &amp;&amp; Filters</source>
         <translation>쉐이더 &amp;&amp; 필터</translation>
     </message>
@@ -22615,763 +24153,743 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccPropertiesTreeDelegate</name>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="101"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="103"/>
         <source>None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="105"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="107"/>
         <source>Scalar field</source>
         <translation>스칼라필드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="108"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="110"/>
         <source>Default</source>
         <translation>기본값</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="109"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="111"/>
         <source>Default Width</source>
         <translation>기본값 너비</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="227"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="229"/>
         <source>Property</source>
         <translation>속성</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="228"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="230"/>
         <source>State/Value</source>
         <translation>상태/값</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="328"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="330"/>
         <source>Transformation history</source>
         <translation>변환 히스토리</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="333"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="335"/>
         <source>Display transformation</source>
         <translation>투영표시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="420"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="422"/>
         <source>Meta data</source>
         <translation>메타데이터</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="453"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="455"/>
         <source>CC Object</source>
         <translation>CC 객체</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="456"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1058"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="458"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1060"/>
         <source>Name</source>
         <translation>이름</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="461"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="735"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="463"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="737"/>
         <source>Visible</source>
         <translation>표시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="467"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="469"/>
         <source>Normals</source>
         <translation>노말</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="473"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="475"/>
         <source>Colors</source>
         <translation>컬러</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="495"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="497"/>
         <source>Show name (in 3D)</source>
         <translation>이름보기 (3D)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="499"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="501"/>
         <source>Local box dimensions</source>
         <translation>로컬박스 치수</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="499"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="501"/>
         <source>Box dimensions</source>
         <translation>박스치수</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="517"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="519"/>
         <source>Shifted box center</source>
         <translation>이격된 박스중심</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="517"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="519"/>
         <source>Box center</source>
         <translation>박스중심</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="525"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="527"/>
         <source>Global box center</source>
         <translation>글로벌 박스중심</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="532"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
         <source>Info</source>
         <translation>정보</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="532"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
         <source>Object ID: %1 - Children: %2</source>
         <translation>객체번호: %1 - 칠드런: %2</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="535"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="537"/>
         <source>Current Display</source>
         <translation>현재표시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="548"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="550"/>
         <source>Global shift</source>
         <translation>글로벌 이격</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="551"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="553"/>
         <source>Global scale</source>
         <translation>글로벌 스케일</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="563"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="565"/>
         <source>Coordinate System</source>
         <translation>좌표계</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="564"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="566"/>
         <source>Origin</source>
         <translation>원점</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="566"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="568"/>
         <source>Planes Visible</source>
         <translation>평면 가시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="567"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="569"/>
         <source>Planes Stippled</source>
         <translation>평면 점선</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="568"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="570"/>
         <source>Axis Lines Visible</source>
         <translation>축라인 가시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="569"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="571"/>
         <source>Axis width</source>
         <translation>축너비</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="570"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="572"/>
         <source>Display scale</source>
         <translation>화면 스케일</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="580"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="582"/>
         <source>Cloud</source>
         <translation>클라우드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="583"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1418"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="585"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1408"/>
         <source>Points</source>
         <translation>점</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="589"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="591"/>
         <source>Point size</source>
         <translation>점크기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="605"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="607"/>
         <source>Scan grids</source>
         <translation>스캔그리드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="609"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="611"/>
         <source>Scan grid</source>
         <translation>스캔그리드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="616"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="618"/>
         <source>Scan #%1</source>
         <translation>스캔 #%1</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="616"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="618"/>
         <source>%1 x %2 (%3 points)</source>
         <translation>%1 x %2 (%3 점)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="623"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="625"/>
         <source>Waveform</source>
         <translation>웨이브폼</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="624"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="626"/>
         <source>Waves</source>
         <translation>웨이브</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="625"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="627"/>
         <source>Descriptors</source>
         <translation>설명</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="628"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="630"/>
         <source>Data size</source>
         <translation>데이터크기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="657"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="659"/>
         <source>Draw normals as lines</source>
         <translation>선으로 노말 드로우</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="661"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="663"/>
         <source>Draw</source>
         <translation>드로우</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="664"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="915"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="666"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="917"/>
         <source>Length</source>
         <translation>길이</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="667"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="669"/>
         <source>Color</source>
         <translation>컬러</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="684"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="686"/>
         <source>LOD rendering</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="688"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="690"/>
         <source>Use LOD Rendering</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="709"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="711"/>
         <source>Scalar Fields</source>
         <translation>스칼라필드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="709"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="711"/>
         <source>Scalar Field</source>
         <translation>스칼라필드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="712"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1078"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1112"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1229"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="714"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1080"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1114"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1231"/>
         <source>Count</source>
         <translation>갯수</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="715"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="717"/>
         <source>Active</source>
         <translation>활성화</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="723"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="725"/>
         <source>Offset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="729"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="731"/>
         <source>Current</source>
         <translation>현재</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="732"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="734"/>
         <source>Steps</source>
         <translation>단계</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="737"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="739"/>
         <source>SF display params</source>
         <translation>스칼라필드 표시 파라미터</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="753"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="755"/>
         <source>Primitive</source>
         <translation>기본요소</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="756"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="758"/>
         <source>Type</source>
         <translation>종류</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="761"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="904"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="763"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="906"/>
         <source>Drawing precision</source>
         <translation>드로잉 정밀도</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="766"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="773"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="795"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="906"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="768"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="775"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="797"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="908"/>
         <source>Radius</source>
         <translation>반경</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="770"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1013"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="772"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1015"/>
         <source>Height</source>
         <translation>높이</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="777"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="779"/>
         <source>Bottom radius</source>
         <translation>하단반경</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="778"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="780"/>
         <source>Top radius</source>
         <translation>상단반경</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="783"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="785"/>
         <source>Apex</source>
         <translation>Apex</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="786"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="788"/>
         <source>Half angle</source>
         <translation>반각</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="807"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="809"/>
         <source>Facet</source>
         <translation>측면</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="813"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="815"/>
         <source>Surface</source>
         <translation>지면</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="816"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="976"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="818"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="978"/>
         <source>RMS</source>
         <translation>RMS</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="819"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="821"/>
         <source>Center</source>
         <translation>중심</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="824"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="826"/>
         <source>Show contour</source>
         <translation>등고선 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="830"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="832"/>
         <source>Show polygon</source>
         <translation>폴리곤 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="842"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="844"/>
         <source>Normal</source>
         <translation>노말</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="848"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="850"/>
         <source>Dip / Dip dir. (integer)</source>
         <translation>Dip / Dip 방향 (정수)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="849"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="851"/>
         <source>Dip / Dip dir.</source>
         <translation>Dip / Dip 방향</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="852"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="854"/>
         <source>Show normal vector</source>
         <translation>노멀벡터 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="865"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="867"/>
         <source>Sub-mesh</source>
         <translation>하쉬메쉬</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="865"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="867"/>
         <source>Mesh</source>
         <translation>메쉬</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="868"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="870"/>
         <source>Faces</source>
         <translation>페이스</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="872"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="874"/>
         <source>Materials/textures</source>
         <translation>자재/텍스쳐</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="875"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="877"/>
         <source>Wireframe</source>
         <translation>와이어프레임</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="879"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="881"/>
         <source>Stippling</source>
         <translation>스티플링</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="902"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="904"/>
         <source>Circle</source>
         <translation type="unfinished">원형</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="909"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="911"/>
         <source>Polyline</source>
         <translation>폴리선</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="912"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="914"/>
         <source>Vertices</source>
         <translation>버틱스</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="918"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="920"/>
         <source>Line width</source>
         <translation>선너비</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="932"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="934"/>
         <source>Octree</source>
         <translation>옥트리</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="935"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="937"/>
         <source>Display mode</source>
         <translation>표시모드</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="938"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="940"/>
         <source>Display level</source>
         <translation>표시레벨</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="940"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="942"/>
         <source>Current level</source>
         <translation>현재레벨</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="948"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="950"/>
         <source>Cell size</source>
         <translation>셀크기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="952"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="954"/>
         <source>Cell count</source>
         <translation>셀갯수</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="955"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="957"/>
         <source>Filled volume</source>
         <translation>성토부피</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="966"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="968"/>
         <source>Kd-tree</source>
         <translation>Kd-트리</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="969"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="971"/>
         <source>Max Error</source>
         <translation>최대에러</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="979"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="981"/>
         <source>Max dist @ 68%</source>
         <translation>최대거리 @ 68%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="982"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="984"/>
         <source>Max dist @ 95%</source>
         <translation>최대거리 @ 95%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="985"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="987"/>
         <source>Max dist @ 99%</source>
         <translation>최대거리 @ 99%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="988"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="990"/>
         <source>Max distance</source>
         <translation>최대거리</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="992"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="994"/>
         <source>unknown</source>
         <translation>알수없음</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="995"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="997"/>
         <source>Error measure</source>
         <translation>측정에러</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1007"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1009"/>
         <source>Image</source>
         <translation>이미지</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1010"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1012"/>
         <source>Width</source>
         <translation>너비</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1016"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1018"/>
         <source>Alpha</source>
         <translation>알파</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1020"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1022"/>
         <source>Sensor</source>
         <translation>센서</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1022"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1102"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1024"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1104"/>
         <source>Apply Viewport</source>
         <translation>뷰포인트 적용</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1034"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1036"/>
         <source>Label</source>
         <translation>라벨</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1038"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1040"/>
         <source>Body</source>
         <translation>바디</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1041"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1043"/>
         <source>Show 2D label</source>
         <translation>2D 라벨 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1044"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1046"/>
         <source>Show legend(s)</source>
         <translation>범례 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1055"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1057"/>
         <source>Viewport</source>
         <translation>뷰포인트</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1058"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1060"/>
         <source>undefined</source>
         <translation>미설정</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1061"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1063"/>
         <source>Apply viewport</source>
         <translation>뷰포인트 적용</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1064"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1066"/>
         <source>Update viewport</source>
         <translation>뷰포인트 업데이트</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1075"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1077"/>
         <source>Trans. buffer</source>
         <translation>트랜스 버퍼</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1081"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1083"/>
         <source>Show path</source>
         <translation>경로보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1084"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1086"/>
         <source>Show trihedrons</source>
         <translation>삼면체 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1087"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1089"/>
         <source>Scale</source>
         <translation>스케일</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1099"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1101"/>
         <source>Drawing scale</source>
         <translation>드로잉 스케일</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1105"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1107"/>
         <source>Position/Orientation</source>
         <translation>위치/방향</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1109"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1111"/>
         <source>Associated positions</source>
         <translation>관련위치</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1120"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1122"/>
         <source>Indices</source>
         <translation>인덱스</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1123"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1125"/>
         <source>Active index</source>
         <translation>사용 인덱스</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1135"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1137"/>
         <source>TLS/GBL Sensor</source>
         <translation>TLS/GBL 센서</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1138"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1140"/>
         <source>Uncertainty</source>
         <translation>불확실성</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1141"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1143"/>
         <source>Angular viewport (degrees)</source>
         <translation>각도 뷰포인트 (deg)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1146"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1148"/>
         <source>Yaw span</source>
         <translation>Yaw 스판</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1153"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1155"/>
         <source>Yaw step</source>
         <translation>Yaw 단계</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1160"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1162"/>
         <source>Pitch span</source>
         <translation>피치 스판</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1167"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1169"/>
         <source>Pitch step</source>
         <translation>피치 단계</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1184"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1186"/>
         <source>Camera Sensor</source>
         <translation>카메라센서</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1189"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1191"/>
         <source>Vert. focal</source>
         <translation>수직초점</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1192"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1194"/>
         <source>Array size</source>
         <translation>해상도</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1195"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1197"/>
         <source>Principal point</source>
         <translation>주점 (PP)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1200"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1202"/>
         <source>Pixel size</source>
         <translation>픽셀크기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1204"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1206"/>
         <source>Field of view</source>
         <translation>FOV</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1207"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1209"/>
         <source>Skew</source>
         <translation>꼬임</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1209"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1211"/>
         <source>Frustum display</source>
         <translation>Frustum 표시</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1212"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1214"/>
         <source>Show lines</source>
         <translation>선보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1213"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1215"/>
         <source>Show side planes</source>
         <translation>사이드면 보기</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1226"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1228"/>
         <source>Material set</source>
         <translation>자재세트</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1243"/>
-        <source>Array</source>
-        <translation>배열</translation>
-    </message>
-    <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1247"/>
-        <source>Shared</source>
-        <translation>공유</translation>
-    </message>
-    <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1247"/>
-        <source>No</source>
-        <translation>아니오</translation>
-    </message>
-    <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1247"/>
-        <source>Yes (%1)</source>
-        <translation>예 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1417"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1407"/>
         <source>Wire</source>
         <translation>와이어</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1419"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1409"/>
         <source>Plain cubes</source>
         <translation>평면큐브</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1577"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1587"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1597"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1568"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1578"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1588"/>
         <source>Apply</source>
         <translation>적용</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1606"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1597"/>
         <source>Update</source>
         <translation>업데이트</translation>
     </message>
@@ -23379,12 +24897,12 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccRasterizeTool</name>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="2537"/>
+        <location filename="../ccRasterizeTool.cpp" line="2553"/>
         <source>Delaunay triangulation</source>
         <translation>들로네 삼각분할</translation>
     </message>
     <message>
-        <location filename="../ccRasterizeTool.cpp" line="2537"/>
+        <location filename="../ccRasterizeTool.cpp" line="2553"/>
         <source>Triangles max edge length (0 = no limit)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -23392,46 +24910,51 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccRecentFiles</name>
     <message>
-        <location filename="../ccRecentFiles.cpp" line="35"/>
+        <location filename="../ccRecentFiles.cpp" line="40"/>
         <source>Open Recent...</source>
         <translation>최근열기...</translation>
     </message>
     <message>
-        <location filename="../ccRecentFiles.cpp" line="37"/>
+        <location filename="../ccRecentFiles.cpp" line="42"/>
         <source>Clear Menu</source>
         <translation>메뉴지우기</translation>
+    </message>
+    <message>
+        <location filename="../ccRecentFiles.cpp" line="112"/>
+        <source>File &apos;%1&apos; not found, it has been removed from the recent files</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ccScalarFieldsManagerDialog</name>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="213"/>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="217"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="210"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="214"/>
         <source>Constant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="222"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="219"/>
         <source>New SF name</source>
         <translation type="unfinished">신규 SF 이름</translation>
     </message>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="222"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="219"/>
         <source>SF name (must be unique)</source>
         <translation type="unfinished">SF 이름 (중복되지 않은값)</translation>
     </message>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="312"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="309"/>
         <source>Histogram [%1]</source>
         <translation type="unfinished">히스토그램 [%1]</translation>
     </message>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="323"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="320"/>
         <source>%1 (%2 values) </source>
         <translation type="unfinished">%1 (%2 값) </translation>
     </message>
     <message>
-        <location filename="../ccScalarFieldsManagerDlg.cpp" line="326"/>
+        <location filename="../ccScalarFieldsManagerDlg.cpp" line="323"/>
         <source>Count</source>
         <translation type="unfinished">갯수</translation>
     </message>
@@ -23439,31 +24962,31 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccSectionExtractionTool</name>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1606"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1603"/>
         <source>Unfold cloud(s)</source>
         <translation>클라우드 펼치기</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1609"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1606"/>
         <source>Number of polylines: %1
 Number of points: %2</source>
         <translation>폴리라인 갯수: %1
 점갯수: %2</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1669"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1666"/>
         <source>Number of segments: %1
 Number of points: %2</source>
         <translation>분할갯수: %1
 좀갯수: %2</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1929"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1926"/>
         <source>Extract sections</source>
         <translation>단면추출</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1930"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1927"/>
         <source>Number of sections: %1
 Number of points: %2</source>
         <translation>단면갯수: %1
@@ -23514,50 +25037,50 @@ Number of points: %2</source>
         <translation>옥트리</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="178"/>
-        <location filename="../ccSubsamplingDlg.cpp" line="183"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="169"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="174"/>
         <source>none</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="179"/>
-        <location filename="../ccSubsamplingDlg.cpp" line="184"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="170"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="175"/>
         <source>all</source>
         <translation>전체</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="180"/>
-        <location filename="../ccSubsamplingDlg.cpp" line="185"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="171"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="176"/>
         <source>remaining points</source>
         <translation>남은점</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="188"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="179"/>
         <source>large</source>
         <translation>라지</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="189"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="180"/>
         <source>small</source>
         <translation>스몰</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="190"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="181"/>
         <source>min. space between points</source>
         <translation>점간 최소공간</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="193"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="184"/>
         <source>min</source>
         <translation>최소</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="194"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="185"/>
         <source>max</source>
         <translation>최대</translation>
     </message>
     <message>
-        <location filename="../ccSubsamplingDlg.cpp" line="195"/>
+        <location filename="../ccSubsamplingDlg.cpp" line="186"/>
         <source>subdivision level</source>
         <translation>하위분할 레벨</translation>
     </message>
@@ -23565,7 +25088,7 @@ Number of points: %2</source>
 <context>
     <name>ccTracePolylineTool</name>
     <message>
-        <location filename="../ccTracePolylineTool.cpp" line="178"/>
+        <location filename="../ccTracePolylineTool.cpp" line="173"/>
         <source>Oversampling polyline: %1 vertices</source>
         <translation>과샘플링 폴리라인: %1 버텍스</translation>
     </message>
@@ -23929,20 +25452,20 @@ At least 2 viewports must be selected.</source>
 <context>
     <name>qBroomDlg</name>
     <message>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1913"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1910"/>
         <source>Error</source>
         <translation>에러</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1953"/>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1972"/>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2001"/>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2072"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1950"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1969"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1998"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2069"/>
         <source>Not enough memory</source>
         <translation>메모리 부족</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2066"/>
+        <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2063"/>
         <source>Not enough memory to apply the last segmentation</source>
         <translation>최근 분할에 적용할 메모리가 부족합니다</translation>
     </message>
@@ -23956,6 +25479,24 @@ At least 2 viewports must be selected.</source>
     </message>
 </context>
 <context>
+    <name>qCork</name>
+    <message>
+        <location filename="../../plugins/core/Standard/qCork/src/qCork.cpp" line="330"/>
+        <source>Another boolean operation is already in progress!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCork/src/qCork.cpp" line="398"/>
+        <source>Computation failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCork/src/qCork.cpp" line="398"/>
+        <source>Computation failed! (check console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>qHoughNormals</name>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/src/qHoughNormals.cpp" line="132"/>
@@ -23966,7 +25507,12 @@ At least 2 viewports must be selected.</source>
 <context>
     <name>qMeshBoolean</name>
     <message>
-        <location filename="../../plugins/core/Standard/qMeshBoolean/src/qMeshBoolean.cpp" line="330"/>
+        <location filename="../../plugins/core/Standard/qMeshBoolean/src/qMeshBoolean.cpp" line="295"/>
+        <source>Another boolean operation is already in progress!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qMeshBoolean/src/qMeshBoolean.cpp" line="338"/>
         <source>Operation in progress</source>
         <translation>작동중</translation>
     </message>
@@ -23980,14 +25526,22 @@ At least 2 viewports must be selected.</source>
     </message>
 </context>
 <context>
+    <name>qPoissonRecon</name>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/src/qPoissonRecon.cpp" line="423"/>
+        <source>Initialization</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>qRansacSD</name>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/src/qRANSAC_SD.cpp" line="422"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/src/qRANSAC_SD.cpp" line="432"/>
         <source>Computing normals (please wait)</source>
         <translation>Normals 계산중 (기다리십시오)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/src/qRANSAC_SD.cpp" line="496"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/src/qRANSAC_SD.cpp" line="506"/>
         <source>Operation in progress (please wait)</source>
         <translation>작업중 (기다리십시오)</translation>
     </message>

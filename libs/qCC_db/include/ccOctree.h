@@ -70,10 +70,19 @@ class QCC_DB_LIB_API ccOctree : public QObject
 	//! Returns the octree (square) bounding-box
 	ccBBox getSquareBB() const;
 	//! Returns the points bounding-box
-	ccBBox getPointsBB() const;
+	const ccBBox& getPointsBB() const
+	{
+		return m_pointsBoundingBox;
+	}
 
 	// inherited from DgmOctree
 	void clear() override;
+	int  build(CCCoreLib::GenericProgressCallback* progressCb = nullptr) override;
+	int  build(const CCVector3&                    octreeMin,
+	           const CCVector3&                    octreeMax,
+	           const CCVector3*                    pointsMinFilter = nullptr,
+	           const CCVector3*                    pointsMaxFilter = nullptr,
+	           CCCoreLib::GenericProgressCallback* progressCb      = nullptr) override;
 
   public: // RENDERING
 	//! Returns the currently displayed octree level
@@ -197,4 +206,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 
 	//! For frustum intersection
 	ccOctreeFrustumIntersector* m_frustumIntersector;
+
+	//! Bounding-box of the points projected in the octree
+	ccBBox m_pointsBoundingBox;
 };

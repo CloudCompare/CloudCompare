@@ -105,28 +105,71 @@ ccBBox ccOctree::getSquareBB() const
 	return {m_dimMin, m_dimMax, true};
 }
 
-ccBBox ccOctree::getPointsBB() const
-{
-	return {m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0};
-}
-
 void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	m_dimMin *= multFactor;
 	m_dimMax *= multFactor;
-	m_pointsMin *= multFactor;
-	m_pointsMax *= multFactor;
+	m_pointsBoundingBox *= multFactor;
 
 	for (int i = 0; i <= MAX_OCTREE_LEVEL; ++i)
+	{
 		m_cellSize[i] *= multFactor;
+	}
 }
 
 void ccOctree::translateBoundingBox(const CCVector3& T)
 {
 	m_dimMin += T;
 	m_dimMax += T;
-	m_pointsMin += T;
-	m_pointsMax += T;
+	m_pointsBoundingBox += T;
+}
+
+int ccOctree::build(CCCoreLib::GenericProgressCallback* progressCb /*=nullptr*/)
+{
+	// determine the projected points bounding-box
+	if (m_theAssociatedCloud)
+	{
+		CCVector3 pointsMin, pointsMax;
+		m_theAssociatedCloud->getBoundingBox(pointsMin, pointsMax);
+		m_pointsBoundingBox = ccBBox(pointsMin, pointsMax, true);
+	}
+	else
+	{
+		assert(false);
+	}
+
+	return CCCoreLib::DgmOctree::build(progressCb);
+}
+
+int ccOctree::build(const CCVector3&                    octreeMin,
+                    const CCVector3&                    octreeMax,
+                    const CCVector3*                    pointsMinFilter /*=nullptr*/,
+                    const CCVector3*                    pointsMaxFilter /*=nullptr*/,
+                    CCCoreLib::GenericProgressCallback* progressCb /*=nullptr*/)
+{
+	// determine the projected points bounding-box
+	if (m_theAssociatedCloud)
+	{
+		CCVector3 pointsMin, pointsMax;
+		m_theAssociatedCloud->getBoundingBox(pointsMin, pointsMax);
+		m_pointsBoundingBox = ccBBox(pointsMin, pointsMax, true);
+
+		if (pointsMinFilter && pointsMaxFilter)
+		{
+			m_pointsBoundingBox.minCorner().x = std::clamp(m_pointsBoundingBox.minCorner().x, pointsMinFilter->x, pointsMaxFilter->x);
+			m_pointsBoundingBox.minCorner().y = std::clamp(m_pointsBoundingBox.minCorner().y, pointsMinFilter->y, pointsMaxFilter->y);
+			m_pointsBoundingBox.minCorner().z = std::clamp(m_pointsBoundingBox.minCorner().z, pointsMinFilter->z, pointsMaxFilter->z);
+			m_pointsBoundingBox.maxCorner().x = std::clamp(m_pointsBoundingBox.maxCorner().x, pointsMinFilter->x, pointsMaxFilter->x);
+			m_pointsBoundingBox.maxCorner().y = std::clamp(m_pointsBoundingBox.maxCorner().y, pointsMinFilter->y, pointsMaxFilter->y);
+			m_pointsBoundingBox.maxCorner().z = std::clamp(m_pointsBoundingBox.maxCorner().z, pointsMinFilter->z, pointsMaxFilter->z);
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+
+	return CCCoreLib::DgmOctree::build(octreeMin, octreeMax, pointsMinFilter, pointsMaxFilter, progressCb);
 }
 
 /*** RENDERING METHODS ***/
@@ -144,7 +187,9 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
+	{
 		return;
+	}
 
 	glFunc->glPushAttrib(GL_LIGHTING_BIT);
 
@@ -154,13 +199,10 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 		//(therefore we always render it dynamically)
 
 		glFunc->glDisable(GL_LIGHTING);
-		if (pickingColor)
-			ccGL::Color(glFunc, *pickingColor);
-		else
-			ccGL::Color(glFunc, ccColor::green);
+		ccGL::Color(glFunc, pickingColor ? *pickingColor : ccColor::green);
 
-		void* additionalParameters[] = {reinterpret_cast<void*>(m_frustumIntersector),
-		                                reinterpret_cast<void*>(glFunc)};
+		void* additionalParameters[]{reinterpret_cast<void*>(m_frustumIntersector),
+		                             reinterpret_cast<void*>(glFunc)};
 		executeFunctionForAllCellsAtLevel(m_displayedLevel,
 		                                  &DrawCellAsABox,
 		                                  additionalParameters);
@@ -244,10 +286,12 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 				box.showNormals(glParams.showNorms);
 
 				// trick: replace all normal indexes so that they point on the first one
+				if (box.arePerTriangleNormalsEnabled())
 				{
-					if (box.arePerTriangleNormalsEnabled())
-						for (unsigned i = 0; i < box.size(); ++i)
-							box.setTriangleNormalIndexes(i, 0, 0, 0);
+					for (unsigned i = 0; i < box.size(); ++i)
+					{
+						box.setTriangleNormalIndexes(i, 0, 0, 0);
+					}
 				}
 
 				// fake context

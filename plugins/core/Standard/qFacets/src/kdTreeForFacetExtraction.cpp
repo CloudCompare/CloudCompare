@@ -133,7 +133,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			currentCell->userData = macroIndex++;
 
 			//we init the current set of 'fused' points with the cell's points
-			CCCoreLib::ReferenceCloud* currentPointSet = currentCell->points;
+			auto* currentPointSet = currentCell->points;
 			//get current fused set centroid and normal
 			CCVector3 currentCentroid = *CCCoreLib::Neighbourhood(currentPointSet).getGravityCenter();
 			CCVector3 currentNormal(currentCell->planeEq);
@@ -249,7 +249,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						}
 
 						//fuse the main set with the current candidate
-						CCCoreLib::ReferenceCloud* fused = new CCCoreLib::ReferenceCloud(*currentPointSet);
+						CCCoreLib::ReferenceCloud* fused = new CCCoreLib::ReferenceCloud(currentPointSet);
 						if (!fused->add(*(it->leaf->points)))
 						{
 							//not enough memory!
@@ -363,7 +363,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 		for (size_t i = 0; i < leaves.size(); ++i)
 		{
-			CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
+			auto* subset = leaves[i]->points;
 			if (subset)
 			{
 				ScalarType scalar = static_cast<ScalarType>(leaves[i]->userData);

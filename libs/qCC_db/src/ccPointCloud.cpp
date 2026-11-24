@@ -762,14 +762,6 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 	assert(addedCloud);
 
-	// the per-point arrays must have one value per point, otherwise copying them
-	// below would throw or silently drop values
-	addedCloud->fixPerPointArraySizes();
-	if (size() == pointCountBefore)
-	{
-		fixPerPointArraySizes();
-	}
-
 	unsigned addedPoints = addedCloud->size();
 
 	if (!reserve(pointCountBefore + addedPoints))

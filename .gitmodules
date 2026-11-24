@@ -59,3 +59,7 @@
 [submodule "plugins/core/Standard/qFWF"]
 	path = plugins/core/Standard/qFWF
 	url = https://github.com/dgirardeau/qFWF.git
+[submodule "plugins/core/Standard/qSemSeg"]
+	path = plugins/core/Standard/qSemSeg
+	url = https://github.com/DanielRoncelli/qSemSeg.git
+	branch = master

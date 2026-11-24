@@ -46,19 +46,25 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
 
-      # qSemSeg: bundle the official ONNX Runtime CPU release next to the apps
+      # qSemSeg: bundle the official ONNX Runtime CPU runtime next to the apps
       # at install time (ONNXRUNTIME_DLL_DIR). CUDA/DirectML stay optional
       # manual downloads - see the plugin README. The version matches the
       # vendored C API header (ORT >= 1.23).
+      # The GitHub release assets for 1.23.2 are no longer available; the same
+      # Microsoft-built binaries ship in the PyPI wheel (pinned by SHA256).
       - name: Download ONNX Runtime (Windows)
         if: matrix.config.os == 'windows-latest'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri 'https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-win-x64-1.23.2.zip' -OutFile ort.zip
-          $hash = (Get-FileHash ort.zip -Algorithm SHA256).Hash.ToLower()
-          if ($hash -ne '0b38df9af21834e41e73d602d90db5cb06dbd1ca618948b8f1d66d607ac9f3cd') { throw "ONNX Runtime zip hash mismatch: $hash" }
+          Invoke-WebRequest -Uri 'https://files.pythonhosted.org/packages/3a/db/1b4a62e23183a0c3fe441782462c0ede9a2a65c6bbffb9582fab7c7a0d38/onnxruntime-1.23.2-cp311-cp311-win_amd64.whl' -OutFile ort.whl
+          $hash = (Get-FileHash ort.whl -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne '902c756d8b633ce0dedd889b7c08459433fbcf35e9c38d1c03ddc020f0648c6e') { throw "ONNX Runtime wheel hash mismatch: $hash" }
+          Copy-Item ort.whl ort.zip
           Expand-Archive ort.zip -DestinationPath ort -Force
-          "ONNXRUNTIME_DLL_DIR=$env:GITHUB_WORKSPACE/ort/onnxruntime-win-x64-1.23.2/lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          New-Item -ItemType Directory -Force ort/lib | Out-Null
+          Copy-Item ort/onnxruntime/capi/onnxruntime.dll ort/lib/
+          Copy-Item ort/onnxruntime/capi/onnxruntime_providers_shared.dll ort/lib/
+          "ONNXRUNTIME_DLL_DIR=$env:GITHUB_WORKSPACE/ort/lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'
@@ -205,19 +211,24 @@ jobs:
           udev libudev-dev libhidapi-dev libusb-1.0-0-dev
           xvfb
 
-      # qSemSeg: download the ONNX Runtime CPU release for the TestSemSeg
+      # qSemSeg: download the ONNX Runtime CPU runtime for the TestSemSeg
       # gated stages (warm-up probe, validation report) and the
       # TestSemSegRunParity test against the committed tiny model, plus
       # install-time bundling next to the apps (ONNXRUNTIME_DLL_DIR).
       # Version matches the vendored C API header (ORT >= 1.23).
+      # The GitHub release assets for 1.23.2 are no longer available; the same
+      # Microsoft-built binaries ship in the PyPI wheel (pinned by SHA256).
       - name: Download ONNX Runtime (Ubuntu)
         run: |
-          curl -sSL -o ort.tgz https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-linux-x64-1.23.2.tgz
-          echo "1fa4dcaef22f6f7d5cd81b28c2800414350c10116f5fdd46a2160082551c5f9b  ort.tgz" | sha256sum -c -
-          mkdir ort && tar -xzf ort.tgz -C ort
-          echo "QSEMSEG_TEST_ORT_LIBRARY=$GITHUB_WORKSPACE/ort/onnxruntime-linux-x64-1.23.2/lib/libonnxruntime.so.1" >> $GITHUB_ENV
+          curl -sSL -o ort.whl https://files.pythonhosted.org/packages/e9/80/113381ba832d5e777accedc6cb41d10f9eca82321ae31ebb6bcede530cea/onnxruntime-1.23.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+          echo "da44b99206e77734c5819aa2142c69e64f3b46edc3bd314f6a45a932defc0b3e  ort.whl" | sha256sum -c -
+          unzip -q ort.whl -d ort
+          mkdir -p ort/lib
+          cp ort/onnxruntime/capi/libonnxruntime.so.1.23.2 ort/lib/libonnxruntime.so.1
+          cp ort/onnxruntime/capi/libonnxruntime_providers_shared.so ort/lib/
+          echo "QSEMSEG_TEST_ORT_LIBRARY=$GITHUB_WORKSPACE/ort/lib/libonnxruntime.so.1" >> $GITHUB_ENV
           echo "QSEMSEG_TINY_MODEL=$GITHUB_WORKSPACE/plugins/core/Standard/qSemSeg/test/data/tiny_fkaconv.onnx" >> $GITHUB_ENV
-          echo "ONNXRUNTIME_DLL_DIR=$GITHUB_WORKSPACE/ort/onnxruntime-linux-x64-1.23.2/lib" >> $GITHUB_ENV
+          echo "ONNXRUNTIME_DLL_DIR=$GITHUB_WORKSPACE/ort/lib" >> $GITHUB_ENV
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'

@@ -86,6 +86,15 @@ jobs:
           export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
           export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
 
+          # qSemSeg: pass the Windows-only options here so cmake runs once.
+          # BUILD_TESTING compiles TestSemSeg so the MSVC build covers it too.
+          EXTRA_ARGS=()
+          if [ "${{ matrix.config.os }}" = "windows-latest" ]; then
+            EXTRA_ARGS+=("-DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/cc-install")
+            EXTRA_ARGS+=("-DONNXRUNTIME_DLL_DIR=$ONNXRUNTIME_DLL_DIR")
+            EXTRA_ARGS+=("-DBUILD_TESTING=ON")
+          fi
+
           cmake \
             -B build \
             -G "${{ matrix.config.generator }}" \
@@ -125,18 +134,8 @@ jobs:
             -DPLUGIN_STANDARD_QPCL=OFF \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             -DPLUGIN_STANDARD_QVOXFALL=ON \
+            "${EXTRA_ARGS[@]}" \
             .
-
-          # qSemSeg: deterministic install tree + install-time ONNX Runtime
-          # bundling (Windows only; macOS keeps the default install prefix).
-          # BUILD_TESTING compiles the plugin's test suite (TestSemSeg) so the
-          # MSVC build is covered too - the Windows job runs it below.
-          if [ "${{ matrix.config.os }}" = "windows-latest" ]; then
-            cmake -B build \
-              -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/cc-install" \
-              -DONNXRUNTIME_DLL_DIR="$ONNXRUNTIME_DLL_DIR" \
-              -DBUILD_TESTING=ON
-          fi
 
       - name: Check Format
         if: matrix.config.os == 'windows-latest'

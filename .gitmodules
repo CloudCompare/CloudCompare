@@ -56,3 +56,6 @@
 [submodule "libs/qPCP"]
 	path = libs/qPCP
 	url = https://github.com/farmakis/qPCP.git
+[submodule "plugins/core/Standard/qFWF"]
+	path = plugins/core/Standard/qFWF
+	url = https://github.com/dgirardeau/qFWF.git

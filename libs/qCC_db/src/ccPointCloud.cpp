@@ -1659,6 +1659,81 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 	       && (!hasFWF() || m_fwfWaveforms.size() == newNumberOfPoints);
 }
 
+bool ccPointCloud::fixPerPointArraySizes()
+{
+	const unsigned pointCount     = size();
+	bool           sizesWereValid = true;
+
+	// warns that an array doesn't have one value per point (before it gets fixed)
+	auto warnWrongSize = [&](const QString& arrayName, size_t arraySize, const char* missingValues)
+	{
+		sizesWereValid = false;
+		ccLog::Warning(QString("[ccPointCloud] Cloud '%1' has %2 %3 for %4 points: %5")
+		                   .arg(getName())
+		                   .arg(arraySize)
+		                   .arg(arrayName)
+		                   .arg(pointCount)
+		                   .arg(arraySize < pointCount ? QString("the missing ones are %1").arg(missingValues) : QString("the extra ones are removed")));
+	};
+
+	if (hasColors() && m_rgbaColors->currentSize() != pointCount)
+	{
+		warnWrongSize("colors", m_rgbaColors->currentSize(), "set to white");
+		if (!m_rgbaColors->resizeSafe(pointCount, true, &ccColor::white))
+		{
+			ccLog::Warning("[ccPointCloud] Not enough memory: the colors are removed");
+			unallocateColors();
+		}
+		colorsHaveChanged();
+	}
+
+	if (hasNormals() && m_normals->currentSize() != pointCount)
+	{
+		warnWrongSize("normals", m_normals->currentSize(), "set to (0,0,0)");
+		static const CompressedNormType s_nullNormal = ccNormalCompressor::NULL_NORM_CODE;
+		if (!m_normals->resizeSafe(pointCount, true, &s_nullNormal))
+		{
+			ccLog::Warning("[ccPointCloud] Not enough memory: the normals are removed");
+			unallocateNorms();
+		}
+		normalsHaveChanged();
+	}
+
+	for (unsigned i = 0; i < getNumberOfScalarFields();)
+	{
+		CCCoreLib::ScalarField::Shared sf = getScalarField(static_cast<int>(i));
+		if (sf->currentSize() != pointCount)
+		{
+			warnWrongSize(QString("values in scalar field '%1'").arg(QString::fromStdString(sf->getName())), sf->currentSize(), "set to NaN");
+			colorsHaveChanged(); // in case it's the displayed scalar field
+			if (!sf->resizeSafe(pointCount, true, CCCoreLib::NAN_VALUE))
+			{
+				ccLog::Warning(QString("[ccPointCloud] Not enough memory: the scalar field '%1' is removed").arg(QString::fromStdString(sf->getName())));
+				deleteScalarField(static_cast<int>(i));
+				continue;
+			}
+			sf->computeMinAndMax();
+		}
+		++i;
+	}
+
+	if (!m_fwfWaveforms.empty() && m_fwfWaveforms.size() != pointCount)
+	{
+		warnWrongSize("waveforms", m_fwfWaveforms.size(), "left empty");
+		try
+		{
+			m_fwfWaveforms.resize(pointCount, ccWaveform(0));
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning("[ccPointCloud] Not enough memory: the waveforms are removed");
+			clearFWFData();
+		}
+	}
+
+	return sizesWereValid;
+}
+
 void ccPointCloud::showSFColorsScale(bool state)
 {
 	m_sfColorScaleDisplayed = state;
@@ -5600,7 +5675,6 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 				m_fwfDescriptors.clear();
 				return ReadError();
 			}
-			assert(waveformCount >= size());
 			try
 			{
 				m_fwfWaveforms.resize(waveformCount);
@@ -5652,6 +5726,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			}
 		}
 	}
+
+	// the file may have been saved with per-point arrays of the wrong size (e.g. because of #2542)
+	fixPerPointArraySizes();
 
 	// notifyGeometryUpdate(); //FIXME: we can't call it now as the dependent 'pointers' are not valid yet!
 

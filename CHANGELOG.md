@@ -166,6 +166,10 @@ New plugins
 		
 	- 3D Forest Inventory
 		- previously available as a Python plugin, now a standalone C++ one
+		
+	- FWF: las full waveforms advanced processing
+		- github repository: https://github.com/dgirardeau/qFWF.git
+		- Documentation: https://lidar.univ-rennes.fr/en/fwf
 
 Improvements:
 

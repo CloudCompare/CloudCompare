@@ -645,6 +645,17 @@ bool StereogramDialog::init(double angularStep_deg,
 						+	ccNormalVectors::ConvertDipAndDipDirToString(	static_cast<PointCoordinateType>(meanDip_deg),
 																			static_cast<PointCoordinateType>(meanDipDir_deg)) );
 
+	//the filter center is initialized with the mean orientation (see StereogramWidget::init)
+	if (meanDip_deg >= 0 && meanDipDir_deg >= 0)
+	{
+		dipDoubleSpinBox->blockSignals(true);
+		dipDirDoubleSpinBox->blockSignals(true);
+		dipDoubleSpinBox->setValue(meanDip_deg);
+		dipDirDoubleSpinBox->setValue(meanDipDir_deg);
+		dipDoubleSpinBox->blockSignals(false);
+		dipDirDoubleSpinBox->blockSignals(false);
+	}
+
 	//restore any old set state before forgetting it!
 	bool filterModeEnabled = filterFacetsGroupBox->isChecked();
 	if (m_facetGroupUniqueID != 0 && filterModeEnabled)

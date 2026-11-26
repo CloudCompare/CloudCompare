@@ -97,13 +97,13 @@ static void LogHidReport(const char* label, const unsigned char* buf, int n)
 #endif // CC_HID_DEBUG
 
 #ifndef CC_WINDOWS
-//! Returns true if the 3Dconnexion driver daemon (3DConnexionHelper application) is
+//! Returns true if the 3Dconnexion driver daemon (3DconnexionHelper application) is
 //! currently running. On macOS it holds an exclusive lock on 3DConnexion HID
 //! devices and silently consumes reports, so our hid_read returns 0 forever.
 static bool Is3dConnexionHelperRunning()
 {
 	// pgrep -x matches the exact process name. Exit code 0 == found.
-	int exitCode = QProcess::execute(QStringLiteral("pgrep"), {QStringLiteral("-x"), QStringLiteral("3DConnexionHelper")});
+	int exitCode = QProcess::execute(QStringLiteral("pgrep"), {QStringLiteral("-x"), QStringLiteral("3DconnexionHelper")});
 	return exitCode == 0;
 }
 #endif
@@ -264,7 +264,7 @@ bool HIDWorker::openDevice()
 	}
 
 	// Fallback: first openable interface. This is typically only reached when
-	// 3DConnexionHelper application is running (it creates virtual HID interfaces that
+	// 3DconnexionHelper application is running (it creates virtual HID interfaces that
 	// don't carry the Multi-axis Controller usage), or on devices that simply
 	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
 	if (!m_handle)
@@ -297,11 +297,11 @@ bool HIDWorker::openDevice()
 #ifndef CC_WINDOWS
 	// Warn if the 3Dconnexion driver daemon is running: it holds an exclusive
 	// lock on the device and silently consumes reports, so our hid_read would
-	// return 0 forever. The user must quit 3DConnexionHelper.app (System
+	// return 0 forever. The user must quit 3DconnexionHelper.app (System
 	// Settings -> General -> Login Items / Background) for the HID path to work.
 	if (Is3dConnexionHelperRunning())
 	{
-		ccLog::Warning("[3D Mouse] 3DConnexionHelper application is running and may "
+		ccLog::Warning("[3D Mouse] 3DconnexionHelper application is running and may "
 		               "intercept the device. If so, quit it (System Settings -> "
 		               "General -> Login Items / Background) to use the HID path.");
 	}
@@ -398,7 +398,7 @@ void HIDWorker::run()
 					               "If you have moved the cap and nothing happens, "
 					               "you may want to try stopping the 3DConnexion driver "
 #ifndef CC_WINDOWS
-					               "(3DConnexionHelper application)"
+					               "(3DconnexionHelper application) "
 #endif
 					               "as it can intercept the device and prevent the HID "
 					               "path from seeing reports.");

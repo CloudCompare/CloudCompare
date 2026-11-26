@@ -70,12 +70,16 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 	ccGenericPointCloud* associatedGenericCloud = kdTree->associatedGenericCloud();
 	if (!associatedGenericCloud || !associatedGenericCloud->isA(CC_TYPES::POINT_CLOUD) || maxError < 0.0)
+	{
 		return false;
+	}
 
 	//get leaves
 	std::vector<ccKdTree::Leaf*> leaves;
 	if (!kdTree->getLeaves(leaves) || leaves.empty())
+	{
 		return false;
+	}
 
 	//progress notification
 	CCCoreLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(leaves.size()));
@@ -116,7 +120,9 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		for (auto& currentCell : leaves)
 		{
 			if (currentCell->error >= maxError)
+			{
 				currentCell->userData = 0; //0 = special group for cells already above the user defined threshold!
+			}
 
 			//already fused?
 			if (currentCell->userData != -1)
@@ -199,8 +205,10 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					//update the set of candidates
 					if (closestFirst && candidates.size() > 1)
 					{
-						for (std::list<Candidate>::iterator it = candidates.begin(); it !=candidates.end(); ++it)
-							it->dist = (it->centroid-currentCentroid).norm2();
+						for (std::list<Candidate>::iterator it = candidates.begin(); it != candidates.end(); ++it)
+						{
+							it->dist = (it->centroid - currentCentroid).norm2();
+						}
 
 						//sort candidates by their distance
 						candidates.sort(CandidateDistAscendingComparison);
@@ -235,7 +243,9 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 								const CCVector3* P = currentPointSet->getPoint(j);
 								PointCoordinateType d2 = (*P - it->centroid).norm2();
 								if (d2 < minDistToMainSet || j == 0)
+								{
 									minDistToMainSet = d2;
+								}
 							}
 							minDistToMainSet = sqrt(minDistToMainSet);
 						}
@@ -249,14 +259,16 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						}
 
 						//fuse the main set with the current candidate
-						CCCoreLib::ReferenceCloud* fused = new CCCoreLib::ReferenceCloud(currentPointSet);
+						CCCoreLib::ReferenceCloud* fused = new CCCoreLib::ReferenceCloud(*currentPointSet);
 						if (!fused->add(*(it->leaf->points)))
 						{
 							//not enough memory!
 							ccLog::Warning("[ccKdTreeForFacetExtraction] Not enough memory!");
 							delete fused;
 							if (currentPointSet != currentCell->points)
+							{
 								delete currentPointSet;
+							}
 							return false;
 						}
 
@@ -281,13 +293,17 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 								bestIt = it;
 								bestError = error;
 								if (bestFused)
+								{
 									delete bestFused;
+								}
 								bestFused = fused;
 								bestNormal = CCVector3(planeEquation);
 								fused = nullptr;
 
 								if (closestFirst)
+								{
 									break; //if we have found a good candidate, we stop here (closest first ;)
+								}
 							}
 							++it;
 						}
@@ -304,7 +320,9 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					{
 						assert(bestFused && bestError >= 0.0);
 						if (currentPointSet != currentCell->points)
+						{
 							delete currentPointSet;
+						}
 						currentPointSet = bestFused;
 						{
 							//update infos
@@ -344,11 +362,15 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 			//end of the fusion process for the current leaf
 			if (currentPointSet != currentCell->points)
+			{
 				delete currentPointSet;
+			}
 			currentPointSet = nullptr;
 
 			if (cancelled)
+			{
 				break;
+			}
 		}
 	}
 

@@ -46,6 +46,26 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
 
+      # qSemSeg: bundle the official ONNX Runtime CPU runtime next to the apps
+      # at install time (ONNXRUNTIME_DLL_DIR). CUDA/DirectML stay optional
+      # manual downloads - see the plugin README. The version matches the
+      # vendored C API header (ORT >= 1.23).
+      # The GitHub release assets for 1.23.2 are no longer available; the same
+      # Microsoft-built binaries ship in the PyPI wheel (pinned by SHA256).
+      - name: Download ONNX Runtime (Windows)
+        if: matrix.config.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri 'https://files.pythonhosted.org/packages/3a/db/1b4a62e23183a0c3fe441782462c0ede9a2a65c6bbffb9582fab7c7a0d38/onnxruntime-1.23.2-cp311-cp311-win_amd64.whl' -OutFile ort.whl
+          $hash = (Get-FileHash ort.whl -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne '902c756d8b633ce0dedd889b7c08459433fbcf35e9c38d1c03ddc020f0648c6e') { throw "ONNX Runtime wheel hash mismatch: $hash" }
+          Copy-Item ort.whl ort.zip
+          Expand-Archive ort.zip -DestinationPath ort -Force
+          New-Item -ItemType Directory -Force ort/lib | Out-Null
+          Copy-Item ort/onnxruntime/capi/onnxruntime.dll ort/lib/
+          Copy-Item ort/onnxruntime/capi/onnxruntime_providers_shared.dll ort/lib/
+          "ONNXRUNTIME_DLL_DIR=$env:GITHUB_WORKSPACE/ort/lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
@@ -65,6 +85,15 @@ jobs:
 
           export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
           export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
+
+          # qSemSeg: pass the Windows-only options here so cmake runs once.
+          # BUILD_TESTING compiles TestSemSeg so the MSVC build covers it too.
+          EXTRA_ARGS=()
+          if [ "${{ matrix.config.os }}" = "windows-latest" ]; then
+            EXTRA_ARGS+=("-DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/cc-install")
+            EXTRA_ARGS+=("-DONNXRUNTIME_DLL_DIR=$ONNXRUNTIME_DLL_DIR")
+            EXTRA_ARGS+=("-DBUILD_TESTING=ON")
+          fi
 
           cmake \
             -B build \
@@ -101,9 +130,11 @@ jobs:
             -DPLUGIN_STANDARD_QPOISSON_RECON=OFF \
             -DPLUGIN_STANDARD_QSRA=ON \
             -DPLUGIN_STANDARD_QRANSAC_SD=ON \
+            -DPLUGIN_STANDARD_QSEMSEG=ON \
             -DPLUGIN_STANDARD_QPCL=OFF \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             -DPLUGIN_STANDARD_QVOXFALL=ON \
+            "${EXTRA_ARGS[@]}" \
             .
 
       - name: Check Format
@@ -113,6 +144,13 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
+      # qSemSeg: the plugin's test suite must also compile and pass under
+      # MSVC. Only that test is run here; the unrelated core tests are
+      # exercised by the Ubuntu job, where the full ctest suite runs under xvfb.
+      - name: Test qSemSeg (Windows)
+        if: matrix.config.os == 'windows-latest'
+        run: ctest --test-dir build -R "^TestSemSeg$" --output-on-failure
+
       - name: Install (macOS)
         if: matrix.config.os == 'macos-latest'
         run: sudo cmake --install build
@@ -120,6 +158,21 @@ jobs:
       - name: Install (Windows)
         if: matrix.config.os == 'windows-latest'
         run: cmake --install build
+
+      # qSemSeg: end-to-end smoke test of the bundled runtime - the probe runs
+      # the plugin's exact startup sequence (ORT load, session creation,
+      # manifest and IO validation, one warm-up inference) against the
+      # committed tiny test model. Exit 0 proves a fresh Windows machine can
+      # run qSemSeg with zero manual steps.
+      - name: Smoke test qSemSeg (Windows)
+        if: matrix.config.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/cc-install/CloudCompare/qSemSegProbe.exe" `
+            "$env:GITHUB_WORKSPACE/cc-install/CloudCompare/onnxruntime.dll" `
+            "$env:GITHUB_WORKSPACE/plugins/core/Standard/qSemSeg/test/data/tiny_fkaconv.onnx" `
+            cpu
+          if ($LASTEXITCODE -ne 0) { throw "qSemSegProbe smoke test failed (exit $LASTEXITCODE)" }
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }}
@@ -156,6 +209,25 @@ jobs:
           libglu1-mesa-dev
           udev libudev-dev libhidapi-dev libusb-1.0-0-dev
           xvfb
+
+      # qSemSeg: download the ONNX Runtime CPU runtime for the TestSemSeg
+      # gated stages (warm-up probe, validation report) and the
+      # TestSemSegRunParity test against the committed tiny model, plus
+      # install-time bundling next to the apps (ONNXRUNTIME_DLL_DIR).
+      # Version matches the vendored C API header (ORT >= 1.23).
+      # The GitHub release assets for 1.23.2 are no longer available; the same
+      # Microsoft-built binaries ship in the PyPI wheel (pinned by SHA256).
+      - name: Download ONNX Runtime (Ubuntu)
+        run: |
+          curl -sSL -o ort.whl https://files.pythonhosted.org/packages/e9/80/113381ba832d5e777accedc6cb41d10f9eca82321ae31ebb6bcede530cea/onnxruntime-1.23.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+          echo "da44b99206e77734c5819aa2142c69e64f3b46edc3bd314f6a45a932defc0b3e  ort.whl" | sha256sum -c -
+          unzip -q ort.whl -d ort
+          mkdir -p ort/lib
+          cp ort/onnxruntime/capi/libonnxruntime.so.1.23.2 ort/lib/libonnxruntime.so.1
+          cp ort/onnxruntime/capi/libonnxruntime_providers_shared.so ort/lib/
+          echo "QSEMSEG_TEST_ORT_LIBRARY=$GITHUB_WORKSPACE/ort/lib/libonnxruntime.so.1" >> $GITHUB_ENV
+          echo "QSEMSEG_TINY_MODEL=$GITHUB_WORKSPACE/plugins/core/Standard/qSemSeg/test/data/tiny_fkaconv.onnx" >> $GITHUB_ENV
+          echo "ONNXRUNTIME_DLL_DIR=$GITHUB_WORKSPACE/ort/lib" >> $GITHUB_ENV
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -232,16 +304,20 @@ jobs:
           -DPLUGIN_STANDARD_QPOISSON_RECON=ON
           -DPLUGIN_STANDARD_QSRA=ON
           -DPLUGIN_STANDARD_QRANSAC_SD=ON
+          -DPLUGIN_STANDARD_QSEMSEG=ON
           -DPLUGIN_STANDARD_QPCL=ON
           -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
           -DPLUGIN_STANDARD_QVOXFALL=ON
           -DBUILD_TESTING=ON
+          -DQSEMSEG_TEST_ORT_LIBRARY="$QSEMSEG_TEST_ORT_LIBRARY"
+          -DQSEMSEG_TEST_MODEL="$QSEMSEG_TINY_MODEL"
+          -DONNXRUNTIME_DLL_DIR="$ONNXRUNTIME_DLL_DIR"
 
       - name: Build
         run: cmake --build build --parallel
 
       - name: Test
-        run: xvfb-run ctest --test-dir build
+        run: xvfb-run ctest --test-dir build --output-on-failure
 
       - name: Install
         run: sudo cmake --install build

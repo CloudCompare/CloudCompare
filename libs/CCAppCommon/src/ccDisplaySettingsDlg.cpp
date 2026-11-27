@@ -19,6 +19,7 @@
 
 // Local
 #include "../include/ccApplicationBase.h"
+#include "ccXRaySettingsEditor.h"
 
 // Ui
 #include <ui_displaySettingsDlg.h>
@@ -33,7 +34,6 @@
 // Qt
 #include <QColorDialog>
 #include <QSettings>
-#include <QStyle>
 #include <QStyleFactory>
 
 // System
@@ -155,6 +155,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 
 	m_oldParameters = m_parameters = ccGui::Parameters();
 	m_oldOptions = m_options = ccOptions::Instance();
+
+	new ccXRaySettingsEditor(*this, *m_ui);
 
 	refresh();
 

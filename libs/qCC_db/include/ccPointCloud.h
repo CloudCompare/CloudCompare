@@ -36,7 +36,6 @@
 
 class ccPolyline;
 class ccMesh;
-class QOpenGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 
@@ -524,6 +523,16 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 
 	//! Clears all associated FWF data
 	void clearFWFData();
+
+  public: // X-ray rendering
+	//! Returns whether X-ray display is enabled or not.
+	bool isXRayEnabled() const;
+	//! Sets whether X-ray display is enabled or not.
+	void setXRayEnabled(bool enabled);
+	//! Returns the X-ray exposure override (or NaN if none).
+	double xRayExposureOverride() const;
+	//! Sets the X-ray exposure override (NaN to disable).
+	void setXRayExposureOverride(double value);
 
   public: // other methods
 	//! Returns the cloud gravity center

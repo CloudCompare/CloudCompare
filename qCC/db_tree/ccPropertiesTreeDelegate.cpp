@@ -17,6 +17,8 @@
 
 #include "ccPropertiesTreeDelegate.h"
 
+#include "ccXRayExposureResetButton.h"
+
 // Local
 #include "mainwindow.h"
 #include "matrixDisplayDlg.h"
@@ -28,7 +30,6 @@
 
 // qCC_db
 #include <cc2DLabel.h>
-#include <cc2DViewportLabel.h>
 #include <cc2DViewportObject.h>
 #include <ccAdvancedTypes.h>
 #include <ccCameraSensor.h>
@@ -54,11 +55,11 @@
 #include <ccScalarField.h>
 #include <ccSensor.h>
 #include <ccSphere.h>
-#include <ccSubMesh.h>
 
 // qCC_glWindow
 #include <ccGLWindowInterface.h>
 #include <ccGuiParameters.h>
+#include <ccXRaySettings.h>
 
 // Qt
 #include <QAbstractItemView>
@@ -68,16 +69,14 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QLocale>
 #include <QPushButton>
 #include <QScrollBar>
-#include <QSlider>
 #include <QSpinBox>
 #include <QStandardItemModel>
-#include <QToolButton>
 
 // System
 #include <cassert>
+#include <cmath>
 
 class FilterMouseWheelNoFocusEvent : public QObject
 {
@@ -597,6 +596,15 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	if (_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
 		const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+
+		// x-ray mode
+		{
+			addSeparator(tr("X-ray mode"));
+			auto* item = CHECKABLE_ITEM(cloud->isXRayEnabled(), OBJECT_CLOUD_XRAY);
+			item->setToolTip(tr("Unlit point display. Adjust X-ray settings in Display Settings. Temporarily inactive while EDL is enabled."));
+			appendRow(ITEM(tr("X-ray enabled")), item);
+			appendRow(ITEM(tr("Exposure")), PERSISTENT_EDITOR(OBJECT_CLOUD_XRAY_EXPOSURE), true);
+		}
 
 		// scan grid(s)
 		size_t gridCount = cloud->gridCount();
@@ -1517,6 +1525,57 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget*                    pare
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CLOUD_XRAY_EXPOSURE:
+	{
+		QWidget* widget = new QWidget(parent);
+		widget->setObjectName(QStringLiteral("xRayExposureEditor"));
+		auto* layout = new QHBoxLayout(widget);
+		layout->setContentsMargins(0, 0, 0, 0);
+		auto* slider = new QSlider(Qt::Horizontal, widget);
+		slider->setObjectName(QStringLiteral("xRayExposureSlider"));
+		slider->setRange(-81, 80);
+		auto* spinBox = new QDoubleSpinBox(widget);
+		spinBox->setObjectName(QStringLiteral("xRayExposureValue"));
+		spinBox->setRange(-8.1, 8.0);
+		spinBox->setDecimals(1);
+		spinBox->setSingleStep(0.1);
+		spinBox->setSpecialValueText(tr("Default"));
+		spinBox->setValue(spinBox->minimum());
+		layout->addWidget(slider, 1);
+		layout->addWidget(spinBox);
+		auto* resetButton = createXRayExposureResetButton(spinBox, slider, widget, [this]
+		                                                  { return ccHObjectCaster::ToPointCloud(m_currentObject); },
+		                                                  [this]
+		                                                  { const_cast<ccPropertiesTreeDelegate*>(this)->updateDisplay(); });
+		layout->addWidget(resetButton);
+
+		connect(slider, &QSlider::valueChanged, widget, [spinBox](int position)
+		        {
+			        double value = position / 10.0;
+			        spinBox->setValue(value); });
+
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), widget, [this, slider, resetButton](double value)
+		        {
+					const QSignalBlocker blocker(slider);
+					bool defaultExposure = false;
+					if (value == -8.1) // special text/value
+					{
+						value = ccXRaySettings::Parameters().exposure;
+						defaultExposure = true;
+					}
+					slider->setValue(static_cast<int>(value * 10.0));
+
+					if (m_currentObject && m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+					{
+						ccPointCloud* cloud = static_cast<ccPointCloud*>(m_currentObject);
+						cloud->setXRayExposureOverride(defaultExposure ? std::numeric_limits<double>::quiet_NaN() : value);
+						updateXRayExposureResetButton(resetButton, cloud);
+						const_cast<ccPropertiesTreeDelegate*>(this)->updateDisplay();
+				} });
+
+		outputWidget = widget;
+	}
+	break;
 	case OBJECT_IMAGE_ALPHA:
 	{
 		QSlider* slider = new QSlider(Qt::Horizontal, parent);
@@ -2100,6 +2159,35 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget* editor, const QModelIndex&
 		}
 		break;
 	}
+	case OBJECT_CLOUD_XRAY_EXPOSURE:
+	{
+		auto* slider      = editor->findChild<QSlider*>(QStringLiteral("xRayExposureSlider"));
+		auto* spinBox     = editor->findChild<QDoubleSpinBox*>(QStringLiteral("xRayExposureValue"));
+		auto* resetButton = editor->findChild<QToolButton*>(QStringLiteral("xRayExposureReset"));
+		auto* cloud       = ccHObjectCaster::ToPointCloud(m_currentObject);
+		if (slider && spinBox && cloud)
+		{
+			const QSignalBlocker sliderBlocker(slider);
+			const QSignalBlocker spinBlocker(spinBox);
+
+			double value = cloud->xRayExposureOverride();
+			if (std::isnan(value))
+			{
+				spinBox->setValue(spinBox->minimum()); // should display the special value text ("Default")
+				value = ccXRaySettings::Parameters().exposure;
+			}
+			else
+			{
+				spinBox->setValue(value);
+			}
+			// zoomSpinBox->setSpecialValueText(tr("Default"));
+			if (resetButton)
+				updateXRayExposureResetButton(resetButton, cloud);
+			slider->setValue(static_cast<int>(value * 10));
+			editor->setEnabled(cloud->isXRayEnabled());
+		}
+		break;
+	}
 	case OBJECT_IMAGE_ALPHA:
 	{
 		QSlider* slider = qobject_cast<QSlider*>(editor);
@@ -2395,6 +2483,17 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem* item)
 	case OBJECT_NAME_IN_3D:
 		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
 		redraw = true;
+		break;
+	case OBJECT_CLOUD_XRAY:
+		if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			static_cast<ccPointCloud*>(m_currentObject)->setXRayEnabled(item->checkState() == Qt::Checked);
+			if (auto* editor = m_view ? m_view->indexWidget(m_model->index(item->row() + 1, 1)) : nullptr)
+			{
+				editor->setEnabled(item->checkState() == Qt::Checked);
+			}
+			redraw = true;
+		}
 		break;
 	case OBJECT_SHOW_TRANS_BUFFER_PATH:
 	{

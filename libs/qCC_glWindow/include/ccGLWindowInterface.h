@@ -60,6 +60,8 @@ struct HotZone;
 //! OpenGL 3D view interface
 class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 {
+	friend class ccXRayRenderer;
+
   public:
 	//! Picking mode
 	enum PICKING_MODE

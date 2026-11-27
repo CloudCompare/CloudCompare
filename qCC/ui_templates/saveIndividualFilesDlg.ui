@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SaveIndividualFilesDlg</class>
+ <widget class="QDialog" name="SaveIndividualFilesDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>360</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Save entities as individual files</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="summaryLabel">
+     <property name="text">
+      <string notr="true">Summary</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="outputGroupBox">
+     <property name="title">
+      <string>Output folder</string>
+     </property>
+     <layout class="QHBoxLayout" name="outputLayout">
+      <item>
+       <widget class="QLineEdit" name="outputFolderLineEdit"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseToolButton">
+        <property name="text">
+         <string notr="true">...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="formatsGroupBox">
+     <property name="title">
+      <string>Output formats</string>
+     </property>
+     <layout class="QFormLayout" name="formatsLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="cloudFormatLabel">
+        <property name="text">
+         <string>Clouds</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cloudFormatComboBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="meshFormatLabel">
+        <property name="text">
+         <string>Meshes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="meshFormatComboBox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="polylineFormatLabel">
+        <property name="text">
+         <string>Polylines</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="polylineFormatComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="optionsGroupBox">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QFormLayout" name="optionsLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="folderStructureLabel">
+        <property name="text">
+         <string>Sub-folders</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="folderStructureComboBox">
+        <property name="toolTip">
+         <string>How the DB tree hierarchy (groups) is reproduced as sub-folders</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None (all files in the output folder)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hierarchy below the selected entities</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Full DB tree hierarchy</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QCheckBox" name="overwriteCheckBox">
+        <property name="toolTip">
+         <string>If unchecked, existing files are skipped</string>
+        </property>
+        <property name="text">
+         <string>Overwrite existing files</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="showFilterDialogsCheckBox">
+        <property name="toolTip">
+         <string>If unchecked, the default export options of each format are used</string>
+        </property>
+        <property name="text">
+         <string>Show the format options dialog for each file</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SaveIndividualFilesDlg</receiver>
+   <slot>accept()</slot>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SaveIndividualFilesDlg</receiver>
+   <slot>reject()</slot>
+  </connection>
+ </connections>
+</ui>

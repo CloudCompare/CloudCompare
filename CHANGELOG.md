@@ -4,6 +4,12 @@ CloudCompare Version History
 v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
+	- File > Save as individual files
+		- saves each selected cloud, mesh or polyline in its own file (one output format per entity type)
+		- the DB tree groups can be reproduced as sub-folders (below the selected entities, or from the DB tree root)
+		- duplicate names get a suffix (_1, _2, etc.) and invalid characters are replaced
+		- see https://github.com/CloudCompare/CloudCompare/issues/569
+
 	- New I/O filter: dotBIM (.bim)
 		- to load dotBIM meshes (https://dotbim.net/)
 		- import only; each 'element' is loaded as its own mesh, with its rotation and translation applied

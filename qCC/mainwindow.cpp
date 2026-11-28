@@ -4048,6 +4048,8 @@ void MainWindow::doActionRegister()
 		parameters.maxThreadCount          = rDlg.getMaxThreadCount();
 		parameters.useC2MSignedDistances   = rDlg.useC2MSignedDistances(parameters.robustC2MSignedDistances);
 		parameters.normalsMatching         = rDlg.normalsMatchingOption();
+		parameters.errorMetric             = rDlg.errorMetric();
+		parameters.robustWeighting         = rDlg.robustWeighting();
 
 		if (parameters.adjustScale)
 		{
@@ -4079,8 +4081,22 @@ void MainWindow::doActionRegister()
 	                             this,
 	                             true))
 	{
-		QString rmsString           = tr("Final RMS*: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
-		QString rmsDisclaimerString = tr("(* RMS is potentially weighted, depending on the selected options)");
+		bool    pointToPlane    = (parameters.errorMetric == CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE);
+		bool    robustWeighting = (parameters.robustWeighting != CCCoreLib::ICPRegistrationTools::NO_ROBUST_WEIGHTING);
+		QString rmsString       = tr("Final RMS*: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
+		QString rmsDisclaimerString;
+		if (robustWeighting)
+		{
+			rmsDisclaimerString = (pointToPlane
+			                           ? tr("(* weighted RMS of the point-to-plane distances: with robust weighting, the outliers count less, so it can't be compared with the RMS of a registration without it)")
+			                           : tr("(* weighted RMS: with robust weighting, the outliers count less, so it can't be compared with the RMS of a registration without it)"));
+		}
+		else
+		{
+			rmsDisclaimerString = (pointToPlane
+			                           ? tr("(* RMS of the point-to-plane distances, potentially weighted depending on the selected options)")
+			                           : tr("(* RMS is potentially weighted, depending on the selected options)"));
+		}
 		ccLog::Print(QString("[Register] ") + rmsString);
 		ccLog::Print(QString("[Register] ") + rmsDisclaimerString);
 
@@ -4117,6 +4133,33 @@ void MainWindow::doActionRegister()
 		QString overlapString = tr("Theoretical overlap: %1%").arg(static_cast<int>(parameters.finalOverlapRatio * 100));
 		ccLog::Print(QString("[Register] ") + overlapString);
 		summary << overlapString;
+
+		// error metric and robust weighting
+		{
+			QString metricString = tr("Error metric: %1").arg(pointToPlane ? tr("point-to-plane") : tr("point-to-point"));
+			ccLog::Print(QString("[Register] ") + metricString);
+			summary << metricString;
+
+			QString weightingName;
+			switch (parameters.robustWeighting)
+			{
+			case CCCoreLib::ICPRegistrationTools::HUBER_WEIGHTING:
+				weightingName = tr("Huber");
+				break;
+			case CCCoreLib::ICPRegistrationTools::CAUCHY_WEIGHTING:
+				weightingName = tr("Cauchy");
+				break;
+			case CCCoreLib::ICPRegistrationTools::TUKEY_WEIGHTING:
+				weightingName = tr("Tukey");
+				break;
+			default:
+				weightingName = tr("none");
+				break;
+			}
+			QString weightingString = tr("Robust weighting: %1").arg(weightingName);
+			ccLog::Print(QString("[Register] ") + weightingString);
+			summary << weightingString;
+		}
 
 		summary << "----------------";
 		summary << tr("This report has been output to Console (F8)");

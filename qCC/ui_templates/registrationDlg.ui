@@ -243,6 +243,75 @@
          </property>
         </spacer>
        </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabAdvancedParams">
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_advanced">
+       <item>
+        <layout class="QFormLayout" name="formLayout_advanced">
+         <item row="0" column="0">
+          <widget class="QLabel" name="errorMetricLabel">
+           <property name="text">
+            <string>Error metric</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="errorMetricComboBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Point-to-point&lt;/b&gt;: minimizes the distances between the points and their closest points on the reference.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Point-to-plane&lt;/b&gt;: minimizes the distances between the points and the reference surface (the tangent planes at the closest points). It needs much fewer iterations and is more precise, as the points can slide along the surface. It requires normals on the reference cloud (with a reference mesh, the triangles are used), and it can't adjust the scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Point-to-point</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Point-to-plane</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="robustWeightingLabel">
+           <property name="text">
+            <string>Robust weighting</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="robustWeightingComboBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reduces the influence of the outliers (noise, parts that don't overlap, moving objects, etc.): at each iteration, the points far from the reference compared to the median distance get a lower weight.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Huber&lt;/b&gt;: mild, &lt;b&gt;Cauchy&lt;/b&gt;: medium, &lt;b&gt;Tukey&lt;/b&gt;: strong (the farthest points are ignored).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Huber (mild)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cauchy (medium)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Tukey (strong)</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QGroupBox" name="adjustScaleGroupBox">
          <property name="title">
@@ -501,6 +570,19 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_advanced">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

@@ -43,6 +43,8 @@ New features:
 		- New option -OUTPUT_MATRIX_FILE {filename} for the -ICP command
 			- saves the registration matrix to this file instead of the automatically generated '{cloud path}/{cloud name}_REGISTRATION_MATRIX.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended
+		- New options -POINT_TO_PLANE and -ROBUST_WEIGHTING {HUBER|CAUCHY|TUKEY} for the -ICP command
+			- see the new 'Error metric' and 'Robust weighting' options of the ICP tool
 		- New option -OUTPUT_INFO_FILE {filename} for the -BEST_FIT_PLANE command
 			- saves the plane information file to this file instead of the automatically generated '{cloud path}/{cloud name}_BEST_FIT_PLANE_INFO.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended
@@ -404,6 +406,13 @@ Improvements:
 	- ICP
 		- new option to define/restrict the scaling range if 'adjust scale' is enabled
 		- when the Fine registration (ICP) tool is canceled after at least one ICP step has been measured, a popup now asks whether to keep the pose of the last measured step (its RMS is shown) or to go back to the pose from before the registration
+		- new 'Error metric' option: 'Point-to-plane' minimizes the distances to the reference surface instead of the distances to the closest points
+			- needs much fewer iterations and is more precise, as the points can slide along the surface
+			- requires normals on the reference cloud (with a reference mesh, the triangles are used), and can't be combined with 'adjust scale'
+			- the transformation constraints (rotation axis, translation components) are applied exactly
+		- new 'Robust weighting' option (Huber, Cauchy or Tukey): at each iteration, the points far from the reference compared to the median distance
+			get a lower weight, so that the outliers (noise, parts that don't overlap, moving objects, etc.) have less influence on the result
+		- the options below 'Final overlap' (error metric, robust weighting, scale adjustment, normals and max thread count) are now in a new 'Advanced' tab
 
 	- Cross Section (clipping box) tool
 		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)
@@ -437,6 +446,8 @@ Improvements:
 Bug fixes:
 	- ASCII files saved with legacy Mac line endings (a lone CR) were read as a single line, silently loading only one point
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
+		- this could still happen when the reference cloud had more points than the random sampling limit
+	- ICP with a reference mesh, normals and the farthest points removal could crash
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
 		to a crash (warning: now, the polylines will be emptied to prevent a crash)

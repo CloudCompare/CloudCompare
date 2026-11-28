@@ -127,6 +127,9 @@ class ccRegistrationDlg : public QDialog
 	//! Enables the scale adjustment only if the error metric supports it
 	void updateScaleState();
 
+	//! Enables the point-to-plane metric only if the reference supports it
+	void updateErrorMetricState();
+
   protected:
 	//! Forces the update of the GUI
 	void updateGUI();
@@ -136,4 +139,10 @@ class ccRegistrationDlg : public QDialog
 
 	//! 'Data' entity
 	ccHObject* dataEntity;
+
+	//! Error metric chosen by the user (even if the current reference doesn't support it)
+	int m_preferredErrorMetric;
+
+	//! Default tooltip of the error metric combo-box
+	QString m_errorMetricToolTip;
 };

@@ -62,12 +62,15 @@ static int      s_robustWeighting             = CCCoreLib::ICPRegistrationTools:
 ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
     , Ui::RegistrationDialog()
+    , m_preferredErrorMetric(s_errorMetric)
 {
 	assert(data && model);
 	dataEntity  = data;
 	modelEntity = model;
 
 	setupUi(this);
+
+	m_errorMetricToolTip = errorMetricComboBox->toolTip();
 
 	QDoubleValidator* rmsValidator = new QDoubleValidator(rmsDifferenceLineEdit);
 	rmsValidator->setNotation(QDoubleValidator::ScientificNotation);
@@ -109,13 +112,15 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget*
 		useC2MSignedDistancesCheckBox->setChecked(s_useC2MSignedDistances);
 		robustC2MDistsCheckBox->setChecked(s_robustC2MSignedDistances);
 		normalsComboBox->setCurrentIndex(s_normalsMatchingOption);
-		errorMetricComboBox->setCurrentIndex(s_errorMetric);
 		robustWeightingComboBox->setCurrentIndex(s_robustWeighting);
 	}
 
 	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
 	connect(errorMetricComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccRegistrationDlg::updateScaleState);
-	updateScaleState();
+	// only the user's choices are remembered (not the forced point-to-point metric)
+	connect(errorMetricComboBox, qOverload<int>(&QComboBox::activated), this, [this](int index)
+	        { m_preferredErrorMetric = index; });
+	updateErrorMetricState();
 }
 
 ccRegistrationDlg::~ccRegistrationDlg()
@@ -156,7 +161,7 @@ void ccRegistrationDlg::saveParameters() const
 	s_useC2MSignedDistances       = useC2MSignedDistancesCheckBox->isChecked();
 	s_robustC2MSignedDistances    = robustC2MDistsCheckBox->isChecked();
 	s_normalsMatchingOption       = normalsComboBox->currentIndex();
-	s_errorMetric                 = errorMetricComboBox->currentIndex();
+	s_errorMetric                 = m_preferredErrorMetric;
 	s_robustWeighting             = robustWeightingComboBox->currentIndex();
 }
 
@@ -349,11 +354,23 @@ void ccRegistrationDlg::updateGUI()
 	robustC2MDistsCheckBox->setEnabled(hasRefMesh);
 	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); // only supported if both the to-be-aligned and the reference entities have normals
 
-	// the point-to-plane metric needs the normals of the reference (or its triangles)
-	errorMetricComboBox->setEnabled(hasRefMesh || modelEntity->hasNormals());
-	updateScaleState();
+	updateErrorMetricState();
 
 	MainWindow::RefreshAllGLWindow(false);
+}
+
+void ccRegistrationDlg::updateErrorMetricState()
+{
+	// the point-to-plane metric needs the normals of the reference (or its triangles)
+	bool canUsePointToPlane = (modelEntity->isKindOf(CC_TYPES::MESH) || modelEntity->hasNormals());
+
+	// always show the metric that will actually be used
+	errorMetricComboBox->setEnabled(canUsePointToPlane);
+	errorMetricComboBox->setCurrentIndex(canUsePointToPlane ? m_preferredErrorMetric : CCCoreLib::ICPRegistrationTools::POINT_TO_POINT);
+	errorMetricComboBox->setToolTip(canUsePointToPlane ? m_errorMetricToolTip
+	                                                   : tr("The point-to-plane metric needs normals on the reference cloud (Edit > Normals > Compute), or a reference mesh"));
+
+	updateScaleState();
 }
 
 void ccRegistrationDlg::swapModelAndData()

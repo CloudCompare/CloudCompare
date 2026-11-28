@@ -85,6 +85,20 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 		modelCloud = ccHObjectCaster::ToGenericPointCloud(model);
 	}
 
+	if (params.errorMetric == CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE)
+	{
+		if (params.adjustScale)
+		{
+			ccLog::Error(QObject::tr("[ICP] The point-to-plane metric can't adjust the scale"));
+			return false;
+		}
+		if (!modelMesh && (!modelCloud || !modelCloud->normalsAvailable()))
+		{
+			ccLog::Error(QObject::tr("[ICP] The point-to-plane metric needs normals on the reference cloud (or a reference mesh)"));
+			return false;
+		}
+	}
+
 	// if the 'data' entity is a mesh, we need to sample points on it
 	CCCoreLib::GenericIndexedCloudPersist* dataCloud = nullptr;
 	if (data->isKindOf(CC_TYPES::MESH))

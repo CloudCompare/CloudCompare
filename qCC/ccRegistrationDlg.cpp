@@ -56,6 +56,8 @@ static bool     s_useModelSFAsWeights         = false;
 static bool     s_useC2MSignedDistances       = false;
 static bool     s_robustC2MSignedDistances    = true;
 static int      s_normalsMatchingOption       = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+static int      s_errorMetric                 = CCCoreLib::ICPRegistrationTools::POINT_TO_POINT;
+static int      s_robustWeighting             = CCCoreLib::ICPRegistrationTools::NO_ROBUST_WEIGHTING;
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
@@ -107,9 +109,13 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget*
 		useC2MSignedDistancesCheckBox->setChecked(s_useC2MSignedDistances);
 		robustC2MDistsCheckBox->setChecked(s_robustC2MSignedDistances);
 		normalsComboBox->setCurrentIndex(s_normalsMatchingOption);
+		errorMetricComboBox->setCurrentIndex(s_errorMetric);
+		robustWeightingComboBox->setCurrentIndex(s_robustWeighting);
 	}
 
 	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
+	connect(errorMetricComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccRegistrationDlg::updateScaleState);
+	updateScaleState();
 }
 
 ccRegistrationDlg::~ccRegistrationDlg()
@@ -150,6 +156,8 @@ void ccRegistrationDlg::saveParameters() const
 	s_useC2MSignedDistances       = useC2MSignedDistancesCheckBox->isChecked();
 	s_robustC2MSignedDistances    = robustC2MDistsCheckBox->isChecked();
 	s_normalsMatchingOption       = normalsComboBox->currentIndex();
+	s_errorMetric                 = errorMetricComboBox->currentIndex();
+	s_robustWeighting             = robustWeightingComboBox->currentIndex();
 }
 
 ccHObject* ccRegistrationDlg::getDataEntity()
@@ -188,9 +196,29 @@ CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING ccRegistrationDlg::normalsMatc
 	return CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 }
 
+CCCoreLib::ICPRegistrationTools::ERROR_METRIC ccRegistrationDlg::errorMetric() const
+{
+	if (errorMetricComboBox->isEnabled() && errorMetricComboBox->currentIndex() == 1)
+	{
+		return CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE;
+	}
+	return CCCoreLib::ICPRegistrationTools::POINT_TO_POINT;
+}
+
+CCCoreLib::ICPRegistrationTools::ROBUST_WEIGHTING ccRegistrationDlg::robustWeighting() const
+{
+	return static_cast<CCCoreLib::ICPRegistrationTools::ROBUST_WEIGHTING>(robustWeightingComboBox->currentIndex());
+}
+
 bool ccRegistrationDlg::adjustScale() const
 {
-	return adjustScaleGroupBox->isChecked();
+	return adjustScaleGroupBox->isEnabled() && adjustScaleGroupBox->isChecked();
+}
+
+void ccRegistrationDlg::updateScaleState()
+{
+	// the point-to-plane metric can't adjust the scale
+	adjustScaleGroupBox->setEnabled(errorMetric() != CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE);
 }
 
 std::pair<double, double> ccRegistrationDlg::constrainedScaleRange() const
@@ -320,6 +348,10 @@ void ccRegistrationDlg::updateGUI()
 	useC2MSignedDistancesCheckBox->setEnabled(hasRefMesh); // only supported if a mesh is the reference cloud
 	robustC2MDistsCheckBox->setEnabled(hasRefMesh);
 	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); // only supported if both the to-be-aligned and the reference entities have normals
+
+	// the point-to-plane metric needs the normals of the reference (or its triangles)
+	errorMetricComboBox->setEnabled(hasRefMesh || modelEntity->hasNormals());
+	updateScaleState();
 
 	MainWindow::RefreshAllGLWindow(false);
 }

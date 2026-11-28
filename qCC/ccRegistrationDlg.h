@@ -95,6 +95,12 @@ class ccRegistrationDlg : public QDialog
 	//! Method to take normals into account
 	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatchingOption() const;
 
+	//! Error metric minimized at each iteration
+	CCCoreLib::ICPRegistrationTools::ERROR_METRIC errorMetric() const;
+
+	//! Robust weighting of the couples
+	CCCoreLib::ICPRegistrationTools::ROBUST_WEIGHTING robustWeighting() const;
+
 	//! Returns whether to adjust the scale during optimization
 	/** This is useful for co-registration of lidar and photogrammetric clouds
 	for instance.
@@ -117,6 +123,9 @@ class ccRegistrationDlg : public QDialog
 
   protected:
 	void swapModelAndData();
+
+	//! Enables the scale adjustment only if the error metric supports it
+	void updateScaleState();
 
   protected:
 	//! Forces the update of the GUI

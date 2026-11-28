@@ -4048,6 +4048,8 @@ void MainWindow::doActionRegister()
 		parameters.maxThreadCount          = rDlg.getMaxThreadCount();
 		parameters.useC2MSignedDistances   = rDlg.useC2MSignedDistances(parameters.robustC2MSignedDistances);
 		parameters.normalsMatching         = rDlg.normalsMatchingOption();
+		parameters.errorMetric             = rDlg.errorMetric();
+		parameters.robustWeighting         = rDlg.robustWeighting();
 
 		if (parameters.adjustScale)
 		{
@@ -4080,7 +4082,9 @@ void MainWindow::doActionRegister()
 	                             true))
 	{
 		QString rmsString           = tr("Final RMS*: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
-		QString rmsDisclaimerString = tr("(* RMS is potentially weighted, depending on the selected options)");
+		QString rmsDisclaimerString = (parameters.errorMetric == CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE
+		                                   ? tr("(* RMS of the point-to-plane distances, potentially weighted depending on the selected options)")
+		                                   : tr("(* RMS is potentially weighted, depending on the selected options)"));
 		ccLog::Print(QString("[Register] ") + rmsString);
 		ccLog::Print(QString("[Register] ") + rmsDisclaimerString);
 

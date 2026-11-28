@@ -404,6 +404,12 @@ Improvements:
 	- ICP
 		- new option to define/restrict the scaling range if 'adjust scale' is enabled
 		- when the Fine registration (ICP) tool is canceled after at least one ICP step has been measured, a popup now asks whether to keep the pose of the last measured step (its RMS is shown) or to go back to the pose from before the registration
+		- new 'Error metric' option: 'Point-to-plane' minimizes the distances to the reference surface instead of the distances to the closest points
+			- needs much fewer iterations and is more precise, as the points can slide along the surface
+			- requires normals on the reference cloud (with a reference mesh, the triangles are used), and can't be combined with 'adjust scale'
+			- the transformation constraints (rotation axis, translation components) are applied exactly
+		- new 'Robust weighting' option (Huber, Cauchy or Tukey): at each iteration, the points far from the reference compared to the median distance
+			get a lower weight, so that the outliers (noise, parts that don't overlap, moving objects, etc.) have less influence on the result
 
 	- Cross Section (clipping box) tool
 		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)

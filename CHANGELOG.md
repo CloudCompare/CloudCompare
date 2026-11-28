@@ -412,6 +412,7 @@ Improvements:
 			- the transformation constraints (rotation axis, translation components) are applied exactly
 		- new 'Robust weighting' option (Huber, Cauchy or Tukey): at each iteration, the points far from the reference compared to the median distance
 			get a lower weight, so that the outliers (noise, parts that don't overlap, moving objects, etc.) have less influence on the result
+		- the options below 'Final overlap' (error metric, robust weighting, scale adjustment, normals and max thread count) are now in a new 'Advanced' tab
 
 	- Cross Section (clipping box) tool
 		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)

@@ -186,6 +186,8 @@ constexpr char COMMAND_ICP_SKIP_TX[]                      = "SKIP_TX";
 constexpr char COMMAND_ICP_SKIP_TY[]                      = "SKIP_TY";
 constexpr char COMMAND_ICP_SKIP_TZ[]                      = "SKIP_TZ";
 constexpr char COMMAND_ICP_C2M_DIST[]                     = "USE_C2M_DIST";
+constexpr char COMMAND_ICP_POINT_TO_PLANE[]               = "POINT_TO_PLANE";
+constexpr char COMMAND_ICP_ROBUST_WEIGHTING[]             = "ROBUST_WEIGHTING";
 constexpr char COMMAND_ICP_OUTPUT_MATRIX_FILE[]           = "OUTPUT_MATRIX_FILE";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]                = "PLY_EXPORT_FMT";
 constexpr char COMMAND_PLY_NO_SF_PREFIX[]                 = "PLY_NO_SF_PREFIX";
@@ -7070,6 +7072,8 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	bool                                              useC2MDistances       = false;
 	bool                                              robustC2MDistances    = true;
 	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatching       = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+	CCCoreLib::ICPRegistrationTools::ERROR_METRIC     errorMetric           = CCCoreLib::ICPRegistrationTools::POINT_TO_POINT;
+	CCCoreLib::ICPRegistrationTools::ROBUST_WEIGHTING robustWeighting       = CCCoreLib::ICPRegistrationTools::NO_ROBUST_WEIGHTING;
 	QString                                           outputMatrixFile;
 
 	ccArgumentParser parser(cmd.arguments());
@@ -7255,6 +7259,37 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Unknown normal matching mode: ") + normalsMatchingOption);
 			}
 		}
+		else if (parser.tryConsumeOption(COMMAND_ICP_POINT_TO_PLANE))
+		{
+			errorMetric = CCCoreLib::ICPRegistrationTools::POINT_TO_PLANE;
+			cmd.print(QObject::tr("[ICP] Use the point-to-plane error metric"));
+		}
+		else if (parser.tryConsumeOption(COMMAND_ICP_ROBUST_WEIGHTING))
+		{
+			if (parser.isEmpty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: robust weighting method (HUBER, CAUCHY or TUKEY) after '%1'").arg(COMMAND_ICP_ROBUST_WEIGHTING));
+			}
+
+			QString robustWeightingOption = parser.takeNext().toUpper();
+			if (robustWeightingOption == "HUBER")
+			{
+				robustWeighting = CCCoreLib::ICPRegistrationTools::HUBER_WEIGHTING;
+			}
+			else if (robustWeightingOption == "CAUCHY")
+			{
+				robustWeighting = CCCoreLib::ICPRegistrationTools::CAUCHY_WEIGHTING;
+			}
+			else if (robustWeightingOption == "TUKEY")
+			{
+				robustWeighting = CCCoreLib::ICPRegistrationTools::TUKEY_WEIGHTING;
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Unknown robust weighting method: %1 (expected HUBER, CAUCHY or TUKEY)").arg(robustWeightingOption));
+			}
+			cmd.print(QObject::tr("[ICP] Use %1 robust weighting").arg(robustWeightingOption));
+		}
 		else
 		{
 			break; // as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
@@ -7344,6 +7379,8 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		parameters.useC2MSignedDistances    = useC2MDistances;
 		parameters.robustC2MSignedDistances = robustC2MDistances;
 		parameters.normalsMatching          = normalsMatching;
+		parameters.errorMetric              = errorMetric;
+		parameters.robustWeighting          = robustWeighting;
 	}
 
 	if (ccRegistrationTools::ICP(dataAndModel[0]->getEntity(),

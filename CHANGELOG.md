@@ -43,6 +43,8 @@ New features:
 		- New option -OUTPUT_MATRIX_FILE {filename} for the -ICP command
 			- saves the registration matrix to this file instead of the automatically generated '{cloud path}/{cloud name}_REGISTRATION_MATRIX.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended
+		- New options -POINT_TO_PLANE and -ROBUST_WEIGHTING {HUBER|CAUCHY|TUKEY} for the -ICP command
+			- see the new 'Error metric' and 'Robust weighting' options of the ICP tool
 		- New option -OUTPUT_INFO_FILE {filename} for the -BEST_FIT_PLANE command
 			- saves the plane information file to this file instead of the automatically generated '{cloud path}/{cloud name}_BEST_FIT_PLANE_INFO.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended
